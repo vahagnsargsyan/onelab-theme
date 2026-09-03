@@ -1,0 +1,30 @@
+{% doc %}
+  Custom Liquid block. Doubles as an app block insertion point inside any section
+  that accepts theme blocks.
+
+  @example
+  {% content_for 'block', type: 'liquid', id: 'liquid' %}
+{% enddoc %}
+
+<div class="custom-liquid" {{ block.shopify_attributes }}>
+  {{ block.settings.custom_liquid }}
+</div>
+
+{% schema %}
+{
+  "name": "t:general.custom_liquid",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "t:labels.custom_liquid",
+      "info": "t:info.custom_liquid"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.custom_liquid"
+    }
+  ]
+}
+{% endschema %}

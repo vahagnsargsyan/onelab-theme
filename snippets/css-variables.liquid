@@ -1,0 +1,103 @@
+{% doc %}
+  Emits the theme's design tokens as CSS custom properties, plus one @font-face
+  set per unique font family.
+
+  Font roles that share a family are emitted once. Because every role defaults to
+  the same family, a default install loads 4 faces rather than 16 — which is what
+  keeps the Lighthouse performance budget reachable.
+
+  Sections and blocks must read the custom properties below, never `settings.*`
+  directly, so color schemes and per-section overrides keep working.
+{% enddoc %}
+
+{% liquid
+  assign font_roles = 'body,subheading,heading,accent' | split: ','
+  assign emitted_families = ''
+%}
+
+{% style %}
+  {%- liquid
+    for role in font_roles
+      assign font_key = 'font_' | append: role
+      assign font = settings[font_key]
+
+      assign fingerprint = font.family | append: '~' | append: font.weight | append: '~' | append: font.style | append: '|'
+
+      unless emitted_families contains fingerprint
+        assign emitted_families = emitted_families | append: fingerprint
+
+        echo font | font_face: font_display: 'swap'
+
+        assign font_bold = font | font_modify: 'weight', 'bold'
+        if font_bold
+          echo font_bold | font_face: font_display: 'swap'
+        endif
+
+        assign font_italic = font | font_modify: 'style', 'italic'
+        if font_italic
+          echo font_italic | font_face: font_display: 'swap'
+        endif
+
+        if font_bold
+          assign font_bold_italic = font_bold | font_modify: 'style', 'italic'
+          if font_bold_italic
+            echo font_bold_italic | font_face: font_display: 'swap'
+          endif
+        endif
+      endunless
+    endfor
+  -%}
+
+  :root {
+    {%- for role in font_roles %}
+      {%- assign font_key = 'font_' | append: role %}
+      {%- assign font = settings[font_key] %}
+    --font-{{ role }}--family: {{ font.family }}, {{ font.fallback_families }};
+    --font-{{ role }}--style: {{ font.style }};
+    --font-{{ role }}--weight: {{ font.weight }};
+    {%- endfor %}
+
+    --page-width: {{ settings.page_width }}px;
+    --page-margin: {{ settings.page_margin }}px;
+    --section-spacing: {{ settings.section_spacing }}px;
+    --grid-gap: {{ settings.grid_gap }}px;
+    --content-grid:
+      minmax(var(--page-margin), 1fr)
+      minmax(0, var(--page-width))
+      minmax(var(--page-margin), 1fr);
+
+    --button-radius: {{ settings.button_corner_radius }}px;
+    --button-border-width: {{ settings.button_border_width }}px;
+    --input-radius: {{ settings.input_corner_radius }}px;
+    --input-border-width: {{ settings.input_border_width }}px;
+
+    --focus-ring-width: {{ settings.focus_ring_width }}px;
+    --focus-ring-offset: {{ settings.focus_ring_offset }}px;
+
+    --logo-width: {{ settings.logo_width }}px;
+  }
+
+  {%- for scheme in settings.color_schemes %}
+    {%- assign s = scheme.settings %}
+    .color-{{ scheme.id }} {
+      --color-background: {{ s.background }};
+      --color-background-rgb: {{ s.background.red }}, {{ s.background.green }}, {{ s.background.blue }};
+      {%- if s.background_gradient != blank %}
+      --gradient-background: {{ s.background_gradient }};
+      {%- else %}
+      --gradient-background: {{ s.background }};
+      {%- endif %}
+      --color-foreground: {{ s.text }};
+      --color-foreground-rgb: {{ s.text.red }}, {{ s.text.green }}, {{ s.text.blue }};
+      --color-button: {{ s.button }};
+      --color-button-text: {{ s.button_label }};
+      --color-button-secondary-text: {{ s.secondary_button_label }};
+      --color-border: {{ s.borders }};
+      --color-shadow: {{ s.shadow }};
+      --color-shadow-rgb: {{ s.shadow.red }}, {{ s.shadow.green }}, {{ s.shadow.blue }};
+
+      color: var(--color-foreground);
+      background-color: var(--color-background);
+    }
+  {%- endfor %}
+{% endstyle %}

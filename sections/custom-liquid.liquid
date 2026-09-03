@@ -1,0 +1,27 @@
+{% comment %}
+  Lets merchants add their own Liquid, HTML, or Liquid-rendered app snippets to
+  any template. Required on every template that supports sections.
+{% endcomment %}
+
+<div class="custom-liquid">
+  {{ section.settings.custom_liquid }}
+</div>
+
+{% schema %}
+{
+  "name": "t:general.custom_liquid",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "t:labels.custom_liquid",
+      "info": "t:info.custom_liquid"
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.custom_liquid"
+    }
+  ]
+}
+{% endschema %}

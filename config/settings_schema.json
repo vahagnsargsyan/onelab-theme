@@ -1,0 +1,274 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Onelab",
+    "theme_version": "0.1.0",
+    "theme_author": "Onelab",
+    "theme_documentation_url": "https://example.com/onelab/docs",
+    "theme_support_url": "https://example.com/onelab/support"
+  },
+  {
+    "name": "t:general.colors",
+    "settings": [
+      {
+        "type": "color_scheme_group",
+        "id": "color_schemes",
+        "definition": [
+          {
+            "type": "color",
+            "id": "background",
+            "label": "t:labels.background",
+            "default": "#FFFFFF"
+          },
+          {
+            "type": "color_background",
+            "id": "background_gradient",
+            "label": "t:labels.background_gradient"
+          },
+          {
+            "type": "color",
+            "id": "text",
+            "label": "t:labels.text",
+            "default": "#171717"
+          },
+          {
+            "type": "color",
+            "id": "button",
+            "label": "t:labels.button_background",
+            "default": "#171717"
+          },
+          {
+            "type": "color",
+            "id": "button_label",
+            "label": "t:labels.button_text",
+            "default": "#FFFFFF"
+          },
+          {
+            "type": "color",
+            "id": "secondary_button_label",
+            "label": "t:labels.secondary_button_text",
+            "default": "#171717"
+          },
+          {
+            "type": "color",
+            "id": "borders",
+            "label": "t:labels.borders",
+            "default": "#767676"
+          },
+          {
+            "type": "color",
+            "id": "shadow",
+            "label": "t:labels.shadow",
+            "default": "#171717"
+          }
+        ],
+        "role": {
+          "background": {
+            "solid": "background",
+            "gradient": "background_gradient"
+          },
+          "text": "text",
+          "primary_button": "button",
+          "on_primary_button": "button_label",
+          "primary_button_border": "button",
+          "secondary_button": "background",
+          "on_secondary_button": "secondary_button_label",
+          "secondary_button_border": "secondary_button_label",
+          "links": "text",
+          "icons": "text",
+          "borders": "borders",
+          "shadow": "shadow"
+        }
+      }
+    ]
+  },
+  {
+    "name": "t:general.typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:general.fonts"
+      },
+      {
+        "type": "paragraph",
+        "content": "t:info.font_performance"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_body",
+        "label": "t:labels.body",
+        "default": "work_sans_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_subheading",
+        "label": "t:labels.subheading",
+        "default": "work_sans_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_heading",
+        "label": "t:labels.heading",
+        "default": "work_sans_n4"
+      },
+      {
+        "type": "font_picker",
+        "id": "font_accent",
+        "label": "t:labels.accent",
+        "default": "work_sans_n4"
+      }
+    ]
+  },
+  {
+    "name": "t:general.layout",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "min": 1000,
+        "max": 1600,
+        "step": 20,
+        "unit": "px",
+        "label": "t:labels.page_width",
+        "default": 1400
+      },
+      {
+        "type": "range",
+        "id": "page_margin",
+        "min": 12,
+        "max": 80,
+        "step": 2,
+        "unit": "px",
+        "label": "t:labels.page_margin",
+        "default": 20
+      },
+      {
+        "type": "range",
+        "id": "section_spacing",
+        "min": 0,
+        "max": 100,
+        "step": 4,
+        "unit": "px",
+        "label": "t:labels.section_spacing",
+        "default": 48
+      },
+      {
+        "type": "range",
+        "id": "grid_gap",
+        "min": 4,
+        "max": 48,
+        "step": 2,
+        "unit": "px",
+        "label": "t:labels.grid_gap",
+        "default": 16
+      }
+    ]
+  },
+  {
+    "name": "t:general.buttons_and_inputs",
+    "settings": [
+      {
+        "type": "header",
+        "content": "t:general.buttons"
+      },
+      {
+        "type": "range",
+        "id": "button_corner_radius",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.button_corner_radius",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "button_border_width",
+        "min": 0,
+        "max": 4,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.button_border_width",
+        "default": 1
+      },
+      {
+        "type": "header",
+        "content": "t:general.inputs"
+      },
+      {
+        "type": "range",
+        "id": "input_corner_radius",
+        "min": 0,
+        "max": 20,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.input_corner_radius",
+        "default": 0
+      },
+      {
+        "type": "range",
+        "id": "input_border_width",
+        "min": 1,
+        "max": 4,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.input_border_width",
+        "default": 1
+      },
+      {
+        "type": "header",
+        "content": "t:general.focus"
+      },
+      {
+        "type": "paragraph",
+        "content": "t:info.focus_accessibility"
+      },
+      {
+        "type": "range",
+        "id": "focus_ring_width",
+        "min": 2,
+        "max": 5,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.focus_ring_width",
+        "default": 2
+      },
+      {
+        "type": "range",
+        "id": "focus_ring_offset",
+        "min": 0,
+        "max": 6,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.focus_ring_offset",
+        "default": 2
+      }
+    ]
+  },
+  {
+    "name": "t:general.brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "t:labels.logo"
+      },
+      {
+        "type": "range",
+        "id": "logo_width",
+        "min": 50,
+        "max": 300,
+        "step": 10,
+        "unit": "px",
+        "label": "t:labels.logo_width",
+        "default": 120
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "t:labels.favicon",
+        "info": "t:info.favicon"
+      }
+    ]
+  }
+]
