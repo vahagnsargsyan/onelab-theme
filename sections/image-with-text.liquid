@@ -69,6 +69,11 @@
   if media_style == 'overlap' and s.secondary_image != blank
     assign has_overlap = true
   endif
+
+  assign heading_overlay = false
+  if s.heading_position == 'overlay'
+    assign heading_overlay = true
+  endif
 %}
 
 <div {% render 'layout-style', s: section.settings, class: 'image-with-text full-width' %}>
@@ -84,6 +89,7 @@
         image-text--align-{{ s.content_alignment | default: 'left' }}
         image-text--spacing-{{ s.content_spacing | default: 'grouped' }}
         image-text--overlap-{{ overlap_side }}
+        {% if heading_overlay %}image-text--heading-overlay{% endif %}
       "
       style="
         --image-text-columns: {{ columns }};
@@ -123,63 +129,80 @@
 
       {%- capture content_markup -%}
         <div class="image-text__pane">
-          <div class="image-text__content">
-            {%- comment -%}
-              The heading is a sibling of the body, not a child of it, so the two
-              can be pushed apart by Content spacing.
-            {%- endcomment -%}
-            {%- if s.heading != blank -%}
-              <h2 class="image-text__heading">{{ s.heading }}</h2>
-            {%- endif -%}
-
-            <div class="image-text__body">
-              {%- if s.show_divider -%}
-                <span class="image-text__divider" aria-hidden="true"></span>
-              {%- endif -%}
-
-              {%- if s.text != blank -%}
-                <div class="image-text__text rte">{{ s.text }}</div>
-              {%- endif -%}
-
-              {%- if has_button -%}
-                <a
-                  {% if s.button_link != blank %}
-                    href="{{ s.button_link }}"
-                  {% else %}
-                    href="#"
-                    aria-disabled="true"
-                  {% endif %}
-                  class="button{% if s.button_style == 'secondary' %} button--secondary{% endif %}"
-                >
-                  {{- s.button_label -}}
-                </a>
-              {%- endif -%}
-            </div>
-          </div>
-
-          {%- if has_overlap -%}
-            {%- liquid
-              assign second = s.secondary_image
-              assign second_focal = second.presentation.focal_point | default: 'center center'
-              assign second_style = 'object-position: ' | append: second_focal | append: ';'
-              assign second_alt = second.alt | default: ''
-            -%}
-            <div class="image-text__secondary">
-              {{
-                second
-                | image_url: width: 1200
-                | image_tag:
-                  class: 'image-text__secondary-image',
-                  widths: '275, 360, 533, 720, 940, 1200',
-                  sizes: '(min-width: 750px) 30vw, 100vw',
-                  alt: second_alt,
-                  loading: 'lazy',
-                  style: second_style
-              }}
-            </div>
+          {%- comment -%}
+            The heading is a sibling of the body, not a child of it, so Content
+            spacing can push the two apart. In overlay mode it is hoisted out of
+            the pane entirely — see below.
+          {%- endcomment -%}
+          {%- if s.heading != blank and heading_overlay == false -%}
+            <h2 class="image-text__heading">{{ s.heading }}</h2>
           {%- endif -%}
+
+          {%- comment -%}
+            Copy and the second image sit side by side in normal flow. Nothing
+            here is positioned, so the row grows with its content and the two
+            never collide.
+          {%- endcomment -%}
+          <div class="image-text__row">
+            <div class="image-text__content">
+              <div class="image-text__body">
+                {%- if s.show_divider -%}
+                  <span class="image-text__divider" aria-hidden="true"></span>
+                {%- endif -%}
+
+                {%- if s.text != blank -%}
+                  <div class="image-text__text rte">{{ s.text }}</div>
+                {%- endif -%}
+
+                {%- if has_button -%}
+                  <a
+                    {% if s.button_link != blank %}
+                      href="{{ s.button_link }}"
+                    {% else %}
+                      href="#"
+                      aria-disabled="true"
+                    {% endif %}
+                    class="button{% if s.button_style == 'secondary' %} button--secondary{% endif %}"
+                  >
+                    {{- s.button_label -}}
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if has_overlap -%}
+              {%- liquid
+                assign second = s.secondary_image
+                assign second_focal = second.presentation.focal_point | default: 'center center'
+                assign second_style = 'object-position: ' | append: second_focal | append: ';'
+                assign second_alt = second.alt | default: ''
+              -%}
+              <div class="image-text__secondary">
+                {{
+                  second
+                  | image_url: width: 1200
+                  | image_tag:
+                    class: 'image-text__secondary-image',
+                    widths: '275, 360, 533, 720, 940, 1200',
+                    sizes: '(min-width: 750px) 30vw, 100vw',
+                    alt: second_alt,
+                    loading: 'lazy',
+                    style: second_style
+                }}
+              </div>
+            {%- endif -%}
+          </div>
         </div>
       {%- endcapture -%}
+
+      {%- comment -%}
+        Overlay heading. The only positioned element in the section, centered
+        across the whole thing rather than over one column. Rendered first so it
+        also comes first for a screen reader, matching the visual order.
+      {%- endcomment -%}
+      {%- if s.heading != blank and heading_overlay -%}
+        <h2 class="image-text__heading image-text__heading--overlay">{{ s.heading }}</h2>
+      {%- endif -%}
 
       {%- if content_first -%}
         {{ content_markup }}
@@ -320,6 +343,30 @@
     margin: 0;
   }
 
+  /*
+   * Overlay heading. Centered across the whole section rather than over one
+   * column, and taken out of flow so the columns keep their own heights.
+   *
+   * `pointer-events: none` keeps it from swallowing clicks on whatever sits
+   * beneath — it is display type, never a control.
+   */
+  .image-text__heading--overlay {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 50%;
+    z-index: 3;
+    translate: -50% 0;
+    width: max-content;
+    max-width: min(100%, 40rem);
+    pointer-events: none;
+    text-align: center;
+  }
+
+  /* Room for the overlay so it never lands on top of the copy. */
+  .image-text--heading-overlay .image-text__pane {
+    padding-block-start: var(--overlay-heading-space, 8rem);
+  }
+
   .image-text__divider {
     display: block;
     width: 8.75rem;
@@ -330,20 +377,28 @@
   }
 
   /*
-   * Overlapping image, anchored to the pane's lower outer corner. Which corner
-   * that is comes from Content position, so the two move together.
+   * Copy and the second image, side by side in normal flow. The image sits on
+   * the outer side, so it swaps with Content position rather than staying put.
    */
-  .image-text__secondary {
-    position: absolute;
-    inset-block-end: 0;
-    width: var(--secondary-width);
+  .image-text__row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--layout-gap, 0);
+    width: 100%;
+    min-width: 0;
   }
 
-  .image-text--overlap-end .image-text__secondary {
-    inset-inline-end: 0;
+  .image-text--overlap-start .image-text__row {
+    flex-direction: row-reverse;
   }
-  .image-text--overlap-start .image-text__secondary {
-    inset-inline-start: 0;
+
+  .image-text__secondary {
+    flex: 0 0 var(--secondary-width);
+    min-width: 0;
+  }
+
+  .image-text__row .image-text__content {
+    flex: 1 1 auto;
   }
 
   .image-text__secondary-image {
@@ -368,14 +423,19 @@
       gap: 1.5rem;
     }
 
-    /*
-     * The overlap becomes a stacked image rather than disappearing. Hiding it
-     * would drop real content for small screens and screen readers alike.
-     */
+    /* Copy above, second image below — no room for them side by side. */
+    .image-text__row,
+    .image-text--overlap-start .image-text__row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
     .image-text__secondary {
-      position: static;
-      width: 100%;
-      margin-block-start: var(--layout-gap, 0);
+      flex: 0 0 auto;
+    }
+
+    .image-text--heading-overlay .image-text__pane {
+      padding-block-start: 5rem;
     }
 
     .image-text__panel {
@@ -451,6 +511,11 @@
       "options": [
         { "value": "grouped", "label": "t:options.content_spacing.grouped" },
         { "value": "spread", "label": "t:options.content_spacing.spread" }
+      ] },
+    { "type": "select", "id": "heading_position", "label": "t:labels.heading_position", "info": "t:info.heading_position", "default": "inline",
+      "options": [
+        { "value": "inline", "label": "t:options.heading_position.inline" },
+        { "value": "overlay", "label": "t:options.heading_position.overlay" }
       ] },
     { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
 
@@ -528,6 +593,7 @@
         "padding_bottom": 0,
         "show_divider": true,
         "content_spacing": "spread",
+        "heading_position": "overlay",
         "button_style": "secondary",
         "color_scheme": "scheme-4"
       }
