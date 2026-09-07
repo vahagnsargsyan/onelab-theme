@@ -257,6 +257,45 @@
         "padding_left": 0,
         "padding_right": 0
       }
+    },
+    "image_with_text_wUQUn8": {
+      "type": "image-with-text",
+      "name": "t:general.image_banner",
+      "settings": {
+        "heading": "Jewelry that speaks elegance",
+        "text": "<p>Elevate your everyday style with timeless pieces crafted to shine through every moment. Minimal, modern, and effortlessly luxurious.</p>",
+        "show_divider": true,
+        "button_label": "Shop collection",
+        "button_link": "",
+        "button_style": "secondary",
+        "image": "shopify://shop_images/image_54.png",
+        "image_ratio": "fill",
+        "media_style": "overlap",
+        "panel_color": "#1F3A34",
+        "panel_offset": 32,
+        "secondary_image": "shopify://shop_images/image_55.png",
+        "secondary_image_width": 30,
+        "content_position": "right",
+        "media_width": "one_third",
+        "content_alignment": "left",
+        "content_spacing": "spread",
+        "gap": 0,
+        "width": "full",
+        "height": "large",
+        "color_scheme": "scheme-4",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
@@ -264,6 +303,7 @@
     "collections_A8Kaxc",
     "featured_products_MczVn9",
     "blog_posts_kpKz4n",
-    "instagram_gallery_ik3zCD"
+    "instagram_gallery_ik3zCD",
+    "image_with_text_wUQUn8"
   ]
 }
