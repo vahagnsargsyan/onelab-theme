@@ -9,6 +9,9 @@
  */
 {
   "current": {
+    "social_instagram": "#",
+    "social_facebook": "#",
+    "social_x": "#",
     "content_for_index": [],
     "color_schemes": {
       "scheme-1": {
@@ -63,12 +66,12 @@
         "settings": {
           "background": "#ffffff",
           "background_gradient": "",
-          "text": "#FFFFFF",
+          "text": "#ffffff",
           "button": "#171717",
           "button_label": "#ffffff",
-          "secondary_button_label": "#FFFFFF",
-          "borders": "#FFFFFF",
-          "shadow": "#FFFFFF"
+          "secondary_button_label": "#ffffff",
+          "borders": "#ffffff",
+          "shadow": "#ffffff"
         }
       }
     }

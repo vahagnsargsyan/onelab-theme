@@ -13,9 +13,68 @@
   "sections": {
     "footer": {
       "type": "footer",
+      "blocks": {
+        "newsletter_mzQHXp": {
+          "type": "newsletter",
+          "settings": {
+            "heading": "Newsletter",
+            "text": "<p>Sign up for new arrivals and offers.</p>",
+            "button_label": "Subscribe"
+          }
+        },
+        "menu_qg3rRG": {
+          "type": "menu",
+          "settings": {
+            "heading": "Customer Care",
+            "menu": "education"
+          }
+        },
+        "menu_y6eBDR": {
+          "type": "menu",
+          "settings": {
+            "heading": "Info",
+            "menu": "education"
+          }
+        },
+        "social_9VDEth": {
+          "type": "social",
+          "settings": {
+            "heading": "Follow us",
+            "text": ""
+          }
+        },
+        "text_UKxQHU": {
+          "type": "text",
+          "settings": {
+            "heading": "Contact us",
+            "text": "<p>Questions about an order or a piece? We usually reply within one business day.<br/>Mon-Fri / 10am-5pm CEST<br/><br/>your email@domain.com<br/>+123 456 789<br/></p>"
+          }
+        }
+      },
+      "block_order": [
+        "newsletter_mzQHXp",
+        "menu_qg3rRG",
+        "menu_y6eBDR",
+        "social_9VDEth",
+        "text_UKxQHU"
+      ],
       "settings": {
-        "menu": "",
-        "show_payment_icons": true
+        "bottom_text": "",
+        "bottom_menu": "",
+        "show_payment_icons": true,
+        "display": "grid",
+        "columns": 4,
+        "columns_mobile": "1",
+        "alignment": "left",
+        "position": "top",
+        "gap": 32,
+        "width": "page",
+        "color_scheme": "scheme-4",
+        "background_color": "",
+        "padding_top": 60,
+        "padding_bottom": 40,
+        "padding_left": 0,
+        "padding_right": 0
       }
     }
   },
