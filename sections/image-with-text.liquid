@@ -1,0 +1,537 @@
+{% comment %}
+  Image with text. One image and one block of copy, with the text on any side.
+
+  Media style covers the two treatments in the reference designs:
+    - Simple:  just the image.
+    - Panel:   a colored rectangle offset behind the image.
+    - Overlap: a second image on the outer corner of the text pane.
+
+  The overlapping image belongs to the content pane, not the section, so moving
+  Content position carries it along and it always anchors to the outer edge —
+  bottom left when the text is on the left, bottom right when it is on the right.
+
+  The heading is its own element, a sibling of the body group rather than one
+  more item inside it. That is what lets Content spacing pin the heading to the
+  top of the pane and drop the divider, text, and button to the bottom.
+
+  Content and media are emitted in visual order, so DOM order always matches
+  what is on screen and focus order follows it — that is why the position is a
+  Liquid branch rather than a CSS `order`.
+
+  This section omits the canonical Display / Direction / Columns / Alignment /
+  Position settings: it is a fixed two-part layout, so they cannot apply.
+  Content position and Media width replace them. Everything else — Size,
+  Appearance, Borders, Padding, and Gap — is the shared layout verbatim.
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+  assign position = s.content_position | default: 'right'
+  assign media_style = s.media_style | default: 'simple'
+  assign image = s.image
+
+  case s.media_width
+    when 'one_third'
+      assign media_track = '33%'
+    when 'two_thirds'
+      assign media_track = '66%'
+    else
+      assign media_track = '50%'
+  endcase
+
+  assign content_first = false
+  if position == 'top' or position == 'left'
+    assign content_first = true
+  endif
+
+  assign columns = 'minmax(0, 1fr)'
+  if position == 'left'
+    assign columns = 'minmax(0, 1fr) ' | append: media_track
+  elsif position == 'right'
+    assign columns = media_track | append: ' minmax(0, 1fr)'
+  endif
+
+  assign has_button = false
+  if s.button_label != blank
+    assign has_button = true
+  endif
+
+  comment
+    The overlap hugs the edge of the pane furthest from the image. With the text
+    stacked above or below, there is no outer side, so it falls back to the end.
+  endcomment
+  assign overlap_side = 'end'
+  if position == 'left'
+    assign overlap_side = 'start'
+  endif
+
+  assign has_overlap = false
+  if media_style == 'overlap' and s.secondary_image != blank
+    assign has_overlap = true
+  endif
+%}
+
+<div {% render 'layout-style', s: section.settings, class: 'image-with-text full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    <div
+      class="
+        image-text
+        image-text--position-{{ position }}
+        image-text--media-{{ media_style }}
+        image-text--ratio-{{ s.image_ratio | default: 'adapt' }}
+        image-text--align-{{ s.content_alignment | default: 'left' }}
+        image-text--spacing-{{ s.content_spacing | default: 'grouped' }}
+        image-text--overlap-{{ overlap_side }}
+      "
+      style="
+        --image-text-columns: {{ columns }};
+        --panel-color: {{ s.panel_color | default: '#1F3A34' }};
+        --panel-offset: {{ s.panel_offset | default: 32 }}px;
+        --secondary-width: {{ s.secondary_image_width | default: 30 }}%;
+      "
+    >
+      {%- capture media_markup -%}
+        <div class="image-text__media">
+          {%- if media_style == 'panel' -%}
+            <span class="image-text__panel" aria-hidden="true"></span>
+          {%- endif -%}
+
+          {%- if image != blank -%}
+            {%- liquid
+              assign focal = image.presentation.focal_point | default: 'center center'
+              assign focal_style = 'object-position: ' | append: focal | append: ';'
+              assign alt = image.alt | default: ''
+            -%}
+            {{
+              image
+              | image_url: width: 2000
+              | image_tag:
+                class: 'image-text__image',
+                widths: '375, 550, 750, 1100, 1500, 2000',
+                sizes: '(min-width: 750px) 50vw, 100vw',
+                alt: alt,
+                loading: 'lazy',
+                style: focal_style
+            }}
+          {%- else -%}
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'image-text__image image-text__placeholder' }}
+          {%- endif -%}
+        </div>
+      {%- endcapture -%}
+
+      {%- capture content_markup -%}
+        <div class="image-text__pane">
+          <div class="image-text__content">
+            {%- comment -%}
+              The heading is a sibling of the body, not a child of it, so the two
+              can be pushed apart by Content spacing.
+            {%- endcomment -%}
+            {%- if s.heading != blank -%}
+              <h2 class="image-text__heading">{{ s.heading }}</h2>
+            {%- endif -%}
+
+            <div class="image-text__body">
+              {%- if s.show_divider -%}
+                <span class="image-text__divider" aria-hidden="true"></span>
+              {%- endif -%}
+
+              {%- if s.text != blank -%}
+                <div class="image-text__text rte">{{ s.text }}</div>
+              {%- endif -%}
+
+              {%- if has_button -%}
+                <a
+                  {% if s.button_link != blank %}
+                    href="{{ s.button_link }}"
+                  {% else %}
+                    href="#"
+                    aria-disabled="true"
+                  {% endif %}
+                  class="button{% if s.button_style == 'secondary' %} button--secondary{% endif %}"
+                >
+                  {{- s.button_label -}}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if has_overlap -%}
+            {%- liquid
+              assign second = s.secondary_image
+              assign second_focal = second.presentation.focal_point | default: 'center center'
+              assign second_style = 'object-position: ' | append: second_focal | append: ';'
+              assign second_alt = second.alt | default: ''
+            -%}
+            <div class="image-text__secondary">
+              {{
+                second
+                | image_url: width: 1200
+                | image_tag:
+                  class: 'image-text__secondary-image',
+                  widths: '275, 360, 533, 720, 940, 1200',
+                  sizes: '(min-width: 750px) 30vw, 100vw',
+                  alt: second_alt,
+                  loading: 'lazy',
+                  style: second_style
+              }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endcapture -%}
+
+      {%- if content_first -%}
+        {{ content_markup }}
+        {{ media_markup }}
+      {%- else -%}
+        {{ media_markup }}
+        {{ content_markup }}
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .image-text {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--image-text-columns, minmax(0, 1fr));
+    gap: var(--layout-gap, 0);
+    align-items: center;
+    width: 100%;
+    min-height: inherit;
+  }
+
+  /* Fill makes the image span the section height, so the cells must stretch. */
+  .image-text--ratio-fill {
+    align-items: stretch;
+  }
+
+  .image-text__media {
+    position: relative;
+    min-width: 0;
+  }
+
+  .image-text__image {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .image-text--ratio-square .image-text__image {
+    aspect-ratio: 1 / 1;
+  }
+  .image-text--ratio-portrait .image-text__image {
+    aspect-ratio: 4 / 5;
+  }
+  .image-text--ratio-landscape .image-text__image {
+    aspect-ratio: 3 / 2;
+  }
+  .image-text--ratio-fill .image-text__media,
+  .image-text--ratio-fill .image-text__image {
+    height: 100%;
+  }
+
+  .image-text__placeholder {
+    background-color: var(--color-border);
+    fill: var(--color-background);
+  }
+
+  /*
+   * Offset panel. Sits behind the image, shifted up and to the outside, so the
+   * image reads as layered on top of a colored plate.
+   */
+  .image-text__panel {
+    position: absolute;
+    inset: calc(var(--panel-offset) * -1) calc(var(--panel-offset) * -1)
+      var(--panel-offset) var(--panel-offset);
+    background-color: var(--panel-color);
+  }
+
+  /*
+   * The pane is the content grid cell. It holds the copy and, when the overlap
+   * style is on, the second image — so the overlap travels with Content
+   * position instead of being pinned to the section.
+   */
+  .image-text__pane {
+    position: relative;
+    display: grid;
+    align-content: stretch;
+    min-width: 0;
+  }
+
+  .image-text__content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+    max-width: 34rem;
+  }
+
+  .image-text__body {
+    display: flex;
+    flex-direction: column;
+    gap: inherit;
+  }
+
+  /*
+   * Spread pushes the heading to the top of the pane and the body to the
+   * bottom. It only has an effect when the pane is taller than the copy, which
+   * is why it needs the heading to be a separate element.
+   */
+  .image-text--spacing-spread .image-text__content {
+    justify-content: space-between;
+    height: 100%;
+    gap: 3rem;
+  }
+
+  .image-text--align-left .image-text__content {
+    align-items: flex-start;
+    justify-self: start;
+    text-align: left;
+  }
+  .image-text--align-center .image-text__content {
+    align-items: center;
+    justify-self: center;
+    text-align: center;
+  }
+  .image-text--align-right .image-text__content {
+    align-items: flex-end;
+    justify-self: end;
+    text-align: right;
+  }
+
+  .image-text--align-left .image-text__body {
+    align-items: flex-start;
+  }
+  .image-text--align-center .image-text__body {
+    align-items: center;
+  }
+  .image-text--align-right .image-text__body {
+    align-items: flex-end;
+  }
+
+  .image-text__heading,
+  .image-text__text {
+    margin: 0;
+  }
+
+  .image-text__divider {
+    display: block;
+    width: 8.75rem;
+    max-width: 100%;
+    height: 1px;
+    background-color: currentColor;
+    opacity: 0.6;
+  }
+
+  /*
+   * Overlapping image, anchored to the pane's lower outer corner. Which corner
+   * that is comes from Content position, so the two move together.
+   */
+  .image-text__secondary {
+    position: absolute;
+    inset-block-end: 0;
+    width: var(--secondary-width);
+  }
+
+  .image-text--overlap-end .image-text__secondary {
+    inset-inline-end: 0;
+  }
+  .image-text--overlap-start .image-text__secondary {
+    inset-inline-start: 0;
+  }
+
+  .image-text__secondary-image {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  @media (max-width: 749px) {
+    .image-text {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .image-text__content {
+      max-width: none;
+    }
+
+    /* No room to spread vertically on a phone; let the copy sit together. */
+    .image-text--spacing-spread .image-text__content {
+      justify-content: flex-start;
+      height: auto;
+      gap: 1.5rem;
+    }
+
+    /*
+     * The overlap becomes a stacked image rather than disappearing. Hiding it
+     * would drop real content for small screens and screen readers alike.
+     */
+    .image-text__secondary {
+      position: static;
+      width: 100%;
+      margin-block-start: var(--layout-gap, 0);
+    }
+
+    .image-text__panel {
+      inset: calc(var(--panel-offset) * -0.5) calc(var(--panel-offset) * -0.5)
+        calc(var(--panel-offset) * 0.5) calc(var(--panel-offset) * 0.5);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.image_with_text",
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.image_text_heading" },
+    { "type": "richtext", "id": "text", "label": "t:labels.text", "default": "t:defaults.image_text_text" },
+    { "type": "checkbox", "id": "show_divider", "label": "t:labels.show_divider", "default": false },
+    { "type": "text", "id": "button_label", "label": "t:labels.button_label", "default": "t:defaults.shop_collection" },
+    { "type": "url", "id": "button_link", "label": "t:labels.button_link" },
+    { "type": "select", "id": "button_style", "label": "t:labels.button_style", "default": "primary",
+      "options": [
+        { "value": "primary", "label": "t:options.button_style.primary" },
+        { "value": "secondary", "label": "t:options.button_style.secondary" }
+      ] },
+
+    { "type": "header", "content": "t:general.media" },
+    { "type": "image_picker", "id": "image", "label": "t:labels.image" },
+    { "type": "select", "id": "image_ratio", "label": "t:labels.image_ratio", "default": "landscape",
+      "options": [
+        { "value": "adapt", "label": "t:options.image_ratio.adapt" },
+        { "value": "square", "label": "t:options.image_ratio.square" },
+        { "value": "portrait", "label": "t:options.image_ratio.portrait" },
+        { "value": "landscape", "label": "t:options.image_ratio.landscape" },
+        { "value": "fill", "label": "t:options.image_ratio.fill" }
+      ] },
+    { "type": "select", "id": "media_style", "label": "t:labels.media_style", "default": "simple",
+      "options": [
+        { "value": "simple", "label": "t:options.media_style.simple" },
+        { "value": "panel", "label": "t:options.media_style.panel" },
+        { "value": "overlap", "label": "t:options.media_style.overlap" }
+      ] },
+    { "type": "color", "id": "panel_color", "label": "t:labels.panel_color", "default": "#1F3A34",
+      "visible_if": "{{ section.settings.media_style == 'panel' }}" },
+    { "type": "range", "id": "panel_offset", "label": "t:labels.panel_offset", "min": 8, "max": 96, "step": 4, "unit": "px", "default": 32,
+      "visible_if": "{{ section.settings.media_style == 'panel' }}" },
+    { "type": "image_picker", "id": "secondary_image", "label": "t:labels.secondary_image", "info": "t:info.secondary_image",
+      "visible_if": "{{ section.settings.media_style == 'overlap' }}" },
+    { "type": "range", "id": "secondary_image_width", "label": "t:labels.secondary_image_width", "min": 15, "max": 50, "step": 1, "unit": "%", "default": 30,
+      "visible_if": "{{ section.settings.media_style == 'overlap' }}" },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "content_position", "label": "t:labels.content_position", "info": "t:info.content_position", "default": "right",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "right", "label": "t:options.alignment.right" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "select", "id": "media_width", "label": "t:labels.media_width", "default": "half",
+      "visible_if": "{{ section.settings.content_position == 'left' or section.settings.content_position == 'right' }}",
+      "options": [
+        { "value": "one_third", "label": "t:options.media_width.one_third" },
+        { "value": "half", "label": "t:options.media_width.half" },
+        { "value": "two_thirds", "label": "t:options.media_width.two_thirds" }
+      ] },
+    { "type": "select", "id": "content_alignment", "label": "t:labels.content_alignment", "default": "left",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "content_spacing", "label": "t:labels.content_spacing", "info": "t:info.content_spacing", "default": "grouped",
+      "options": [
+        { "value": "grouped", "label": "t:options.content_spacing.grouped" },
+        { "value": "spread", "label": "t:options.content_spacing.spread" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "fit",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.image_with_text",
+      "settings": {
+        "content_position": "left",
+        "media_style": "panel",
+        "image_ratio": "landscape",
+        "width": "page",
+        "button_style": "primary"
+      }
+    },
+    {
+      "name": "t:general.image_banner",
+      "settings": {
+        "content_position": "right",
+        "media_style": "overlap",
+        "image_ratio": "fill",
+        "width": "full",
+        "height": "large",
+        "gap": 0,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "show_divider": true,
+        "content_spacing": "spread",
+        "button_style": "secondary",
+        "color_scheme": "scheme-4"
+      }
+    }
+  ]
+}
+{% endschema %}

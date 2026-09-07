@@ -46,10 +46,13 @@
     "heading_5": "Heading 5",
     "heading_6": "Heading 6",
     "image": "Image",
+    "image_banner": "Image banner",
+    "image_with_text": "Image with text",
     "inputs": "Inputs",
     "instagram": "Instagram gallery",
     "layout": "Layout",
     "main": "Main",
+    "media": "Media",
     "padding": "Padding",
     "page": "Page",
     "paragraph": "Paragraph",
@@ -90,6 +93,7 @@
     "button_corner_radius": "Button corner radius",
     "button_label": "Button label",
     "button_link": "Button link",
+    "button_style": "Button style",
     "button_text": "Button text",
     "case": "Case",
     "collection": "Collection",
@@ -97,6 +101,9 @@
     "color_scheme": "Color scheme",
     "columns": "Columns",
     "columns_mobile": "Columns on mobile",
+    "content_alignment": "Content alignment",
+    "content_position": "Content position",
+    "content_spacing": "Content spacing",
     "corner_radius": "Corner radius",
     "custom_liquid": "Liquid code",
     "customer_account_menu": "Customer account menu",
@@ -124,6 +131,8 @@
     "logo": "Logo",
     "logo_width": "Logo width",
     "max_width": "Maximum width",
+    "media_style": "Media style",
+    "media_width": "Media width",
     "menu": "Menu",
     "overlay_color": "Overlay color",
     "overlay_opacity": "Overlay opacity",
@@ -134,6 +143,8 @@
     "padding_top": "Top",
     "page_margin": "Page margin",
     "page_width": "Page width",
+    "panel_color": "Panel color",
+    "panel_offset": "Panel offset",
     "position": "Position",
     "posts_to_show": "Posts to show",
     "preset": "Preset",
@@ -141,12 +152,15 @@
     "products_to_show": "Products to show",
     "profile_url": "Profile link",
     "secondary_button_text": "Secondary button text",
+    "secondary_image": "Overlapping image",
+    "secondary_image_width": "Overlapping image width",
     "section_spacing": "Section spacing",
     "shadow": "Shadow",
     "show_author": "Show author",
     "show_background_overlay": "Show background overlay",
     "show_collection_description": "Show collection description",
     "show_date": "Show date",
+    "show_divider": "Show divider",
     "show_dots": "Show slide dots",
     "show_excerpt": "Show excerpt",
     "show_instagram_icon": "Show Instagram icon",
@@ -172,12 +186,15 @@
     "block_background_color": "Leave empty to let the section background show through.",
     "card_image_fit": "Applies when the image ratio is not set to adapt.",
     "columns": "Items shown in each row. Applies when Display is Grid, or Flex set to Horizontal, and sets items per view for a slider.",
+    "content_position": "Where the text sits in relation to the image.",
+    "content_spacing": "Spread pins the heading to the top and the rest to the bottom, when the section is tall enough.",
     "custom_liquid": "Add app snippets or other Liquid code to create advanced customizations.",
     "favicon": "Scaled down to 32 x 32px.",
     "focus_accessibility": "The focus outline shows keyboard customers where they are on the page. Keep it visible so the storefront stays usable without a mouse.",
     "font_performance": "Roles that share a font family load once. Using fewer families keeps the storefront fast.",
     "instagram_item_link": "Leave empty to use the profile link.",
     "instagram_not_a_feed": "Images are uploaded here, not pulled from Instagram. A live feed needs a third-party app.",
+    "secondary_image": "Sits on the outer corner of the text area, and moves with the content position. Stacks below the text on mobile.",
     "show_instagram_icon": "Needs a profile link. Sits over the center of the row.",
     "show_read_more": "When hidden, the whole card links to the post instead.",
     "slider_loop": "The next arrow returns to the first item after the last one, and the previous arrow jumps to the last.",
@@ -192,8 +209,11 @@
     "blog_heading": "Our blog",
     "featured_products": "Featured products",
     "heading": "Heading",
+    "image_text_heading": "Jewelry that speaks elegance",
+    "image_text_text": "Elevate your everyday style with timeless pieces crafted to shine through every moment. Minimal, modern, and effortlessly luxurious.",
     "instagram_heading": "@yourstore",
     "instagram_subheading": "Join us",
+    "shop_collection": "Shop collection",
     "shop_now": "Shop now",
     "slide_heading": "Timeless elegance in every detail",
     "slide_text": "Discover handcrafted jewelry designed to bring effortless beauty to your everyday style.",
@@ -221,6 +241,10 @@
       "none": "None",
       "solid": "Solid"
     },
+    "button_style": {
+      "primary": "Solid",
+      "secondary": "Outlined"
+    },
     "case": {
       "default": "Default",
       "uppercase": "Uppercase"
@@ -228,6 +252,10 @@
     "columns_mobile": {
       "one": "One",
       "two": "Two"
+    },
+    "content_spacing": {
+      "grouped": "Grouped",
+      "spread": "Spread"
     },
     "direction": {
       "horizontal": "Horizontal",
@@ -258,7 +286,8 @@
       "square": "Square",
       "portrait": "Portrait",
       "landscape": "Landscape",
-      "wide": "Wide"
+      "wide": "Wide",
+      "fill": "Fill section"
     },
     "image_width": {
       "full": "Full",
@@ -280,6 +309,16 @@
       "narrow": "Narrow",
       "normal": "Normal",
       "none": "None"
+    },
+    "media_style": {
+      "simple": "Simple",
+      "panel": "Offset panel",
+      "overlap": "Overlapping image"
+    },
+    "media_width": {
+      "one_third": "One third",
+      "half": "Half",
+      "two_thirds": "Two thirds"
     },
     "position": {
       "top": "Top",
