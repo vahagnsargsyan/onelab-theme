@@ -63,7 +63,7 @@
         "bottom_menu": "",
         "show_payment_icons": true,
         "display": "grid",
-        "columns": 4,
+        "columns": 5,
         "columns_mobile": "1",
         "alignment": "left",
         "position": "top",
