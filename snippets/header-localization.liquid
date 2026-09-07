@@ -1,0 +1,98 @@
+{% doc %}
+  Country/region and language selectors.
+
+  Each is a real `localization` form whose options are submit buttons, so
+  switching works with JavaScript disabled — no change handler, no hidden input
+  kept in sync. Renders nothing when the store has only one country or language.
+
+  @param {boolean} [show_country]
+  @param {boolean} [show_language]
+  @param {string} [class] - Extra classes for the wrapper.
+
+  @example
+  {% render 'header-localization', show_country: true, show_language: true %}
+{% enddoc %}
+
+{%- liquid
+  assign has_country = false
+  if show_country and localization.available_countries.size > 1
+    assign has_country = true
+  endif
+
+  assign has_language = false
+  if show_language and localization.available_languages.size > 1
+    assign has_language = true
+  endif
+-%}
+
+{%- if has_country or has_language -%}
+  <div class="localization {{ class }}">
+    {%- if has_country -%}
+      {%- form 'localization', class: 'localization__form' -%}
+        <details class="localization__details" data-nav-details>
+          <summary class="localization__toggle">
+            <span>
+              {{- localization.country.currency.iso_code }}
+              {{ localization.country.currency.symbol }} -
+              {{ localization.country.name -}}
+            </span>
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </summary>
+
+          <ul class="localization__list">
+            {%- for country in localization.available_countries -%}
+              <li>
+                <button
+                  type="submit"
+                  name="country_code"
+                  value="{{ country.iso_code }}"
+                  class="localization__option"
+                  {% if country.iso_code == localization.country.iso_code %}
+                    aria-current="true"
+                  {% endif %}
+                >
+                  {{- country.name }} ({{ country.currency.iso_code }}
+                  {{ country.currency.symbol }})
+                </button>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </details>
+      {%- endform -%}
+    {%- endif -%}
+
+    {%- if has_country and has_language -%}
+      <span class="localization__divider" aria-hidden="true">|</span>
+    {%- endif -%}
+
+    {%- if has_language -%}
+      {%- form 'localization', class: 'localization__form' -%}
+        <details class="localization__details" data-nav-details>
+          <summary class="localization__toggle">
+            <span>{{ localization.language.endonym_name | capitalize }}</span>
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </summary>
+
+          <ul class="localization__list">
+            {%- for language in localization.available_languages -%}
+              <li>
+                <button
+                  type="submit"
+                  name="locale_code"
+                  value="{{ language.iso_code }}"
+                  class="localization__option"
+                  lang="{{ language.iso_code }}"
+                  {% if language.iso_code == localization.language.iso_code %}
+                    aria-current="true"
+                  {% endif %}
+                >
+                  {{- language.endonym_name | capitalize -}}
+                </button>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </details>
+      {%- endform -%}
+    {%- endif -%}
+  </div>
+{%- endif -%}

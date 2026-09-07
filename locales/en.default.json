@@ -35,7 +35,11 @@
     "checkout": "Checkout",
     "title": "Cart",
     "update": "Update",
-    "remove": "Remove"
+    "remove": "Remove",
+    "item_count": {
+      "one": "{{ count }} item in cart",
+      "other": "{{ count }} items in cart"
+    }
   },
   "collections": {
     "title": "Collections",
@@ -77,6 +81,11 @@
     "instagram": {
       "follow": "Follow us on Instagram",
       "no_images": "Add an image to get started."
+    },
+    "navigation": {
+      "primary": "Primary",
+      "open_menu": "Open menu",
+      "close_menu": "Close menu"
     }
   },
   "gift_card": {

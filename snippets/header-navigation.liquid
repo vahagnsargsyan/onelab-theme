@@ -1,0 +1,82 @@
+{% doc %}
+  Multi-level navigation, up to three levels.
+
+  Built on <details>/<summary> so it opens by keyboard and pointer with no
+  JavaScript at all. header.js only adds the niceties: closing siblings, closing
+  on Escape with focus returned, and closing on an outside click.
+
+  @param {object} menu - A `link_list`, usually `section.settings.menu`.
+  @param {string} label - Accessible name for the <nav>.
+  @param {string} [class] - Extra classes for the <nav>.
+
+  @example
+  {% render 'header-navigation', menu: section.settings.menu, label: 'Primary' %}
+{% enddoc %}
+
+<nav class="header__nav {{ class }}" aria-label="{{ label }}">
+  <ul class="nav list-unstyled">
+    {%- for link in menu.links -%}
+      <li class="nav__item">
+        {%- if link.links.size > 0 -%}
+          <details class="nav__details" data-nav-details>
+            <summary class="nav__link">
+              <span>{{ link.title }}</span>
+              {{- 'icon-caret.svg' | inline_asset_content -}}
+            </summary>
+
+            <ul class="nav__submenu list-unstyled">
+              {%- for child in link.links -%}
+                <li class="nav__item">
+                  {%- if child.links.size > 0 -%}
+                    <details class="nav__details nav__details--child" data-nav-details>
+                      <summary class="nav__sublink">
+                        <span>{{ child.title }}</span>
+                        {{- 'icon-caret.svg' | inline_asset_content -}}
+                      </summary>
+
+                      <ul class="nav__submenu nav__submenu--child list-unstyled">
+                        {%- for grandchild in child.links -%}
+                          <li>
+                            <a
+                              href="{{ grandchild.url }}"
+                              class="nav__sublink"
+                              {% if grandchild.current %}
+                                aria-current="page"
+                              {% endif %}
+                            >
+                              {{- grandchild.title -}}
+                            </a>
+                          </li>
+                        {%- endfor -%}
+                      </ul>
+                    </details>
+                  {%- else -%}
+                    <a
+                      href="{{ child.url }}"
+                      class="nav__sublink"
+                      {% if child.current %}
+                        aria-current="page"
+                      {% endif %}
+                    >
+                      {{- child.title -}}
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          </details>
+        {%- else -%}
+          <a
+            href="{{ link.url }}"
+            class="nav__link"
+            {% if link.current %}
+              aria-current="page"
+            {% endif %}
+          >
+            {{- link.title -}}
+          </a>
+        {%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+</nav>

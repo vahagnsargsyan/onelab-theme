@@ -1,91 +1,215 @@
-<header>
-  <h2 class="header__title">
-    {%- if settings.logo != blank -%}
-      {%- liquid
-        assign logo_sizes = settings.logo_width | append: 'px'
-        assign logo_width_2x = settings.logo_width | times: 2
-      -%}
-      <a href="{{ routes.root_url }}" class="header__logo-link">
-        {{
-          settings.logo
-          | image_url: width: logo_width_2x
-          | image_tag:
-            class: 'header__logo',
-            widths: '150, 300, 450, 600',
-            sizes: logo_sizes,
-            alt: shop.name,
-            loading: 'eager',
-            fetchpriority: 'high'
-        }}
-      </a>
-    {%- else -%}
-      {{ shop.name | link_to: routes.root_url }}
-    {%- endif -%}
-  </h2>
+{% comment %}
+  Header.
 
-  <div class="header__menu">
-    {% for link in section.settings.menu.links %}
-      {{ link.title | link_to: link.url }}
-    {% endfor %}
-  </div>
+  Layout is three slots on a `1fr auto 1fr` grid. The merchant places the logo
+  and the navigation; the utilities — search, account, cart, and the country and
+  language selectors — take whichever slot is left over. That is what makes
+  "logo center, menu left" put the utilities on the right without a fourth
+  setting to keep in sync.
 
-  <div class="header__icons">
-    {% if shop.customer_accounts_enabled %}
-      <shopify-account menu="{{ section.settings.customer_account_menu }}">
-        {{ 'icon-account.svg' | inline_asset_content }}
-      </shopify-account>
-    {% endif %}
+  This section does not use the shared layout snippet. It cannot: a fixed or
+  sticky header needs its own positioning and its own full-bleed grid, and
+  `.layout` is built for in-flow content. It reads the same global tokens
+  (--page-width, --page-margin, color scheme) so it still matches everything
+  else.
+{% endcomment %}
 
-    <a href="{{ routes.cart_url }}">
-      {% if cart.item_count > 0 %}
-        <sup>{{ cart.item_count }}</sup>
-      {% endif %}
+{% liquid
+  assign s = section.settings
+  assign logo_slot = s.logo_position | default: 'center'
+  assign menu_slot = s.menu_position | default: 'start'
 
-      {{ 'icon-cart.svg' | inline_asset_content }}
-    </a>
-  </div>
-</header>
+  comment
+    Utilities land in the first slot neither the logo nor the menu claimed,
+    preferring the end. If all three are taken they share the end slot.
+  endcomment
+  assign taken = logo_slot | append: ',' | append: menu_slot
+  assign utilities_slot = 'end'
+  unless taken contains 'end'
+    assign utilities_slot = 'end'
+  else
+    unless taken contains 'start'
+      assign utilities_slot = 'start'
+    else
+      unless taken contains 'center'
+        assign utilities_slot = 'center'
+      endunless
+    endunless
+  endunless
 
-{% stylesheet %}
-  header {
-    height: 5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  header a {
-    position: relative;
-    text-decoration: none;
-    color: var(--color-foreground);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  header a sup {
-    position: absolute;
-    left: 100%;
-    overflow: hidden;
-    max-width: var(--page-margin);
-  }
-  header svg {
-    width: 2rem;
-  }
-  .header__logo {
-    display: block;
-    width: var(--logo-width);
-    height: auto;
-  }
-  header .header__menu,
-  header .header__icons {
-    display: flex;
-    gap: 1rem;
-  }
-{% endstylesheet %}
+  assign is_home = false
+  if request.page_type == 'index'
+    assign is_home = true
+  endif
+
+  assign is_fixed = false
+  if s.header_position == 'fixed_all'
+    assign is_fixed = true
+  elsif s.header_position == 'fixed_home' and is_home
+    assign is_fixed = true
+  endif
+
+  assign is_sticky = false
+  if s.header_position == 'sticky'
+    assign is_sticky = true
+  endif
+
+  assign is_transparent = false
+  if s.transparent_on_home and is_home and is_fixed
+    assign is_transparent = true
+  endif
+
+  assign nav_label = 'general.navigation.primary' | t
+  assign slots = 'start,center,end' | split: ','
+
+  assign scheme = s.color_scheme
+  if is_transparent and s.transparent_color_scheme != blank
+    assign scheme = s.transparent_color_scheme
+  endif
+%}
+
+{{ 'header.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'header.js' | asset_url }}" defer="defer"></script>
+
+<site-header>
+  <header
+    class="
+      header
+      color-{{ scheme }}
+      {% if is_fixed %}header--fixed{% endif %}
+      {% if is_sticky %}header--sticky{% endif %}
+      {% if is_transparent %}header--transparent{% endif %}
+      {% if is_transparent and s.transparent_scrim %}header--scrim{% endif %}
+    "
+    style="--header-min-height: {{ s.header_height | default: 80 }}px;"
+    data-header
+  >
+    <div class="header__inner">
+      {%- comment -%} Logo {%- endcomment -%}
+      {%- capture logo_markup -%}
+        {%- if settings.logo != blank -%}
+          {%- liquid
+            assign logo_sizes = settings.logo_width | append: 'px'
+            assign logo_width_2x = settings.logo_width | times: 2
+          -%}
+          <a href="{{ routes.root_url }}" class="header__logo-link">
+            {{
+              settings.logo
+              | image_url: width: logo_width_2x
+              | image_tag:
+                class: 'header__logo',
+                widths: '150, 300, 450, 600',
+                sizes: logo_sizes,
+                alt: shop.name,
+                loading: 'eager',
+                fetchpriority: 'high'
+            }}
+          </a>
+        {%- else -%}
+          <a href="{{ routes.root_url }}" class="header__logo-link">
+            <span class="header__shop-name">{{ shop.name }}</span>
+          </a>
+        {%- endif -%}
+      {%- endcapture -%}
+
+      {%- comment -%} Navigation {%- endcomment -%}
+      {%- capture menu_markup -%}
+        {% render 'header-navigation',
+          menu: section.settings.menu,
+          label: nav_label,
+          class: 'header__nav--desktop'
+        %}
+      {%- endcapture -%}
+
+      {%- comment -%} Utilities {%- endcomment -%}
+      {%- capture utilities_markup -%}
+        {% render 'header-localization',
+          show_country: s.show_country,
+          show_language: s.show_language,
+          class: 'header__localization--desktop'
+        %}
+
+        <div class="header__actions">
+          {%- if s.show_search -%}
+            <a href="{{ routes.search_url }}" class="header__action">
+              {{- 'icon-search.svg' | inline_asset_content -}}
+              <span class="visually-hidden">{{ 'search.title' | t }}</span>
+            </a>
+          {%- endif -%}
+
+          {%- if shop.customer_accounts_enabled -%}
+            <shopify-account menu="{{ s.customer_account_menu }}">
+              {{ 'icon-account.svg' | inline_asset_content }}
+            </shopify-account>
+          {%- endif -%}
+
+          <a href="{{ routes.cart_url }}" class="header__action">
+            {{- 'icon-cart.svg' | inline_asset_content -}}
+            <span class="visually-hidden">{{ 'cart.title' | t }}</span>
+            {%- if cart.item_count > 0 -%}
+              <span class="header__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
+              <span class="visually-hidden">
+                {{- 'cart.item_count' | t: count: cart.item_count -}}
+              </span>
+            {%- endif -%}
+          </a>
+
+          <button
+            type="button"
+            class="header__action header__menu-toggle"
+            data-drawer-open
+            aria-haspopup="dialog"
+          >
+            {{- 'icon-menu.svg' | inline_asset_content -}}
+            <span class="visually-hidden">{{ 'general.navigation.open_menu' | t }}</span>
+          </button>
+        </div>
+      {%- endcapture -%}
+
+      {%- for slot in slots -%}
+        <div class="header__slot header__slot--{{ slot }}">
+          {%- if logo_slot == slot -%}{{ logo_markup }}{%- endif -%}
+          {%- if menu_slot == slot -%}{{ menu_markup }}{%- endif -%}
+          {%- if utilities_slot == slot -%}{{ utilities_markup }}{%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+  </header>
+
+  {%- comment -%}
+    Mobile drawer. A <dialog> so showModal traps focus and makes the rest of the
+    page inert without any focus-management code.
+  {%- endcomment -%}
+  <dialog class="header__drawer" data-header-drawer aria-label="{{ nav_label }}">
+    <div class="header__drawer-head">
+      <button type="button" class="header__action" data-drawer-close>
+        {{- 'icon-close.svg' | inline_asset_content -}}
+        <span class="visually-hidden">{{ 'general.navigation.close_menu' | t }}</span>
+      </button>
+    </div>
+
+    {% render 'header-navigation', menu: section.settings.menu, label: nav_label %}
+
+    {% render 'header-localization',
+      show_country: s.show_country,
+      show_language: s.show_language
+    %}
+  </dialog>
+</site-header>
+
+{%- comment -%}
+  A fixed header is out of flow, so the page needs the height back. Not when it
+  is transparent — overlaying the first section is the whole point.
+{%- endcomment -%}
+{%- if is_fixed and is_transparent == false -%}
+  <div class="header-spacer" aria-hidden="true"></div>
+{%- endif -%}
 
 {% schema %}
 {
   "name": "t:general.header",
   "settings": [
+    { "type": "header", "content": "t:general.navigation" },
     {
       "type": "link_list",
       "id": "menu",
@@ -97,7 +221,91 @@
       "id": "customer_account_menu",
       "label": "t:labels.customer_account_menu",
       "default": "customer-account-main-menu"
-    }
+    },
+
+    { "type": "header", "content": "t:general.layout" },
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "t:labels.logo_position",
+      "default": "center",
+      "options": [
+        { "value": "start", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "end", "label": "t:options.alignment.right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "menu_position",
+      "label": "t:labels.menu_position",
+      "info": "t:info.menu_position",
+      "default": "start",
+      "options": [
+        { "value": "start", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "end", "label": "t:options.alignment.right" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "header_height",
+      "label": "t:labels.header_height",
+      "min": 56,
+      "max": 140,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+
+    { "type": "header", "content": "t:general.position" },
+    {
+      "type": "select",
+      "id": "header_position",
+      "label": "t:labels.header_position",
+      "default": "static",
+      "options": [
+        { "value": "static", "label": "t:options.header_position.static" },
+        { "value": "sticky", "label": "t:options.header_position.sticky" },
+        { "value": "fixed_all", "label": "t:options.header_position.fixed_all" },
+        { "value": "fixed_home", "label": "t:options.header_position.fixed_home" }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_on_home",
+      "label": "t:labels.transparent_on_home",
+      "info": "t:info.transparent_on_home",
+      "default": false,
+      "visible_if": "{{ section.settings.header_position == 'fixed_all' or section.settings.header_position == 'fixed_home' }}"
+    },
+    {
+      "type": "color_scheme",
+      "id": "transparent_color_scheme",
+      "label": "t:labels.transparent_color_scheme",
+      "info": "t:info.transparent_color_scheme",
+      "default": "scheme-2",
+      "visible_if": "{{ section.settings.transparent_on_home }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "transparent_scrim",
+      "label": "t:labels.transparent_scrim",
+      "info": "t:info.transparent_scrim",
+      "default": true,
+      "visible_if": "{{ section.settings.transparent_on_home }}"
+    },
+
+    { "type": "header", "content": "t:general.appearance" },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:labels.color_scheme",
+      "default": "scheme-1"
+    },
+    { "type": "checkbox", "id": "show_search", "label": "t:labels.show_search", "default": true },
+    { "type": "checkbox", "id": "show_country", "label": "t:labels.show_country_selector", "default": true },
+    { "type": "checkbox", "id": "show_language", "label": "t:labels.show_language_selector", "default": true }
   ]
 }
 {% endschema %}

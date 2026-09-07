@@ -1,0 +1,388 @@
+/**
+ * Header.
+ *
+ * Layout is three slots — start, center, end — on a `1fr auto 1fr` grid, so the
+ * center slot stays optically centered on the page no matter how wide the other
+ * two get. The section decides which slot the logo, the menu, and the utilities
+ * land in; this file never assumes a particular arrangement.
+ */
+
+.header {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: var(--page-width);
+  min-height: var(--header-min-height, 5rem);
+  margin-inline: auto;
+  padding-inline: var(--page-margin);
+}
+
+.header__slot {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+.header__slot--start {
+  justify-content: flex-start;
+}
+.header__slot--center {
+  justify-content: center;
+}
+.header__slot--end {
+  justify-content: flex-end;
+}
+
+/* Position modes */
+
+.header--sticky {
+  position: sticky;
+  inset-block-start: 0;
+}
+
+.header--fixed {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+}
+
+/*
+ * Reserves the space a fixed header takes out of the flow. Not needed when the
+ * header is transparent, because overlaying the first section is the point.
+ */
+.header-spacer {
+  height: var(--header-height, 5rem);
+}
+
+/*
+ * Transparent mode. Turns solid once the page scrolls, which is what keeps the
+ * text legible after it leaves the hero it was designed against.
+ */
+.header--transparent {
+  background-color: transparent;
+}
+
+site-header.is-scrolled .header--transparent {
+  background-color: var(--color-background);
+}
+
+/*
+ * Optional shade behind a transparent header. Over an arbitrary photo nothing
+ * else guarantees the 4.5:1 the links need.
+ */
+.header--scrim::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgb(0 0 0 / 45%), transparent);
+  pointer-events: none;
+}
+
+site-header.is-scrolled .header--scrim::before {
+  opacity: 0;
+}
+
+/* Logo */
+
+.header__logo-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.header__logo {
+  display: block;
+  width: var(--logo-width);
+  height: auto;
+}
+
+.header__shop-name {
+  margin: 0;
+  font-family: var(--text-h4-family);
+  font-size: var(--text-h4-size);
+  letter-spacing: var(--text-h4-tracking);
+  white-space: nowrap;
+}
+
+/* Navigation */
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav__link,
+.nav__sublink {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  /* 44px keeps every menu target comfortably above the minimum. */
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nav__link[aria-current='page'],
+.nav__sublink[aria-current='page'] {
+  text-decoration: underline;
+  text-underline-offset: 0.4em;
+}
+
+.nav__link:focus-visible,
+.nav__sublink:focus-visible,
+.header__action:focus-visible,
+.localization__toggle:focus-visible,
+.localization__option:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.nav__details > summary {
+  list-style: none;
+}
+.nav__details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nav__details > summary svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  /* The shared caret points left; a disclosure needs it pointing down. */
+  rotate: -90deg;
+  transition: rotate 0.15s;
+}
+
+.nav__details[open] > summary svg {
+  rotate: 90deg;
+}
+
+.nav__submenu {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 12rem;
+  padding: 1rem;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+}
+
+.nav__item {
+  position: relative;
+}
+
+/* Third level opens beside its parent rather than under it. */
+.nav__details--child .nav__submenu {
+  inset-block-start: 0;
+  inset-inline-start: 100%;
+}
+
+/* Utilities */
+
+.header__actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header__action {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.header__action svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.header__cart-count {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  min-width: 1.1rem;
+  padding: 0 0.25rem;
+  font-size: 0.7rem;
+  line-height: 1.1rem;
+  text-align: center;
+  color: var(--color-button-text);
+  background-color: var(--color-button);
+  border-radius: 999px;
+}
+
+.header__actions shopify-account {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+}
+
+/* Localization */
+
+.localization {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.localization__form {
+  position: relative;
+}
+
+.localization__toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  color: inherit;
+  cursor: pointer;
+  list-style: none;
+  white-space: nowrap;
+}
+.localization__toggle::-webkit-details-marker {
+  display: none;
+}
+
+.localization__toggle svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  rotate: -90deg;
+}
+
+.localization__list {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-end: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  max-height: 60svh;
+  min-width: 12rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0.5rem;
+  list-style: none;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+}
+
+.localization__option {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.25rem 0.5rem;
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.localization__option[aria-current='true'] {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.localization__divider {
+  opacity: 0.4;
+}
+
+/* Mobile drawer */
+
+.header__drawer {
+  width: min(22rem, 100%);
+  max-width: 100%;
+  height: 100%;
+  max-height: 100svh;
+  margin: 0;
+  margin-inline-end: auto;
+  padding: 1.5rem;
+  border: 0;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+.header__drawer::backdrop {
+  background-color: rgb(0 0 0 / 45%);
+}
+
+.header__drawer-head {
+  display: flex;
+  justify-content: flex-end;
+  margin-block-end: 1rem;
+}
+
+.header__drawer .nav {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+}
+
+.header__drawer .nav__submenu {
+  position: static;
+  min-width: 0;
+  padding: 0.25rem 0 0.25rem 1rem;
+  border: 0;
+}
+
+.header__drawer .localization {
+  flex-direction: column;
+  align-items: stretch;
+  margin-block-start: 1.5rem;
+}
+
+.header__drawer .localization__list {
+  position: static;
+  border: 0;
+  padding-inline: 0;
+}
+
+/* Desktop and mobile split */
+
+.header__menu-toggle {
+  display: none;
+}
+
+@media (max-width: 989px) {
+  .header__nav--desktop,
+  .header__localization--desktop {
+    display: none;
+  }
+
+  .header__menu-toggle {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav__details > summary svg {
+    transition: none;
+  }
+}
