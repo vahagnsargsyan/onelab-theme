@@ -1,20 +1,31 @@
 {% comment %}
-  Collection template. Renders the collection header and its products, either as
-  a grid or as a scroll-snap slider.
+  Blog posts. Shows recent articles from a merchant-chosen blog as a grid or a
+  scroll-snap slider, on any template.
 
-  Layout, size, appearance, borders, and padding come from the shared snippets.
-  The slider reuses the shared Columns settings as items per view, so a merchant
-  sets the count once and it means the same thing in both modes.
+  Layout, size, appearance, borders, padding, slider, and loop come from the
+  shared layout settings. This section owns only which blog, how many posts, the
+  heading, and which card details to show.
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
+  Cards render through snippets/article-card.liquid, shared with the blog
+  template.
 {% endcomment %}
 
 {% liquid
   assign s = section.settings
-  assign per_page = s.products_per_page | default: 12
-  assign has_products = false
-  if collection.products.size > 0
-    assign has_products = true
+  assign blog = s.blog
+  assign limit = s.posts_to_show | default: 3
+
+  assign has_posts = false
+  if blog.articles.size > 0
+    assign has_posts = true
+  endif
+
+  assign slider_label = s.heading | strip_html | strip
+  if slider_label == blank
+    assign slider_label = blog.title
+  endif
+  if slider_label == blank
+    assign slider_label = 'general.slider.label' | t
   endif
 %}
 
@@ -24,24 +35,22 @@
   <script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-<div {% render 'layout-style', s: section.settings, class: 'collection full-width' %}>
+<div {% render 'layout-style', s: section.settings, class: 'blog-posts full-width' %}>
   {% render 'layout-background', s: section.settings %}
 
   <div class="layout__content">
-    <div class="collection__inner">
-      <header class="collection__header">
-        <h1 class="collection__title">{{ collection.title }}</h1>
+    <div class="blog-posts__inner">
+      {%- if s.heading != blank -%}
+        <header class="blog-posts__header blog-posts__header--{{ s.heading_alignment }}">
+          <h2 class="blog-posts__heading">{{ s.heading }}</h2>
+        </header>
+      {%- endif -%}
 
-        {%- if s.show_description and collection.description != blank -%}
-          <div class="collection__description rte">{{ collection.description }}</div>
-        {%- endif -%}
-      </header>
-
-      {%- if has_products -%}
+      {%- if has_posts -%}
         {%- if s.use_slider -%}
           <slider-carousel
             class="slider"{% if s.slider_loop %} loop{% endif %}
-            style="--slider-per-view: {{ s.columns | default: 4 }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 1 }};"
+            style="--slider-per-view: {{ s.columns | default: 3 }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 1 }};"
           >
             {% render 'slider-controls' %}
 
@@ -50,41 +59,54 @@
               data-slider-track
               tabindex="0"
               role="region"
-              aria-label="{{ collection.title | escape }}"
+              aria-label="{{ slider_label | escape }}"
             >
-              {%- for product in collection.products limit: per_page -%}
+              {%- for article in blog.articles limit: limit -%}
                 <li>
-                  {% render 'product-card', product: product, index: forloop.index0 %}
+                  {% render 'article-card',
+                    article: article,
+                    index: forloop.index0,
+                    show_author: s.show_author,
+                    show_date: s.show_date,
+                    show_excerpt: s.show_excerpt,
+                    show_read_more: s.show_read_more
+                  %}
                 </li>
               {%- endfor -%}
             </ul>
           </slider-carousel>
         {%- else -%}
-          {% paginate collection.products by per_page %}
-            <ul class="layout__blocks collection__grid list-unstyled">
-              {%- for product in collection.products -%}
-                <li>
-                  {% render 'product-card', product: product, index: forloop.index0 %}
-                </li>
-              {%- endfor -%}
-            </ul>
-
-            {%- if paginate.pages > 1 -%}
-              <nav class="collection__pagination" aria-label="{{ 'general.pagination.label' | t }}">
-                {{ paginate | default_pagination }}
-              </nav>
-            {%- endif -%}
-          {% endpaginate %}
+          <ul class="layout__blocks blog-posts__grid list-unstyled">
+            {%- for article in blog.articles limit: limit -%}
+              <li>
+                {% render 'article-card',
+                  article: article,
+                  index: forloop.index0,
+                  show_author: s.show_author,
+                  show_date: s.show_date,
+                  show_excerpt: s.show_excerpt,
+                  show_read_more: s.show_read_more
+                %}
+              </li>
+            {%- endfor -%}
+          </ul>
         {%- endif -%}
-      {%- else -%}
-        <p class="collection__empty">{{ 'collections.empty' | t }}</p>
+
+      {%- elsif request.design_mode -%}
+        <p class="blog-posts__hint">
+          {%- if blog == blank -%}
+            {{ 'blogs.section.no_blog' | t }}
+          {%- else -%}
+            {{ 'blogs.section.empty_blog' | t }}
+          {%- endif -%}
+        </p>
       {%- endif -%}
     </div>
   </div>
 </div>
 
 {% stylesheet %}
-  .collection__inner {
+  .blog-posts__inner {
     display: flex;
     flex-direction: column;
     gap: var(--section-spacing);
@@ -92,28 +114,48 @@
     min-width: 0;
   }
 
-  .collection__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+  .blog-posts__header--left {
+    text-align: left;
+  }
+  .blog-posts__header--center {
+    text-align: center;
+  }
+  .blog-posts__header--right {
+    text-align: right;
   }
 
-  .collection__pagination {
-    display: flex;
-    justify-content: center;
+  .blog-posts__heading {
+    margin: 0;
+  }
+
+  .blog-posts__hint {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--input-radius);
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.collection",
+  "name": "t:general.blog_posts",
   "settings": [
-    { "type": "header", "content": "t:general.products" },
-    { "type": "range", "id": "products_per_page", "label": "t:labels.products_per_page", "min": 4, "max": 48, "step": 4, "default": 12 },
-    { "type": "checkbox", "id": "show_description", "label": "t:labels.show_collection_description", "default": true },
-    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
-    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
-      "visible_if": "{{ section.settings.use_slider }}" },
+    { "type": "header", "content": "t:general.blog" },
+    { "type": "blog", "id": "blog", "label": "t:labels.blog" },
+    { "type": "range", "id": "posts_to_show", "label": "t:labels.posts_to_show", "min": 2, "max": 12, "step": 1, "default": 3 },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.blog_heading" },
+    { "type": "select", "id": "heading_alignment", "label": "t:labels.heading_alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+
+    { "type": "header", "content": "t:general.card" },
+    { "type": "checkbox", "id": "show_author", "label": "t:labels.show_author", "default": true },
+    { "type": "checkbox", "id": "show_date", "label": "t:labels.show_date", "default": true },
+    { "type": "checkbox", "id": "show_excerpt", "label": "t:labels.show_excerpt", "default": false },
+    { "type": "checkbox", "id": "show_read_more", "label": "t:labels.show_read_more", "info": "t:info.show_read_more", "default": true },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
@@ -123,13 +165,16 @@
         { "value": "flex", "label": "t:options.display.flex" },
         { "value": "grid", "label": "t:options.display.grid" }
       ] },
+    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
+    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
     { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
       "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",
       "options": [
         { "value": "vertical", "label": "t:options.direction.vertical" },
         { "value": "horizontal", "label": "t:options.direction.horizontal" }
       ] },
-    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 4 },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 3 },
     { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
       "options": [
         { "value": "1", "label": "t:options.columns_mobile.one" },
@@ -149,7 +194,7 @@
         { "value": "center", "label": "t:options.position.center" },
         { "value": "bottom", "label": "t:options.position.bottom" }
       ] },
-    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 16 },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 32 },
 
     { "type": "header", "content": "t:general.size" },
     { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
@@ -200,6 +245,11 @@
     { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
     { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
     { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.blog_posts"
+    }
   ]
 }
 {% endschema %}

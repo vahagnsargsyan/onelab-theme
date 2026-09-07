@@ -206,13 +206,55 @@ h6 {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  width: 100%;
   min-height: var(--layout-height, auto);
-  background-color: var(--layout-background, var(--color-background));
   border: var(--layout-border-width, 0) solid var(--color-border);
   border-radius: var(--layout-border-radius, 0);
   padding-block: var(--layout-padding-top, 0) var(--layout-padding-bottom, 0);
   padding-inline: var(--layout-padding-left, 0) var(--layout-padding-right, 0);
+}
+
+/*
+ * No background-color here on purpose.
+ *
+ * A section gets its background from its `color-scheme-*` class, and an explicit
+ * Background color override is emitted as an inline style by layout-style. If
+ * .layout painted a fallback, a nested group block would cover the section's
+ * background image with an opaque panel.
+ */
+
+/* Section widths. */
+.layout--width-page,
+.layout--width-full {
+  width: 100%;
+}
+
+/*
+ * Block widths, for a group nested inside a section. Collapse to full width on
+ * small screens, where a quarter-width column is unusable.
+ */
+.layout--width-fit {
+  width: fit-content;
+  max-width: 100%;
+}
+.layout--width-quarter {
+  width: 25%;
+}
+.layout--width-half {
+  width: 50%;
+}
+.layout--width-three-quarters {
+  width: 75%;
+}
+.layout--width-fill {
+  width: 100%;
+}
+
+@media (max-width: 749px) {
+  .layout--width-quarter,
+  .layout--width-half,
+  .layout--width-three-quarters {
+    width: 100%;
+  }
 }
 
 /*
@@ -258,6 +300,15 @@ h6 {
   background-color: var(--color-button);
   border: var(--button-border-width) solid var(--color-button);
   border-radius: var(--button-radius);
+}
+
+/* Still 36px tall, comfortably above the 24px minimum target size. */
+.button--small {
+  min-height: 36px;
+  padding: 0.375rem 1rem;
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
 }
 
 .button--secondary {
@@ -313,11 +364,11 @@ h6 {
  * Any direct child of the content grid is placed, not just .layout__blocks, so
  * a section can put a header and its items in one wrapper.
  */
-.layout--width-page .layout__content > * {
+.layout--width-page > .layout__content > * {
   grid-column: 2;
 }
 
-.layout--width-full .layout__content > * {
+.layout--width-full > .layout__content > * {
   grid-column: 1 / -1;
 }
 
@@ -326,32 +377,50 @@ h6 {
  * and position tokens drive all three so the settings mean the same thing
  * everywhere. Column counts come from --layout-columns (desktop) and
  * --layout-columns-mobile.
+ *
+ * Every selector below is written twice, for the two places a blocks container
+ * can sit relative to its own .layout:
+ *
+ *   section: .layout > .layout__content > .layout__blocks
+ *   block:   .layout > .layout__blocks
+ *
+ * They must be direct-child paths, not descendant. A group block nested in a
+ * section produces two .layout ancestors, and with descendant selectors the
+ * group's own container would match the section's display class too. CSS has no
+ * "nearest ancestor wins" rule — source order would decide, so a Flex group
+ * inside a Grid section would silently render as a grid.
  */
 
 /* Stack: plain flow, gap becomes vertical spacing between children. */
-.layout--display-block .layout__blocks {
+.layout--display-block > .layout__blocks,
+.layout--display-block > .layout__content > .layout__blocks {
   display: block;
 }
-.layout--display-block .layout__blocks > * + * {
+.layout--display-block > .layout__blocks > * + *,
+.layout--display-block > .layout__content > .layout__blocks > * + * {
   margin-block-start: var(--layout-gap, 0);
 }
 
 /* Flex: alignment and position swap axes with direction, so the mapping lives here. */
-.layout--display-flex .layout__blocks {
+.layout--display-flex > .layout__blocks,
+.layout--display-flex > .layout__content > .layout__blocks {
   display: flex;
 }
-.layout--display-flex.layout--vertical .layout__blocks {
+.layout--display-flex.layout--vertical > .layout__blocks,
+.layout--display-flex.layout--vertical > .layout__content > .layout__blocks {
   flex-direction: column;
   align-items: var(--layout-alignment, flex-start);
   justify-content: var(--layout-position, flex-start);
 }
-.layout--display-flex.layout--horizontal .layout__blocks {
+.layout--display-flex.layout--horizontal > .layout__blocks,
+.layout--display-flex.layout--horizontal > .layout__content > .layout__blocks {
   flex-direction: row;
   flex-wrap: wrap;
   align-items: var(--layout-position, flex-start);
   justify-content: var(--layout-alignment, flex-start);
 }
-.layout--display-flex.layout--horizontal .layout__blocks > * {
+.layout--display-flex.layout--horizontal > .layout__blocks > *,
+.layout--display-flex.layout--horizontal > .layout__content > .layout__blocks > * {
   flex: 1 1
     calc(
       (100% - var(--layout-gap, 0px) * (var(--layout-columns, 1) - 1)) /
@@ -361,7 +430,8 @@ h6 {
 }
 
 /* Grid: fixed column count, items aligned inside their cells. */
-.layout--display-grid .layout__blocks {
+.layout--display-grid > .layout__blocks,
+.layout--display-grid > .layout__content > .layout__blocks {
   display: grid;
   grid-template-columns: repeat(var(--layout-columns, 1), minmax(0, 1fr));
   justify-items: var(--layout-alignment, start);
@@ -369,13 +439,15 @@ h6 {
 }
 
 @media (max-width: 749px) {
-  .layout--display-flex.layout--horizontal .layout__blocks > * {
+  .layout--display-flex.layout--horizontal > .layout__blocks > *,
+  .layout--display-flex.layout--horizontal > .layout__content > .layout__blocks > * {
     flex-basis: calc(
       (100% - var(--layout-gap, 0px) * (var(--layout-columns-mobile, 1) - 1)) /
         var(--layout-columns-mobile, 1)
     );
   }
-  .layout--display-grid .layout__blocks {
+  .layout--display-grid > .layout__blocks,
+  .layout--display-grid > .layout__content > .layout__blocks {
     grid-template-columns: repeat(var(--layout-columns-mobile, 1), minmax(0, 1fr));
   }
 }

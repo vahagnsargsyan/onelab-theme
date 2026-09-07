@@ -47,10 +47,8 @@
       { "value": "vertical", "label": "t:options.direction.vertical" },
       { "value": "horizontal", "label": "t:options.direction.horizontal" }
     ] },
-  { "type": "range", "id": "columns", "label": "t:labels.columns", "min": 1, "max": 6, "step": 1, "default": 3,
-    "visible_if": "{{ section.settings.use_slider or section.settings.display == 'grid' or section.settings.display == 'flex' and section.settings.direction == 'horizontal' }}" },
+  { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 3 },
   { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
-    "visible_if": "{{ section.settings.use_slider or section.settings.display == 'grid' or section.settings.display == 'flex' and section.settings.direction == 'horizontal' }}",
     "options": [
       { "value": "1", "label": "t:options.columns_mobile.one" },
       { "value": "2", "label": "t:options.columns_mobile.two" }
@@ -182,6 +180,13 @@ style="
   --layout-padding-right: {{ s.padding_right | default: 0 }}px;
   {%- if s.background_color != blank %}
   --layout-background: {{ s.background_color }};
+  {%- comment -%}
+    Emitted inline as well as a token. An inline style beats both the
+    `color-scheme-*` class and any stylesheet rule, which is what lets an
+    override win without .layout painting a fallback that would make every
+    nested group block opaque.
+  {%- endcomment %}
+  background-color: {{ s.background_color }};
   {%- endif %}
   {%- if s.background_overlay %}
   --layout-overlay: {{ s.overlay_color | default: '#000000' }};

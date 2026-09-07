@@ -1,0 +1,100 @@
+{% doc %}
+  Article card. Shares the `.card` markup and styles with the product and
+  collection cards, so posts read as part of the same system.
+
+  The whole card is only click-through when the Read more button is hidden;
+  otherwise a stretched link would sit on top of that button.
+
+  @param {object} article - The article to render.
+  @param {number} [index] - Position in the list. The first four load eagerly.
+  @param {boolean} [show_author]
+  @param {boolean} [show_date]
+  @param {boolean} [show_excerpt]
+  @param {boolean} [show_read_more]
+
+  @example
+  {% render 'article-card', article: article, index: forloop.index0 %}
+{% enddoc %}
+
+{%- liquid
+  assign image = article.image
+
+  assign loading = 'lazy'
+  if index != blank and index < 4
+    assign loading = 'eager'
+  endif
+
+  assign has_meta = false
+  if show_author and article.author != blank
+    assign has_meta = true
+  endif
+  if show_date
+    assign has_meta = true
+  endif
+
+  assign card_class = 'card card--article'
+  unless show_read_more
+    assign card_class = card_class | append: ' card--linked'
+  endunless
+-%}
+
+<div class="{{ card_class }}" style="--card-image-ratio: 3 / 2;">
+  <div class="card__media">
+    {%- if image != blank -%}
+      {%- liquid
+        assign focal = image.presentation.focal_point | default: 'center center'
+        assign focal_style = 'object-position: ' | append: focal | append: ';'
+        assign alt = image.alt | default: article.title | escape
+      -%}
+      {{
+        image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'card__image',
+          widths: '275, 360, 533, 720, 940, 1200',
+          sizes: '(min-width: 750px) 33vw, 90vw',
+          alt: alt,
+          loading: loading,
+          style: focal_style
+      }}
+    {%- else -%}
+      {{ 'image' | placeholder_svg_tag: 'card__image card__placeholder' }}
+    {%- endif -%}
+  </div>
+
+  <div class="card__content">
+    {%- if has_meta -%}
+      <p class="card__meta">
+        {%- if show_author and article.author != blank -%}
+          {{ article.author }}
+          {%- if show_date -%}
+            <span class="card__separator" aria-hidden="true">&bull;</span>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- if show_date -%}
+          {{ article.published_at | time_tag: format: 'month_day_year' }}
+        {%- endif -%}
+      </p>
+    {%- endif -%}
+
+    <a href="{{ article.url }}" class="card__title card__title--article">{{ article.title }}</a>
+
+    {%- if show_excerpt and article.excerpt_or_content != blank -%}
+      <p class="card__excerpt">
+        {{- article.excerpt_or_content | strip_html | truncatewords: 20 -}}
+      </p>
+    {%- endif -%}
+
+    {%- if show_read_more -%}
+      <div class="card__footer">
+        <a href="{{ article.url }}" class="button button--small">
+          {{- 'blogs.article.read_more' | t -}}
+          <span class="visually-hidden">
+            {{- ' ' }}{{ article.title -}}
+          </span>
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</div>

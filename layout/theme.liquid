@@ -5,17 +5,42 @@
     {% render 'css-variables' %}
 
     {% comment %}
-      Font preloading:
-      1. Preconnect to font CDN for faster connection
-      2. Preload only the critical font variant (base weight)
-      3. Additional variants load on-demand via @font-face
-    {% endcomment %}
-    {% unless settings.type_primary_font.system? %}
-      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+      Font preloading. Only the two faces likely to paint first — body and
+      heading — and only their base weight; the rest load on demand through the
+      @font-face rules in css-variables. Preloading more competes with the
+      critical CSS for bandwidth.
 
-      {% comment %} Preload the base font variant for initial page render {% endcomment %}
-      {{ settings.type_primary_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
-    {% endunless %}
+      Heading is skipped when it shares a family with body, which is the default,
+      so a default install preloads one file rather than two.
+    {% endcomment %}
+    {%- liquid
+      assign body_font = settings.font_body
+      assign heading_font = settings.font_heading
+
+      assign preload_body = false
+      unless body_font.system?
+        assign preload_body = true
+      endunless
+
+      assign preload_heading = false
+      unless heading_font.system?
+        if heading_font.family != body_font.family
+          assign preload_heading = true
+        endif
+      endunless
+    -%}
+
+    {%- if preload_body or preload_heading -%}
+      <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+    {%- endif -%}
+
+    {%- if preload_body -%}
+      {{ body_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
+    {%- endif -%}
+
+    {%- if preload_heading -%}
+      {{ heading_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
+    {%- endif -%}
 
     {% # Load and preload the critical CSS %}
     {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}

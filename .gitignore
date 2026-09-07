@@ -1,0 +1,28 @@
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+node_modules/
+
+# Shopify CLI. Holds the store link and dev-theme id — machine-local, never committed.
+.shopify/
+
+# Release artifacts
+release
+*.zip
+
+# Editor and atomic-write artifacts
+*.tmp.*
+*.swp
+*~
+
+# Internal workspace files
+MEMORY.md
+PORTS.md
+CLAUDE.local.md
+/tasks/
+/investigation/

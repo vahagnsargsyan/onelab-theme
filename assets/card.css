@@ -54,32 +54,48 @@
   gap: 0.25rem;
 }
 
-/*
- * The title link stretches over the whole card so the entire card is clickable,
- * while the accessible name stays the product title alone.
- */
+.card {
+  position: relative;
+}
+
 .card__title {
   color: inherit;
   text-decoration: none;
 }
 
-.card__title::after {
+/*
+ * On a `.card--linked` card the title link stretches over the whole card, so the
+ * entire card is clickable while the accessible name stays the title alone.
+ *
+ * Opt-in, not automatic: a card that contains its own control (a Read more
+ * button, a quick-add) must not have an invisible link lying on top of it.
+ */
+.card--linked .card__title::after {
   content: '';
   position: absolute;
   inset: 0;
 }
 
-.card {
-  position: relative;
-}
-
-.card__title:focus-visible {
+.card--linked .card__title:focus-visible {
   outline: none;
 }
 
-.card:has(.card__title:focus-visible) {
+.card--linked:has(.card__title:focus-visible) {
   outline: var(--focus-ring-width) solid currentColor;
   outline-offset: var(--focus-ring-offset);
+}
+
+.card__excerpt {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.card__footer {
+  margin-block-start: 0.5rem;
+}
+
+.card__separator {
+  margin-inline: 0.4em;
 }
 
 .card__vendor,

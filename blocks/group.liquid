@@ -1,103 +1,190 @@
 {% doc %}
-  Renders a group of blocks with configurable layout direction, gap and
-  alignment.
+  Layout container. Holds other blocks and controls how they sit, with the same
+  vocabulary a section has: display mode, slider, size, appearance, borders, and
+  padding.
 
-  All settings apply to only one dimension to reduce configuration complexity.
+  Appears in the block picker as Column, Row, and Grid — one block, three
+  presets.
 
-  This component is a wrapper concerned only with rendering its children in
-  the specified layout direction with appropriate padding and alignment.
+  Two deliberate differences from the canonical section settings:
+
+    - `visible_if` reads `block.settings`, not `section.settings`.
+    - **Width** means the block's own width inside its parent (Fit content,
+      Quarter, Half, Three quarters, Fill), not the section's Page/Full. The
+      values are named differently so the CSS never collides.
+
+  There is no color scheme setting. A group inherits the section's scheme, which
+  keeps a nested group transparent over the section's background. Set Background
+  color for an explicit panel.
 
   @example
   {% content_for 'block', type: 'group', id: 'group' %}
 {% enddoc %}
 
+{% liquid
+  assign s = block.settings
+%}
+
+{%- if s.use_slider -%}
+  {{ 'slider.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <div
-  class="group {{ block.settings.layout_direction }}"
-  style="
-    --padding: {{ block.settings.padding }}px;
-    --alignment: {{ block.settings.alignment }};
-  "
+  {% render 'layout-style', s: block.settings, class: 'group' %}
   {{ block.shopify_attributes }}
 >
-  {% content_for 'blocks' %}
+  {% render 'layout-background', s: block.settings %}
+
+  {%- if s.use_slider -%}
+    <slider-carousel
+      class="slider"{% if s.slider_loop %} loop{% endif %}
+      style="--slider-per-view: {{ s.columns | default: 3 }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 1 }};"
+    >
+      {% render 'slider-controls' %}
+
+      <div
+        class="slider__track"
+        data-slider-track
+        tabindex="0"
+        role="region"
+        aria-label="{{ 'general.slider.label' | t }}"
+      >
+        {% content_for 'blocks' %}
+      </div>
+    </slider-carousel>
+  {%- else -%}
+    <div class="layout__blocks">
+      {% content_for 'blocks' %}
+    </div>
+  {%- endif -%}
 </div>
-
-{% stylesheet %}
-  .group {
-    display: flex;
-    flex-wrap: nowrap;
-    overflow: hidden;
-    width: 100%;
-  }
-
-  .group--horizontal {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 var(--padding);
-  }
-
-  .group--vertical {
-    flex-direction: column;
-    align-items: var(--alignment);
-    padding: var(--padding) 0;
-  }
-{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.group",
   "blocks": [{ "type": "@theme" }],
   "settings": [
-    {
-      "type": "select",
-      "id": "layout_direction",
-      "label": "t:labels.layout_direction",
-      "default": "group--vertical",
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "display", "label": "t:labels.display", "default": "flex",
+      "visible_if": "{{ block.settings.use_slider == false }}",
       "options": [
-        { "value": "group--horizontal", "label": "t:options.direction.horizontal" },
-        { "value": "group--vertical", "label": "t:options.direction.vertical" }
-      ]
-    },
-    {
-      "visible_if": "{{ block.settings.layout_direction == 'group--vertical' }}",
-      "type": "select",
-      "id": "alignment",
-      "label": "t:labels.alignment",
-      "default": "flex-start",
+        { "value": "block", "label": "t:options.display.block" },
+        { "value": "flex", "label": "t:options.display.flex" },
+        { "value": "grid", "label": "t:options.display.grid" }
+      ] },
+    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
+    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ block.settings.use_slider }}" },
+    { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
+      "visible_if": "{{ block.settings.use_slider == false and block.settings.display == 'flex' }}",
       "options": [
-        { "value": "flex-start", "label": "t:options.alignment.left" },
+        { "value": "vertical", "label": "t:options.direction.vertical" },
+        { "value": "horizontal", "label": "t:options.direction.horizontal" }
+      ] },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 3 },
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
+      "options": [
+        { "value": "1", "label": "t:options.columns_mobile.one" },
+        { "value": "2", "label": "t:options.columns_mobile.two" }
+      ] },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "left",
+      "visible_if": "{{ block.settings.use_slider == false and block.settings.display != 'block' }}",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
         { "value": "center", "label": "t:options.alignment.center" },
-        { "value": "flex-end", "label": "t:options.alignment.right" }
-      ]
-    },
-    {
-      "type": "range",
-      "id": "padding",
-      "label": "t:labels.padding",
-      "default": 0,
-      "min": 0,
-      "max": 200,
-      "step": 2,
-      "unit": "px"
-    }
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "top",
+      "visible_if": "{{ block.settings.use_slider == false and block.settings.display != 'block' }}",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 12 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "fill",
+      "options": [
+        { "value": "fit", "label": "t:options.block_width.fit" },
+        { "value": "quarter", "label": "t:options.block_width.quarter" },
+        { "value": "half", "label": "t:options.block_width.half" },
+        { "value": "three-quarters", "label": "t:options.block_width.three_quarters" },
+        { "value": "fill", "label": "t:options.block_width.fill" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "fit",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ block.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ block.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.block_background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ block.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ block.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ block.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
   ],
   "presets": [
     {
       "name": "t:general.column",
       "category": "t:general.layout",
       "settings": {
-        "layout_direction": "group--vertical",
-        "alignment": "flex-start",
-        "padding": 0
+        "display": "flex",
+        "direction": "vertical",
+        "alignment": "left",
+        "width": "fill"
       }
     },
     {
       "name": "t:general.row",
       "category": "t:general.layout",
       "settings": {
-        "layout_direction": "group--horizontal",
-        "padding": 0
+        "display": "flex",
+        "direction": "horizontal",
+        "alignment": "left",
+        "position": "center",
+        "width": "fill"
+      }
+    },
+    {
+      "name": "t:general.grid",
+      "category": "t:general.layout",
+      "settings": {
+        "display": "grid",
+        "columns": 3,
+        "width": "fill"
       }
     }
   ]

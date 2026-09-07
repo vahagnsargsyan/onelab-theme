@@ -67,10 +67,8 @@
         { "value": "vertical", "label": "t:options.direction.vertical" },
         { "value": "horizontal", "label": "t:options.direction.horizontal" }
       ] },
-    { "type": "range", "id": "columns", "label": "t:labels.columns", "min": 1, "max": 6, "step": 1, "default": 3,
-      "visible_if": "{{ section.settings.use_slider or section.settings.display == 'grid' or section.settings.display == 'flex' and section.settings.direction == 'horizontal' }}" },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 3 },
     { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
-      "visible_if": "{{ section.settings.use_slider or section.settings.display == 'grid' or section.settings.display == 'flex' and section.settings.direction == 'horizontal' }}",
       "options": [
         { "value": "1", "label": "t:options.columns_mobile.one" },
         { "value": "2", "label": "t:options.columns_mobile.two" }
