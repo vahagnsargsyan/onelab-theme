@@ -36,6 +36,12 @@
 >
   {% render 'layout-background', s: block.settings %}
 
+  {%- comment -%}
+    The wrapper is branched, not the content. The blocks tag may appear only
+    once per file — Shopify counts occurrences when it parses, so putting one
+    in each arm of an if/else is rejected as a duplicate even though only one
+    of them ever runs.
+  {%- endcomment -%}
   {%- if s.use_slider -%}
     <slider-carousel
       class="slider"{% if s.slider_loop %} loop{% endif %}
@@ -50,12 +56,16 @@
         role="region"
         aria-label="{{ 'general.slider.label' | t }}"
       >
-        {% content_for 'blocks' %}
+  {%- else -%}
+    <div class="layout__blocks">
+  {%- endif -%}
+
+  {% content_for 'blocks' %}
+
+  {%- if s.use_slider -%}
       </div>
     </slider-carousel>
   {%- else -%}
-    <div class="layout__blocks">
-      {% content_for 'blocks' %}
     </div>
   {%- endif -%}
 </div>
