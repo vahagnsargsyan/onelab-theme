@@ -1,0 +1,52 @@
+{% doc %}
+  One image in the Instagram gallery. Links to the block's own URL when set,
+  otherwise to the section's profile URL, otherwise renders as a plain image.
+
+  @param {object} block - The `image_item` block.
+  @param {number} [index] - Position in the list. The first four load eagerly.
+  @param {string} [profile_url] - Fallback link from the section.
+
+  @example
+  {% render 'instagram-item', block: block, index: forloop.index0, profile_url: s.profile_url %}
+{% enddoc %}
+
+{%- liquid
+  assign image = block.settings.image
+  assign href = block.settings.link | default: profile_url
+
+  assign loading = 'lazy'
+  if index != blank and index < 4
+    assign loading = 'eager'
+  endif
+-%}
+
+<div class="instagram__item">
+  {%- if href != blank -%}
+    <a href="{{ href }}" class="instagram__link" target="_blank" rel="noopener">
+  {%- endif -%}
+
+  {%- if image != blank -%}
+    {%- liquid
+      assign focal = image.presentation.focal_point | default: 'center center'
+      assign focal_style = 'object-position: ' | append: focal | append: ';'
+      assign alt = image.alt | default: ''
+    -%}
+    {{
+      image
+      | image_url: width: 1200
+      | image_tag:
+        class: 'instagram__image',
+        widths: '165, 275, 360, 533, 720, 940, 1200',
+        sizes: '(min-width: 750px) 20vw, 50vw',
+        alt: alt,
+        loading: loading,
+        style: focal_style
+    }}
+  {%- else -%}
+    {{ 'lifestyle-2' | placeholder_svg_tag: 'instagram__image instagram__placeholder' }}
+  {%- endif -%}
+
+  {%- if href != blank -%}
+    </a>
+  {%- endif -%}
+</div>

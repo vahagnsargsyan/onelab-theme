@@ -134,24 +134,6 @@
       assign height = 'auto'
   endcase
 
-  case s.alignment
-    when 'center'
-      assign alignment = 'center'
-    when 'right'
-      assign alignment = 'flex-end'
-    else
-      assign alignment = 'flex-start'
-  endcase
-
-  case s.position
-    when 'center'
-      assign position = 'center'
-    when 'bottom'
-      assign position = 'flex-end'
-    else
-      assign position = 'flex-start'
-  endcase
-
   assign border_width = 0
   if s.border_style == 'solid'
     assign border_width = s.border_width | default: 1
@@ -160,18 +142,97 @@
   assign display = s.display | default: 'flex'
   assign direction = s.direction | default: 'vertical'
   assign width = s.width | default: 'page'
+  assign gap = s.gap | default: 0
+  assign columns = s.columns | default: 1
+  assign columns_mobile = s.columns_mobile | default: 1
+
+  comment
+    Alignment and position resolve to box-alignment keywords (start / center /
+    end) rather than flex-* ones, because the same value has to be legal in both
+    a flex container and a grid container.
+  endcomment
+  case s.alignment
+    when 'center'
+      assign align = 'center'
+    when 'right'
+      assign align = 'end'
+    else
+      assign align = 'start'
+  endcase
+
+  case s.position
+    when 'center'
+      assign pos = 'center'
+    when 'bottom'
+      assign pos = 'end'
+    else
+      assign pos = 'start'
+  endcase
+
+  comment
+    Every display mode is resolved here into plain CSS values. The stylesheet
+    then reads them straight off custom properties, with no ancestor selectors
+    at all — see the note in critical.css for why that matters.
+  endcomment
+  assign css_display = 'flex'
+  assign flex_direction = 'column'
+  assign flex_wrap = 'nowrap'
+  assign grid_columns = 'none'
+  assign grid_columns_mobile = 'none'
+  assign item_grow = '0'
+  assign item_basis = 'auto'
+  assign item_basis_mobile = 'auto'
+  assign align_items = align
+  assign justify_content = pos
+  assign justify_items = 'stretch'
+
+  case display
+    when 'grid'
+      assign css_display = 'grid'
+      assign grid_columns = 'repeat(' | append: columns | append: ', minmax(0, 1fr))'
+      assign grid_columns_mobile = 'repeat(' | append: columns_mobile | append: ', minmax(0, 1fr))'
+      assign align_items = pos
+      assign justify_items = align
+      assign justify_content = 'start'
+
+    when 'flex'
+      if direction == 'horizontal'
+        assign flex_direction = 'row'
+        assign flex_wrap = 'wrap'
+        assign align_items = pos
+        assign justify_content = align
+        assign item_grow = '1'
+        assign item_basis = 'calc((100% - ' | append: gap | append: 'px * (' | append: columns | append: ' - 1)) / ' | append: columns | append: ')'
+        assign item_basis_mobile = 'calc((100% - ' | append: gap | append: 'px * (' | append: columns_mobile | append: ' - 1)) / ' | append: columns_mobile | append: ')'
+      endif
+
+    else
+      comment
+        Stack is a stretched flex column. Behaves like display:block for content,
+        but `gap` works, so it needs no separate rule.
+      endcomment
+      assign align_items = 'stretch'
+      assign justify_content = 'start'
+  endcase
 -%}
 class="layout layout--display-{{ display }} layout--{{ direction }} layout--width-{{ width }}
   {%- if s.background_overlay %} layout--overlay{% endif -%}
   {%- if s.color_scheme != blank %} color-{{ s.color_scheme }}{% endif -%}
   {%- if class != blank %} {{ class }}{% endif -%}"
 style="
-  --layout-gap: {{ s.gap | default: 0 }}px;
-  --layout-columns: {{ s.columns | default: 1 }};
-  --layout-columns-mobile: {{ s.columns_mobile | default: 1 }};
+  --layout-gap: {{ gap }}px;
   --layout-height: {{ height }};
-  --layout-alignment: {{ alignment }};
-  --layout-position: {{ position }};
+  --layout-display: {{ css_display }};
+  --layout-flex-direction: {{ flex_direction }};
+  --layout-flex-wrap: {{ flex_wrap }};
+  --layout-grid-columns: {{ grid_columns }};
+  --layout-grid-columns-mobile: {{ grid_columns_mobile }};
+  --layout-align-items: {{ align_items }};
+  --layout-justify-content: {{ justify_content }};
+  --layout-justify-items: {{ justify_items }};
+  --layout-item-grow: {{ item_grow }};
+  --layout-item-basis: {{ item_basis }};
+  --layout-item-basis-mobile: {{ item_basis_mobile }};
   --layout-border-width: {{ border_width }}px;
   --layout-border-radius: {{ s.border_radius | default: 0 }}px;
   --layout-padding-top: {{ s.padding_top | default: 0 }}px;

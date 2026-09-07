@@ -1,0 +1,342 @@
+{% comment %}
+  Instagram gallery. A row of merchant-chosen images linking to a social
+  profile, with an optional staggered offset so the row reads as a composition
+  rather than a strip.
+
+  These are uploaded images, not a live feed. Pulling posts from Instagram
+  needs API access, and a Theme Store theme has to work with zero apps
+  installed, so a real feed is out of scope for the theme itself. A merchant who
+  wants live posts installs a feed app and drops its app block in.
+
+  Layout, size, appearance, borders, padding, slider, and loop come from the
+  shared layout settings.
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+  assign has_images = false
+  if section.blocks.size > 0
+    assign has_images = true
+  endif
+
+  assign heading_label = s.heading | strip_html | strip
+  if heading_label == blank
+    assign heading_label = 'general.slider.label' | t
+  endif
+%}
+
+{%- if s.use_slider -%}
+  {{ 'slider.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+<div {% render 'layout-style', s: section.settings, class: 'instagram full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    <div class="instagram__inner">
+      {%- if s.subheading != blank or s.heading != blank -%}
+        <header class="instagram__header">
+          {%- if s.subheading != blank -%}
+            <p class="instagram__subheading">{{ s.subheading }}</p>
+          {%- endif -%}
+
+          {%- if s.heading != blank -%}
+            <h2 class="instagram__heading">{{ s.heading }}</h2>
+          {%- endif -%}
+        </header>
+      {%- endif -%}
+
+      {%- if has_images -%}
+        <div
+          class="instagram__gallery{% if s.stagger %} instagram__gallery--stagger{% endif %}"
+          style="--instagram-stagger: {{ s.stagger_offset | default: 40 }}px;"
+        >
+          {%- if s.use_slider -%}
+            <slider-carousel
+              class="slider"{% if s.slider_loop %} loop{% endif %}
+              style="--slider-per-view: {{ s.columns | default: 5 }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 2 }};"
+            >
+              {% render 'slider-controls' %}
+
+              <ul
+                class="slider__track list-unstyled"
+                data-slider-track
+                tabindex="0"
+                role="region"
+                aria-label="{{ heading_label | escape }}"
+              >
+                {%- for block in section.blocks -%}
+                  <li {{ block.shopify_attributes }}>
+                    {% render 'instagram-item', block: block, index: forloop.index0, profile_url: s.profile_url %}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </slider-carousel>
+          {%- else -%}
+            <ul class="layout__blocks list-unstyled">
+              {%- for block in section.blocks -%}
+                <li {{ block.shopify_attributes }}>
+                  {% render 'instagram-item', block: block, index: forloop.index0, profile_url: s.profile_url %}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
+          {%- if s.show_icon and s.profile_url != blank -%}
+            <a
+              href="{{ s.profile_url }}"
+              class="instagram__badge"
+              target="_blank"
+              rel="noopener"
+            >
+              {{- 'icon-instagram.svg' | inline_asset_content -}}
+              <span class="visually-hidden">{{ 'general.instagram.follow' | t }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+
+      {%- elsif request.design_mode -%}
+        <p class="instagram__hint">{{ 'general.instagram.no_images' | t }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .instagram__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-spacing);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .instagram__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .instagram__subheading {
+    margin: 0;
+    font-family: var(--font-subheading--family);
+    font-size: var(--text-h6-size);
+    letter-spacing: var(--text-h6-tracking);
+    text-transform: var(--text-h6-case);
+    opacity: 0.8;
+  }
+
+  .instagram__heading {
+    margin: 0;
+  }
+
+  .instagram__gallery {
+    position: relative;
+    width: 100%;
+  }
+
+  /*
+   * Stagger. Lifts every second item so the row reads as a composition. Applied
+   * with translate rather than margin so it never changes the row's height or
+   * the space the grid reserves.
+   */
+  .instagram__gallery--stagger .layout__blocks > *:nth-child(even),
+  .instagram__gallery--stagger .slider__track > *:nth-child(even) {
+    translate: 0 var(--instagram-stagger);
+  }
+
+  .instagram__gallery--stagger {
+    margin-block-end: var(--instagram-stagger);
+  }
+
+  .instagram__badge {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    /* Comfortably above the 24px minimum target size. */
+    width: 48px;
+    height: 48px;
+    color: var(--color-background);
+    background-color: transparent;
+  }
+
+  .instagram__badge svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .instagram__badge:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .instagram__item,
+  .instagram__link {
+    display: block;
+    width: 100%;
+  }
+
+  .instagram__image {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+  }
+
+  .instagram__placeholder {
+    background-color: var(--color-border);
+    fill: var(--color-background);
+  }
+
+  .instagram__link:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .instagram__hint {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--input-radius);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .instagram__badge {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.instagram",
+  "max_blocks": 12,
+  "blocks": [
+    {
+      "type": "image_item",
+      "name": "t:general.image",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "t:labels.image" },
+        { "type": "url", "id": "link", "label": "t:labels.link", "info": "t:info.instagram_item_link" }
+      ]
+    }
+  ],
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "inline_richtext", "id": "subheading", "label": "t:labels.subheading", "default": "t:defaults.instagram_subheading" },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.instagram_heading" },
+    { "type": "url", "id": "profile_url", "label": "t:labels.profile_url" },
+    { "type": "checkbox", "id": "show_icon", "label": "t:labels.show_instagram_icon", "info": "t:info.show_instagram_icon", "default": true },
+    { "type": "paragraph", "content": "t:info.instagram_not_a_feed" },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "checkbox", "id": "stagger", "label": "t:labels.stagger", "info": "t:info.stagger", "default": true },
+    { "type": "range", "id": "stagger_offset", "label": "t:labels.stagger_offset", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 40,
+      "visible_if": "{{ section.settings.stagger }}" },
+    { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
+      "visible_if": "{{ section.settings.use_slider == false }}",
+      "options": [
+        { "value": "block", "label": "t:options.display.block" },
+        { "value": "flex", "label": "t:options.display.flex" },
+        { "value": "grid", "label": "t:options.display.grid" }
+      ] },
+    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
+    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+    { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
+      "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",
+      "options": [
+        { "value": "vertical", "label": "t:options.direction.vertical" },
+        { "value": "horizontal", "label": "t:options.direction.horizontal" }
+      ] },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 5 },
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "2",
+      "options": [
+        { "value": "1", "label": "t:options.columns_mobile.one" },
+        { "value": "2", "label": "t:options.columns_mobile.two" }
+      ] },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "center",
+      "visible_if": "{{ section.settings.use_slider == false and section.settings.display != 'block' }}",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "top",
+      "visible_if": "{{ section.settings.use_slider == false and section.settings.display != 'block' }}",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 20 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "full",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "fit",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-2" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 60 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 60 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.instagram",
+      "blocks": [
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" },
+        { "type": "image_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}

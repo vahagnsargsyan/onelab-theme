@@ -354,10 +354,55 @@ h6 {
   min-height: inherit;
 }
 
+/*
+ * Layout of the items themselves.
+ *
+ * Deliberately no ancestor selectors. Every value is read from a custom
+ * property that layout-style sets inline on the .layout root, and custom
+ * properties inherit — so the NEAREST .layout ancestor always wins, at any
+ * wrapper depth.
+ *
+ * Selectors cannot express that. CSS has no "nearest ancestor" combinator:
+ * a descendant selector would let an outer section override a nested group,
+ * and a fixed child chain misses sections that wrap their items in a header +
+ * items container, which puts .layout__blocks three levels down.
+ */
 .layout__blocks {
+  display: var(--layout-display, flex);
+  flex-direction: var(--layout-flex-direction, column);
+  flex-wrap: var(--layout-flex-wrap, nowrap);
+  grid-template-columns: var(--layout-grid-columns, none);
   gap: var(--layout-gap, 0);
+  align-items: var(--layout-align-items, start);
+  justify-content: var(--layout-justify-content, start);
+  justify-items: var(--layout-justify-items, stretch);
   min-height: inherit;
   min-width: 0;
+
+  /*
+   * Republished for the children. Resolved here rather than in the `> *` rule
+   * so that a nested group's own inline values — which sit on the group element
+   * itself — cannot change how its parent sizes it.
+   */
+  --item-grow: var(--layout-item-grow, 0);
+  --item-basis: var(--layout-item-basis, auto);
+  --item-basis-mobile: var(--layout-item-basis-mobile, auto);
+}
+
+.layout__blocks > * {
+  flex-grow: var(--item-grow);
+  flex-shrink: 1;
+  flex-basis: var(--item-basis);
+  min-width: 0;
+}
+
+@media (max-width: 749px) {
+  .layout__blocks {
+    grid-template-columns: var(--layout-grid-columns-mobile, none);
+  }
+  .layout__blocks > * {
+    flex-basis: var(--item-basis-mobile);
+  }
 }
 
 /*
@@ -370,86 +415,6 @@ h6 {
 
 .layout--width-full > .layout__content > * {
   grid-column: 1 / -1;
-}
-
-/*
- * Display modes. The merchant picks Stack, Flex, or Grid; the same alignment
- * and position tokens drive all three so the settings mean the same thing
- * everywhere. Column counts come from --layout-columns (desktop) and
- * --layout-columns-mobile.
- *
- * Every selector below is written twice, for the two places a blocks container
- * can sit relative to its own .layout:
- *
- *   section: .layout > .layout__content > .layout__blocks
- *   block:   .layout > .layout__blocks
- *
- * They must be direct-child paths, not descendant. A group block nested in a
- * section produces two .layout ancestors, and with descendant selectors the
- * group's own container would match the section's display class too. CSS has no
- * "nearest ancestor wins" rule — source order would decide, so a Flex group
- * inside a Grid section would silently render as a grid.
- */
-
-/* Stack: plain flow, gap becomes vertical spacing between children. */
-.layout--display-block > .layout__blocks,
-.layout--display-block > .layout__content > .layout__blocks {
-  display: block;
-}
-.layout--display-block > .layout__blocks > * + *,
-.layout--display-block > .layout__content > .layout__blocks > * + * {
-  margin-block-start: var(--layout-gap, 0);
-}
-
-/* Flex: alignment and position swap axes with direction, so the mapping lives here. */
-.layout--display-flex > .layout__blocks,
-.layout--display-flex > .layout__content > .layout__blocks {
-  display: flex;
-}
-.layout--display-flex.layout--vertical > .layout__blocks,
-.layout--display-flex.layout--vertical > .layout__content > .layout__blocks {
-  flex-direction: column;
-  align-items: var(--layout-alignment, flex-start);
-  justify-content: var(--layout-position, flex-start);
-}
-.layout--display-flex.layout--horizontal > .layout__blocks,
-.layout--display-flex.layout--horizontal > .layout__content > .layout__blocks {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: var(--layout-position, flex-start);
-  justify-content: var(--layout-alignment, flex-start);
-}
-.layout--display-flex.layout--horizontal > .layout__blocks > *,
-.layout--display-flex.layout--horizontal > .layout__content > .layout__blocks > * {
-  flex: 1 1
-    calc(
-      (100% - var(--layout-gap, 0px) * (var(--layout-columns, 1) - 1)) /
-        var(--layout-columns, 1)
-    );
-  min-width: 0;
-}
-
-/* Grid: fixed column count, items aligned inside their cells. */
-.layout--display-grid > .layout__blocks,
-.layout--display-grid > .layout__content > .layout__blocks {
-  display: grid;
-  grid-template-columns: repeat(var(--layout-columns, 1), minmax(0, 1fr));
-  justify-items: var(--layout-alignment, start);
-  align-items: var(--layout-position, start);
-}
-
-@media (max-width: 749px) {
-  .layout--display-flex.layout--horizontal > .layout__blocks > *,
-  .layout--display-flex.layout--horizontal > .layout__content > .layout__blocks > * {
-    flex-basis: calc(
-      (100% - var(--layout-gap, 0px) * (var(--layout-columns-mobile, 1) - 1)) /
-        var(--layout-columns-mobile, 1)
-    );
-  }
-  .layout--display-grid > .layout__blocks,
-  .layout--display-grid > .layout__content > .layout__blocks {
-    grid-template-columns: repeat(var(--layout-columns-mobile, 1), minmax(0, 1fr));
-  }
 }
 
 /* An autoplaying background video is motion the customer did not ask for. */

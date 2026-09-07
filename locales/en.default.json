@@ -64,6 +64,10 @@
       "slide": "Slide",
       "go_to_slide": "Go to slide {{ index }}",
       "no_slides": "Add a slide to get started."
+    },
+    "instagram": {
+      "follow": "Follow us on Instagram",
+      "no_images": "Add an image to get started."
     }
   },
   "gift_card": {
