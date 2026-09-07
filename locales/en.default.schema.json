@@ -1,16 +1,18 @@
 {
   "general": {
     "404": "Not found",
+    "appearance": "Appearance",
     "article": "Article",
     "block": "Block",
     "blog": "Blog",
+    "borders": "Borders",
     "brand": "Brand",
     "buttons": "Buttons",
     "buttons_and_inputs": "Buttons and inputs",
     "cart": "Cart",
     "collection": "Collection",
-    "collections": "Collections",
     "collection_card": "Collection card",
+    "collections": "Collections",
     "collections_grid": "Collections grid",
     "colors": "Colors",
     "column": "Column",
@@ -18,25 +20,42 @@
     "content": "Content",
     "custom_liquid": "Custom Liquid",
     "custom_section": "Custom section",
+    "featured_products": "Featured products",
     "focus": "Focus outline",
     "fonts": "Fonts",
     "footer": "Footer",
     "group": "Group",
     "header": "Header",
+    "heading": "Heading",
+    "heading_1": "Heading 1",
+    "heading_2": "Heading 2",
+    "heading_3": "Heading 3",
+    "heading_4": "Heading 4",
+    "heading_5": "Heading 5",
+    "heading_6": "Heading 6",
+    "image": "Image",
     "inputs": "Inputs",
     "layout": "Layout",
     "main": "Main",
+    "padding": "Padding",
     "page": "Page",
+    "paragraph": "Paragraph",
     "password": "Password",
     "primary": "Primary",
     "product": "Product",
+    "product_cards": "Product cards",
+    "products": "Products",
     "row": "Row",
     "search": "Search",
     "secondary": "Secondary",
     "section": "Section",
     "settings": "Settings",
     "sidebar": "Sidebar",
+    "size": "Size",
+    "slide": "Slide",
+    "slideshow": "Slideshow",
     "text": "Text",
+    "text_presets": "Text presets",
     "theme": "Theme",
     "typography": "Typography"
   },
@@ -44,44 +63,108 @@
     "accent": "Accent",
     "alignment": "Alignment",
     "background": "Background",
+    "background_color": "Background color",
     "background_gradient": "Background gradient",
+    "background_image": "Background image",
+    "background_media": "Background media",
+    "background_video": "Background video",
     "body": "Body",
+    "border_width": "Border width",
     "borders": "Borders",
     "button_background": "Button background",
     "button_border_width": "Button border width",
     "button_corner_radius": "Button corner radius",
+    "button_label": "Button label",
+    "button_link": "Button link",
     "button_text": "Button text",
+    "case": "Case",
+    "collection": "Collection",
+    "collections_per_page": "Collections per page",
+    "color_scheme": "Color scheme",
+    "columns": "Columns",
+    "columns_mobile": "Columns on mobile",
+    "corner_radius": "Corner radius",
     "custom_liquid": "Liquid code",
     "customer_account_menu": "Customer account menu",
+    "direction": "Direction",
+    "display": "Display",
     "favicon": "Favicon",
     "focus_ring_offset": "Focus outline offset",
     "focus_ring_width": "Focus outline width",
+    "font": "Font",
     "foreground": "Foreground",
+    "gap": "Gap",
     "grid_gap": "Grid spacing",
-    "grid_item_width": "Grid item width",
     "heading": "Heading",
+    "height": "Height",
+    "image": "Image",
+    "image_fit": "Image fit",
+    "image_position": "Image position",
+    "image_ratio": "Image ratio",
     "input_border_width": "Input border width",
     "input_corner_radius": "Input corner radius",
     "layout_direction": "Layout direction",
+    "letter_spacing": "Letter spacing",
+    "line_height": "Line height",
+    "link": "Link",
     "logo": "Logo",
     "logo_width": "Logo width",
+    "max_width": "Maximum width",
     "menu": "Menu",
+    "overlay_color": "Overlay color",
+    "overlay_opacity": "Overlay opacity",
     "padding": "Padding",
+    "padding_bottom": "Bottom",
+    "padding_left": "Left",
+    "padding_right": "Right",
+    "padding_top": "Top",
     "page_margin": "Page margin",
     "page_width": "Page width",
+    "position": "Position",
+    "preset": "Preset",
+    "products_per_page": "Products per page",
+    "products_to_show": "Products to show",
     "secondary_button_text": "Secondary button text",
     "section_spacing": "Section spacing",
     "shadow": "Shadow",
+    "show_background_overlay": "Show background overlay",
+    "show_collection_description": "Show collection description",
+    "show_dots": "Show slide dots",
     "show_payment_icons": "Show payment icons",
+    "show_product_count": "Show product count",
+    "show_vendor": "Show vendor",
+    "show_view_all": "Show view all button",
+    "size": "Size",
+    "slider_loop": "Loop slides",
+    "style": "Style",
     "subheading": "Subheading",
+    "tag": "HTML tag",
     "text": "Text",
-    "text_style": "Text style"
+    "text_color": "Text color",
+    "use_slider": "Use slider",
+    "width": "Width"
   },
   "info": {
+    "background_color": "Leave empty to use the color scheme background.",
+    "card_image_fit": "Applies when the image ratio is not set to adapt.",
     "custom_liquid": "Add app snippets or other Liquid code to create advanced customizations.",
     "favicon": "Scaled down to 32 x 32px.",
     "focus_accessibility": "The focus outline shows keyboard customers where they are on the page. Keep it visible so the storefront stays usable without a mouse.",
-    "font_performance": "Roles that share a font family load once. Using fewer families keeps the storefront fast."
+    "font_performance": "Roles that share a font family load once. Using fewer families keeps the storefront fast.",
+    "slider_loop": "The next arrow returns to the first item after the last one, and the previous arrow jumps to the last.",
+    "slideshow_background": "The background stays in place while the slides move across it.",
+    "tag": "Sets the heading level for search engines and screen readers. Use the preset to change how the text looks.",
+    "text_color": "Leave empty to use the color scheme text color.",
+    "text_presets_scale": "Sizes set the largest value. Text scales down automatically on smaller screens.",
+    "use_slider": "Items scroll sideways instead of wrapping. The Columns settings set how many are visible."
+  },
+  "defaults": {
+    "featured_products": "Featured products",
+    "heading": "Heading",
+    "shop_now": "Shop now",
+    "slide_heading": "Timeless elegance in every detail",
+    "slide_text": "Discover handcrafted jewelry designed to bring effortless beauty to your everyday style.",
+    "text": "Pair text with an image to focus on your chosen product, collection, or blog post."
   },
   "options": {
     "alignment": {
@@ -89,18 +172,96 @@
       "center": "Center",
       "right": "Right"
     },
+    "background_media": {
+      "none": "None",
+      "image": "Image",
+      "video": "Video"
+    },
+    "border_style": {
+      "none": "None",
+      "solid": "Solid"
+    },
+    "case": {
+      "default": "Default",
+      "uppercase": "Uppercase"
+    },
+    "columns_mobile": {
+      "one": "One",
+      "two": "Two"
+    },
     "direction": {
       "horizontal": "Horizontal",
       "vertical": "Vertical"
     },
-    "size": {
-      "large": "Large",
-      "small": "Small"
+    "display": {
+      "block": "Stack",
+      "flex": "Flex",
+      "grid": "Grid"
     },
-    "text_style": {
-      "title": "Title",
-      "subtitle": "Subtitle",
-      "normal": "Normal text"
+    "font": {
+      "heading": "Heading",
+      "accent": "Accent"
+    },
+    "height": {
+      "fit": "Fit content",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "full": "Full screen"
+    },
+    "image_fit": {
+      "cover": "Fill",
+      "contain": "Fit"
+    },
+    "image_ratio": {
+      "adapt": "Adapt to image",
+      "square": "Square",
+      "portrait": "Portrait",
+      "landscape": "Landscape",
+      "wide": "Wide"
+    },
+    "image_width": {
+      "full": "Full",
+      "large": "Three quarters",
+      "medium": "Half",
+      "small": "Quarter"
+    },
+    "letter_spacing": {
+      "tight": "Tight",
+      "normal": "Normal",
+      "wide": "Wide"
+    },
+    "line_height": {
+      "tight": "Tight",
+      "normal": "Normal",
+      "loose": "Loose"
+    },
+    "max_width": {
+      "narrow": "Narrow",
+      "normal": "Normal",
+      "none": "None"
+    },
+    "position": {
+      "top": "Top",
+      "center": "Center",
+      "bottom": "Bottom"
+    },
+    "preset": {
+      "default": "Default",
+      "paragraph": "Paragraph",
+      "custom": "Custom"
+    },
+    "tag": {
+      "p": "Paragraph",
+      "div": "None"
+    },
+    "text_width": {
+      "fit": "Fit content",
+      "fill": "Fill"
+    },
+    "width": {
+      "page": "Page",
+      "full": "Full"
     }
   }
 }

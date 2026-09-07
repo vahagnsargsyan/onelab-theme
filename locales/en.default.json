@@ -28,7 +28,45 @@
     }
   },
   "collections": {
-    "title": "Collections"
+    "title": "Collections",
+    "empty": "There are no products in this collection yet.",
+    "empty_list": "There are no collections to show yet.",
+    "card": {
+      "product_count": {
+        "one": "{{ count }} product",
+        "other": "{{ count }} products"
+      }
+    }
+  },
+  "general": {
+    "slider": {
+      "previous": "Previous",
+      "next": "Next",
+      "label": "Slider"
+    },
+    "pagination": {
+      "label": "Pagination"
+    },
+    "slideshow": {
+      "label": "Slideshow",
+      "slide": "Slide",
+      "go_to_slide": "Go to slide {{ index }}",
+      "no_slides": "Add a slide to get started."
+    }
+  },
+  "products": {
+    "featured": {
+      "view_all": "View all",
+      "no_collection": "Select a collection to show its products here.",
+      "empty_collection": "The selected collection has no products yet."
+    },
+    "card": {
+      "sold_out": "Sold out",
+      "on_sale": "Sale",
+      "from_price_html": "From {{ price }}",
+      "regular_price": "Regular price",
+      "unit_price_separator": "per"
+    }
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",

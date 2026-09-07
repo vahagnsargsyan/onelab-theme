@@ -11,3 +11,11 @@
 #
 # Ignore templates and sections with a regular expression:
 #   /(templates|sections)/.*\.json/
+
+# Editor and atomic-write artifacts. Writers save to a temp file and rename it
+# over the original; without this the CLI can catch one mid-write and reject it
+# for having the wrong extension.
+*.tmp.*
+*.swp
+*~
+.DS_Store

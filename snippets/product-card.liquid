@@ -1,0 +1,112 @@
+{% doc %}
+  Product card. Shared by the collection, search, recommendation, and featured
+  sections so a product looks the same everywhere it appears.
+
+  Card appearance comes from the theme settings "Product cards" group, never
+  from the calling section.
+
+  @param {object} product - The product to render.
+  @param {number} [index] - Position in the list. The first four load eagerly.
+
+  @example
+  {% render 'product-card', product: product, index: forloop.index0 %}
+{% enddoc %}
+
+{%- liquid
+  assign variant = product.selected_or_first_available_variant
+  assign image = product.featured_media.preview_image
+
+  assign on_sale = false
+  if product.compare_at_price_max > product.price_min
+    assign on_sale = true
+  endif
+
+  assign loading = 'lazy'
+  if index != blank and index < 4
+    assign loading = 'eager'
+  endif
+
+  assign ratio = settings.card_image_ratio
+  case ratio
+    when 'square'
+      assign ratio_value = '1 / 1'
+    when 'portrait'
+      assign ratio_value = '4 / 5'
+    when 'landscape'
+      assign ratio_value = '3 / 2'
+    else
+      assign ratio_value = 'auto'
+  endcase
+-%}
+
+<div
+  class="card"
+  style="--card-image-ratio: {{ ratio_value }}; --card-image-fit: {{ settings.card_image_fit }};"
+>
+  <div class="card__media">
+    {%- if image != blank -%}
+      {%- liquid
+        assign focal = image.presentation.focal_point | default: 'center center'
+        assign focal_style = 'object-position: ' | append: focal | append: ';'
+        assign alt = image.alt | default: product.title | escape
+      -%}
+      {{
+        image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'card__image',
+          widths: '165, 275, 360, 533, 720, 940, 1200',
+          sizes: '(min-width: 750px) 25vw, 50vw',
+          alt: alt,
+          loading: loading,
+          style: focal_style
+      }}
+    {%- else -%}
+      {{ 'product-1' | placeholder_svg_tag: 'card__image card__placeholder' }}
+    {%- endif -%}
+
+    {%- unless product.available -%}
+      <span class="card__badge">{{ 'products.card.sold_out' | t }}</span>
+    {%- elsif on_sale -%}
+      <span class="card__badge">{{ 'products.card.on_sale' | t }}</span>
+    {%- endunless -%}
+  </div>
+
+  <div class="card__content">
+    <a href="{{ product.url }}" class="card__title">{{ product.title }}</a>
+
+    {%- if settings.card_show_vendor and product.vendor != blank -%}
+      <p class="card__vendor">{{ product.vendor }}</p>
+    {%- endif -%}
+
+    <p class="card__price">
+      {%- liquid
+        assign price = product.price_min | money
+        if product.price_varies
+          echo 'products.card.from_price_html' | t: price: price
+        else
+          echo price
+        endif
+      -%}
+
+      {%- if on_sale -%}
+        <s class="card__price-compare">
+          <span class="visually-hidden">{{ 'products.card.regular_price' | t }}</span>
+          {{ product.compare_at_price_max | money }}
+        </s>
+      {%- endif -%}
+    </p>
+
+    {%- if variant.unit_price_measurement -%}
+      <p class="card__unit-price">
+        {{ variant.unit_price | money }}
+        <span aria-hidden="true">/</span>
+        <span class="visually-hidden">{{ 'products.card.unit_price_separator' | t }}</span>
+        {%- if variant.unit_price_measurement.reference_value != 1 -%}
+          {{ variant.unit_price_measurement.reference_value }}
+        {%- endif -%}
+        {{ variant.unit_price_measurement.reference_unit }}
+      </p>
+    {%- endif -%}
+  </div>
+</div>

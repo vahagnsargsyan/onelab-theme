@@ -1,0 +1,51 @@
+{% doc %}
+  Renders the background image or video for an element that uses the shared
+  layout settings. Pairs with `layout-style`; the CSS lives in critical.css.
+
+  Images carry a full responsive `widths`/`sizes` set and honor the focal point
+  chosen in the theme editor. Video autoplays muted; reduced-motion hides it.
+
+  @param {object} s - `section.settings` or `block.settings`.
+
+  @example
+  {% render 'layout-background', s: section.settings %}
+{% enddoc %}
+
+{%- liquid
+  assign image = s.background_image
+  assign video = s.background_video
+-%}
+
+{%- if s.background_media == 'image' and image != blank -%}
+  {%- liquid
+    assign focal = image.presentation.focal_point | default: 'center center'
+    assign focal_style = 'object-position: ' | append: focal | append: ';'
+    assign alt = image.alt | default: ''
+  -%}
+  <div class="layout__background">
+    {{
+      image
+      | image_url: width: 3000
+      | image_tag:
+        class: 'layout__media',
+        widths: '375, 750, 1100, 1500, 2000, 3000',
+        sizes: '100vw',
+        alt: alt,
+        loading: 'lazy',
+        style: focal_style
+    }}
+  </div>
+{%- elsif s.background_media == 'video' and video != blank -%}
+  <div class="layout__background">
+    {{
+      video
+      | video_tag:
+        class: 'layout__media',
+        image_size: '1500x',
+        autoplay: true,
+        loop: true,
+        muted: true,
+        controls: false
+    }}
+  </div>
+{%- endif -%}

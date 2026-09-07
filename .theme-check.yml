@@ -1,1 +1,9 @@
 extends: theme-check:recommended
+
+# Editors and file tools save through a temp file and rename it over the
+# original. The IDE language server watches the folder live and can catch one
+# mid-write; without this it reports the temp file as a bad locale filename.
+ignore:
+  - '**/*.tmp.*'
+  - '**/*.swp'
+  - '**/*~'

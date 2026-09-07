@@ -1,28 +1,157 @@
 {% doc %}
-  Renders a text block.
+  Text block for every text role: headings, subheadings, paragraphs.
+
+  Typography comes from one of three places, chosen with the Preset setting:
+    - Default: inherit whatever the chosen HTML tag gets from critical.css.
+    - Paragraph / Heading 1-6: the global text presets in theme settings.
+    - Custom: a font role plus a free size (range), for one-off cases.
+
+  The visual preset and the HTML tag are separate settings on purpose. Picking
+  the "Heading 1" look on the fourth section of a page must not emit a second
+  <h1>. The tag defaults to a paragraph so the careless path stays valid HTML.
+
+  The block picker shows two entries, Heading and Text, but they are the same
+  block with different preset defaults.
 
   @example
   {% content_for 'block', type: 'text', id: 'text' %}
 {% enddoc %}
 
-<div
-  class="text {{ block.settings.text_style }}"
-  style="--text-align: {{ block.settings.alignment }}"
+{%- liquid
+  assign s = block.settings
+  assign tag = s.tag | default: 'p'
+  assign preset = s.preset | default: 'default'
+  assign has_type = true
+
+  case preset
+    when 'paragraph', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'
+      assign family = 'var(--text-' | append: preset | append: '-family)'
+      assign weight = 'var(--text-' | append: preset | append: '-weight)'
+      assign size = 'var(--text-' | append: preset | append: '-size)'
+      assign leading = 'var(--text-' | append: preset | append: '-leading)'
+      assign tracking = 'var(--text-' | append: preset | append: '-tracking)'
+      assign text_case = 'var(--text-' | append: preset | append: '-case)'
+
+    when 'custom'
+      assign role = s.custom_font | default: 'heading'
+      assign family = 'var(--font-' | append: role | append: '--family)'
+      assign weight = 'var(--font-' | append: role | append: '--weight)'
+
+      assign size_max = s.custom_size | default: 32
+      if tag contains 'h'
+        assign size_min = size_max | times: 0.6 | round
+      else
+        assign size_min = size_max
+      endif
+      assign size_delta = size_max | minus: size_min
+      assign size = 'clamp(' | append: size_min | append: 'px, calc(' | append: size_min | append: 'px + ' | append: size_delta | append: ' * ((100vw - 375px) / 1065)), ' | append: size_max | append: 'px)'
+
+      case s.custom_line_height
+        when 'tight'
+          assign leading = '1.1'
+        when 'loose'
+          assign leading = '1.7'
+        else
+          assign leading = '1.4'
+      endcase
+
+      case s.custom_letter_spacing
+        when 'tight'
+          assign tracking = '-0.02em'
+        when 'wide'
+          assign tracking = '0.06em'
+        else
+          assign tracking = '0'
+      endcase
+
+      if s.custom_case == 'uppercase'
+        assign text_case = 'uppercase'
+      else
+        assign text_case = 'none'
+      endif
+
+    else
+      assign has_type = false
+  endcase
+-%}
+
+<{{ tag }}
+  class="text text--width-{{ s.width | default: 'fit' }} text--max-{{ s.max_width | default: 'normal' }}"
+  style="
+    --text-align: {{ s.text_alignment | default: 'left' }};
+    {%- if has_type %}
+    --text-family: {{ family }};
+    --text-weight: {{ weight }};
+    --text-size: {{ size }};
+    --text-leading: {{ leading }};
+    --text-tracking: {{ tracking }};
+    --text-case: {{ text_case }};
+    {%- endif %}
+    {%- if s.text_color != blank %}
+    --text-color: {{ s.text_color }};
+    {%- endif %}
+    --text-padding-top: {{ s.padding_top | default: 0 }}px;
+    --text-padding-bottom: {{ s.padding_bottom | default: 0 }}px;
+    --text-padding-left: {{ s.padding_left | default: 0 }}px;
+    --text-padding-right: {{ s.padding_right | default: 0 }}px;
+  "
   {{ block.shopify_attributes }}
 >
-  {{ block.settings.text }}
-</div>
+  {{- s.text -}}
+</{{ tag }}>
 
 {% stylesheet %}
   .text {
+    margin: 0;
+    font-family: var(--text-family);
+    font-weight: var(--text-weight);
+    font-size: var(--text-size);
+    line-height: var(--text-leading);
+    letter-spacing: var(--text-tracking);
+    text-transform: var(--text-case);
     text-align: var(--text-align);
+    color: var(--text-color, inherit);
+    padding-block: var(--text-padding-top) var(--text-padding-bottom);
+    padding-inline: var(--text-padding-left) var(--text-padding-right);
   }
-  .text--title {
-    font-size: 2rem;
-    font-weight: 700;
+
+  /* A paragraph tag has no preset tokens in critical.css; fall back to body. */
+  p.text,
+  div.text {
+    --text-family: var(--text-paragraph-family);
+    --text-weight: var(--text-paragraph-weight);
+    --text-size: var(--text-paragraph-size);
+    --text-leading: var(--text-paragraph-leading);
+    --text-tracking: 0;
+    --text-case: none;
   }
-  .text--subtitle {
-    font-size: 1.5rem;
+
+  .text--width-fit {
+    width: fit-content;
+    max-width: 100%;
+  }
+  .text--width-fill {
+    width: 100%;
+  }
+  .text--max-narrow {
+    max-width: min(100%, 30rem);
+  }
+  .text--max-normal {
+    max-width: min(100%, 45rem);
+  }
+  .text--max-none {
+    max-width: none;
+  }
+
+  /* Inline rich text: links and emphasis inherit the surrounding style. */
+  .text a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+  .text a:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
   }
 {% endstylesheet %}
 
@@ -31,29 +160,167 @@
   "name": "t:general.text",
   "settings": [
     {
-      "type": "text",
+      "type": "inline_richtext",
       "id": "text",
       "label": "t:labels.text",
-      "default": "Text"
+      "default": "t:defaults.text"
+    },
+
+    { "type": "header", "content": "t:general.typography" },
+    {
+      "type": "select",
+      "id": "preset",
+      "label": "t:labels.preset",
+      "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" },
+        { "value": "custom", "label": "t:options.preset.custom" }
+      ]
     },
     {
       "type": "select",
-      "id": "text_style",
-      "label": "t:labels.text_style",
+      "id": "tag",
+      "label": "t:labels.tag",
+      "info": "t:info.tag",
+      "default": "p",
       "options": [
-        { "value": "text--title", "label": "t:options.text_style.title" },
-        { "value": "text--subtitle", "label": "t:options.text_style.subtitle" },
-        { "value": "text--normal", "label": "t:options.text_style.normal" }
-      ],
-      "default": "text--title"
+        { "value": "p", "label": "t:options.tag.p" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" },
+        { "value": "div", "label": "t:options.tag.div" }
+      ]
     },
     {
+      "type": "select",
+      "id": "custom_font",
+      "label": "t:labels.font",
+      "default": "heading",
+      "visible_if": "{{ block.settings.preset == 'custom' }}",
+      "options": [
+        { "value": "body", "label": "t:labels.body" },
+        { "value": "subheading", "label": "t:labels.subheading" },
+        { "value": "heading", "label": "t:labels.heading" },
+        { "value": "accent", "label": "t:labels.accent" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "custom_size",
+      "label": "t:labels.size",
+      "min": 12,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 32,
+      "visible_if": "{{ block.settings.preset == 'custom' }}"
+    },
+    {
+      "type": "select",
+      "id": "custom_line_height",
+      "label": "t:labels.line_height",
+      "default": "normal",
+      "visible_if": "{{ block.settings.preset == 'custom' }}",
+      "options": [
+        { "value": "tight", "label": "t:options.line_height.tight" },
+        { "value": "normal", "label": "t:options.line_height.normal" },
+        { "value": "loose", "label": "t:options.line_height.loose" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "custom_letter_spacing",
+      "label": "t:labels.letter_spacing",
+      "default": "normal",
+      "visible_if": "{{ block.settings.preset == 'custom' }}",
+      "options": [
+        { "value": "tight", "label": "t:options.letter_spacing.tight" },
+        { "value": "normal", "label": "t:options.letter_spacing.normal" },
+        { "value": "wide", "label": "t:options.letter_spacing.wide" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "custom_case",
+      "label": "t:labels.case",
+      "default": "default",
+      "visible_if": "{{ block.settings.preset == 'custom' }}",
+      "options": [
+        { "value": "default", "label": "t:options.case.default" },
+        { "value": "uppercase", "label": "t:options.case.uppercase" }
+      ]
+    },
+
+    { "type": "header", "content": "t:general.layout" },
+    {
       "type": "text_alignment",
-      "id": "alignment",
+      "id": "text_alignment",
       "label": "t:labels.alignment",
       "default": "left"
-    }
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:labels.width",
+      "default": "fit",
+      "options": [
+        { "value": "fit", "label": "t:options.text_width.fit" },
+        { "value": "fill", "label": "t:options.text_width.fill" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "max_width",
+      "label": "t:labels.max_width",
+      "default": "normal",
+      "options": [
+        { "value": "narrow", "label": "t:options.max_width.narrow" },
+        { "value": "normal", "label": "t:options.max_width.normal" },
+        { "value": "none", "label": "t:options.max_width.none" }
+      ]
+    },
+
+    { "type": "header", "content": "t:general.appearance" },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "t:labels.text_color",
+      "info": "t:info.text_color"
+    },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 }
   ],
-  "presets": [{ "name": "t:general.text" }]
+  "presets": [
+    {
+      "name": "t:general.heading",
+      "settings": {
+        "text": "t:defaults.heading",
+        "preset": "h2",
+        "tag": "h2"
+      }
+    },
+    {
+      "name": "t:general.text",
+      "settings": {
+        "text": "t:defaults.text",
+        "preset": "paragraph",
+        "tag": "p"
+      }
+    }
+  ]
 }
 {% endschema %}

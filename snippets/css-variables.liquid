@@ -57,6 +57,65 @@
     --font-{{ role }}--weight: {{ font.weight }};
     {%- endfor %}
 
+    {%- comment -%}
+      Text presets. Each style resolves to five properties consumed by
+      critical.css. Sizes are emitted as clamp() so one setting covers every
+      breakpoint: the chosen value is the desktop maximum, and headings compress
+      to 60% of it on small screens. Body text does not scale.
+    {%- endcomment -%}
+    {%- assign text_styles = 'paragraph,h1,h2,h3,h4,h5,h6' | split: ',' -%}
+    {%- for style in text_styles %}
+      {%- assign size_key = style | append: '_size' -%}
+      {%- assign leading_key = style | append: '_line_height' -%}
+      {%- assign tracking_key = style | append: '_letter_spacing' -%}
+      {%- assign case_key = style | append: '_case' -%}
+      {%- assign font_key = style | append: '_font' -%}
+
+      {%- assign size_max = settings[size_key] | times: 1 -%}
+      {%- if style == 'paragraph' -%}
+        {%- assign size_min = size_max -%}
+      {%- else -%}
+        {%- assign size_min = size_max | times: 0.6 | round -%}
+      {%- endif -%}
+      {%- assign size_delta = size_max | minus: size_min -%}
+
+      {%- case settings[leading_key] -%}
+        {%- when 'tight' -%}{%- assign leading = '1.1' -%}
+        {%- when 'loose' -%}{%- assign leading = '1.7' -%}
+        {%- else -%}{%- assign leading = '1.4' -%}
+      {%- endcase -%}
+
+      {%- case settings[tracking_key] -%}
+        {%- when 'tight' -%}{%- assign tracking = '-0.02em' -%}
+        {%- when 'wide' -%}{%- assign tracking = '0.06em' -%}
+        {%- else -%}{%- assign tracking = '0' -%}
+      {%- endcase -%}
+
+      {%- if settings[case_key] == 'uppercase' -%}
+        {%- assign text_case = 'uppercase' -%}
+      {%- else -%}
+        {%- assign text_case = 'none' -%}
+      {%- endif -%}
+
+      {%- if style == 'paragraph' -%}
+        {%- assign font_role = 'body' -%}
+      {%- elsif settings[font_key] == 'accent' -%}
+        {%- assign font_role = 'accent' -%}
+      {%- else -%}
+        {%- assign font_role = 'heading' -%}
+      {%- endif %}
+    --text-{{ style }}-family: var(--font-{{ font_role }}--family);
+    --text-{{ style }}-weight: var(--font-{{ font_role }}--weight);
+    --text-{{ style }}-size: clamp(
+      {{ size_min }}px,
+      calc({{ size_min }}px + {{ size_delta }} * ((100vw - 375px) / 1065)),
+      {{ size_max }}px
+    );
+    --text-{{ style }}-leading: {{ leading }};
+    --text-{{ style }}-tracking: {{ tracking }};
+    --text-{{ style }}-case: {{ text_case }};
+    {%- endfor %}
+
     --page-width: {{ settings.page_width }}px;
     --page-margin: {{ settings.page_margin }}px;
     --section-spacing: {{ settings.section_spacing }}px;
@@ -75,6 +134,7 @@
     --focus-ring-offset: {{ settings.focus_ring_offset }}px;
 
     --logo-width: {{ settings.logo_width }}px;
+    --card-radius: {{ settings.card_radius }}px;
   }
 
   {%- for scheme in settings.color_schemes %}

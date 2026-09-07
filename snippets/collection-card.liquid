@@ -1,0 +1,79 @@
+{% doc %}
+  Collection card. Shares the `.card` markup and styles with
+  snippets/product-card.liquid so collections and products read as one system.
+
+  Card appearance comes from the theme settings "Product cards" group, never
+  from the calling section.
+
+  @param {object} collection - The collection to render.
+  @param {number} [index] - Position in the list. The first four load eagerly.
+  @param {boolean} [show_description] - Show a truncated description.
+  @param {boolean} [show_product_count] - Show how many products it holds.
+
+  @example
+  {% render 'collection-card', collection: collection, index: forloop.index0 %}
+{% enddoc %}
+
+{%- liquid
+  assign image = collection.featured_image
+
+  assign loading = 'lazy'
+  if index != blank and index < 4
+    assign loading = 'eager'
+  endif
+
+  case settings.card_image_ratio
+    when 'square'
+      assign ratio_value = '1 / 1'
+    when 'portrait'
+      assign ratio_value = '4 / 5'
+    when 'landscape'
+      assign ratio_value = '3 / 2'
+    else
+      assign ratio_value = 'auto'
+  endcase
+-%}
+
+<div
+  class="card"
+  style="--card-image-ratio: {{ ratio_value }}; --card-image-fit: {{ settings.card_image_fit }};"
+>
+  <div class="card__media">
+    {%- if image != blank -%}
+      {%- liquid
+        assign focal = image.presentation.focal_point | default: 'center center'
+        assign focal_style = 'object-position: ' | append: focal | append: ';'
+        assign alt = image.alt | default: collection.title | escape
+      -%}
+      {{
+        image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'card__image',
+          widths: '165, 275, 360, 533, 720, 940, 1200',
+          sizes: '(min-width: 750px) 25vw, 50vw',
+          alt: alt,
+          loading: loading,
+          style: focal_style
+      }}
+    {%- else -%}
+      {{ 'collection-1' | placeholder_svg_tag: 'card__image card__placeholder' }}
+    {%- endif -%}
+  </div>
+
+  <div class="card__content">
+    <a href="{{ collection.url }}" class="card__title">{{ collection.title }}</a>
+
+    {%- if show_product_count -%}
+      <p class="card__meta">
+        {{- 'collections.card.product_count' | t: count: collection.all_products_count -}}
+      </p>
+    {%- endif -%}
+
+    {%- if show_description and collection.description != blank -%}
+      <p class="card__description">
+        {{- collection.description | strip_html | truncatewords: 15 -}}
+      </p>
+    {%- endif -%}
+  </div>
+</div>

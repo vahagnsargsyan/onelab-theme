@@ -1,0 +1,32 @@
+{% doc %}
+  Previous and next buttons for a `<slider-carousel>`.
+
+  Must be rendered inside the custom element, alongside the track. The element
+  disables each button when the track cannot travel further that way, and hides
+  the pair entirely when there is nothing to scroll.
+
+  @example
+  <slider-carousel class="slider">
+    {% render 'slider-controls' %}
+    <div class="slider__track" data-slider-track>...</div>
+  </slider-carousel>
+{% enddoc %}
+
+<div class="slider__controls">
+  <button
+    type="button"
+    class="slider__button slider__button--previous"
+    data-slider-previous
+    aria-label="{{ 'general.slider.previous' | t }}"
+  >
+    {{- 'icon-caret.svg' | inline_asset_content -}}
+  </button>
+  <button
+    type="button"
+    class="slider__button slider__button--next"
+    data-slider-next
+    aria-label="{{ 'general.slider.next' | t }}"
+  >
+    {{- 'icon-caret.svg' | inline_asset_content -}}
+  </button>
+</div>

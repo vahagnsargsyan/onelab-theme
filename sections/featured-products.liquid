@@ -1,19 +1,41 @@
 {% comment %}
-  List of collections, used by the list-collections template. Renders as a grid
-  or as a scroll-snap slider.
+  Featured products. Shows the products from a merchant-chosen collection as a
+  grid or a scroll-snap slider, on any template.
 
-  Layout, size, appearance, borders, and padding come from the shared snippets.
-  The slider reuses the shared Columns settings as items per view.
+  Layout, size, appearance, borders, padding, slider, and loop all come from the
+  shared layout settings, so this section only owns what is genuinely its own:
+  which collection, how many products, and the header.
 
-  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
+  Cards render through snippets/product-card.liquid, the same one the collection
+  template uses.
 {% endcomment %}
 
 {% liquid
   assign s = section.settings
-  assign per_page = s.collections_per_page | default: 12
-  assign has_collections = false
-  if collections.size > 0
-    assign has_collections = true
+  assign featured = s.collection
+  assign limit = s.products_to_show | default: 8
+
+  assign has_products = false
+  if featured.products.size > 0
+    assign has_products = true
+  endif
+
+  assign show_view_all = false
+  if s.show_view_all and featured != blank
+    assign show_view_all = true
+  endif
+
+  assign show_header = false
+  if s.heading != blank or show_view_all
+    assign show_header = true
+  endif
+
+  assign slider_label = s.heading | strip_html | strip
+  if slider_label == blank
+    assign slider_label = featured.title
+  endif
+  if slider_label == blank
+    assign slider_label = 'general.slider.label' | t
   endif
 %}
 
@@ -23,16 +45,26 @@
   <script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-<div {% render 'layout-style', s: section.settings, class: 'collections full-width' %}>
+<div {% render 'layout-style', s: section.settings, class: 'featured-products full-width' %}>
   {% render 'layout-background', s: section.settings %}
 
   <div class="layout__content">
-    <div class="collections__inner">
-      <header class="collections__header">
-        <h1 class="collections__title">{{ 'collections.title' | t }}</h1>
-      </header>
+    <div class="featured-products__inner">
+      {%- if show_header -%}
+        <header class="featured-products__header">
+          {%- if s.heading != blank -%}
+            <h2 class="featured-products__heading">{{ s.heading }}</h2>
+          {%- endif -%}
 
-      {%- if has_collections -%}
+          {%- if show_view_all -%}
+            <a href="{{ featured.url }}" class="button button--secondary">
+              {{- 'products.featured.view_all' | t -}}
+            </a>
+          {%- endif -%}
+        </header>
+      {%- endif -%}
+
+      {%- if has_products -%}
         {%- if s.use_slider -%}
           <slider-carousel
             class="slider"{% if s.slider_loop %} loop{% endif %}
@@ -45,51 +77,44 @@
               data-slider-track
               tabindex="0"
               role="region"
-              aria-label="{{ 'collections.title' | t }}"
+              aria-label="{{ slider_label | escape }}"
             >
-              {%- for collection in collections limit: per_page -%}
+              {%- for product in featured.products limit: limit -%}
                 <li>
-                  {% render 'collection-card',
-                    collection: collection,
-                    index: forloop.index0,
-                    show_description: s.show_description,
-                    show_product_count: s.show_product_count
-                  %}
+                  {% render 'product-card', product: product, index: forloop.index0 %}
                 </li>
               {%- endfor -%}
             </ul>
           </slider-carousel>
         {%- else -%}
-          {% paginate collections by per_page %}
-            <ul class="layout__blocks collections__grid list-unstyled">
-              {%- for collection in collections -%}
-                <li>
-                  {% render 'collection-card',
-                    collection: collection,
-                    index: forloop.index0,
-                    show_description: s.show_description,
-                    show_product_count: s.show_product_count
-                  %}
-                </li>
-              {%- endfor -%}
-            </ul>
-
-            {%- if paginate.pages > 1 -%}
-              <nav class="collections__pagination" aria-label="{{ 'general.pagination.label' | t }}">
-                {{ paginate | default_pagination }}
-              </nav>
-            {%- endif -%}
-          {% endpaginate %}
+          <ul class="layout__blocks featured-products__grid list-unstyled">
+            {%- for product in featured.products limit: limit -%}
+              <li>
+                {% render 'product-card', product: product, index: forloop.index0 %}
+              </li>
+            {%- endfor -%}
+          </ul>
         {%- endif -%}
-      {%- else -%}
-        <p class="collections__empty">{{ 'collections.empty_list' | t }}</p>
+
+      {%- elsif request.design_mode -%}
+        {%- comment -%}
+          Shown only in the theme editor. A storefront visitor sees nothing
+          rather than an empty or broken section.
+        {%- endcomment -%}
+        <p class="featured-products__hint">
+          {%- if featured == blank -%}
+            {{ 'products.featured.no_collection' | t }}
+          {%- else -%}
+            {{ 'products.featured.empty_collection' | t }}
+          {%- endif -%}
+        </p>
       {%- endif -%}
     </div>
   </div>
 </div>
 
 {% stylesheet %}
-  .collections__inner {
+  .featured-products__inner {
     display: flex;
     flex-direction: column;
     gap: var(--section-spacing);
@@ -97,29 +122,35 @@
     min-width: 0;
   }
 
-  .collections__header {
+  .featured-products__header {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
-  .collections__pagination {
-    display: flex;
-    justify-content: center;
+  .featured-products__heading {
+    margin: 0;
+  }
+
+  .featured-products__hint {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--input-radius);
   }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "t:general.collections_grid",
+  "name": "t:general.featured_products",
   "settings": [
-    { "type": "header", "content": "t:general.collections" },
-    { "type": "range", "id": "collections_per_page", "label": "t:labels.collections_per_page", "min": 4, "max": 48, "step": 4, "default": 12 },
-    { "type": "checkbox", "id": "show_description", "label": "t:labels.show_collection_description", "default": false },
-    { "type": "checkbox", "id": "show_product_count", "label": "t:labels.show_product_count", "default": false },
-    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
-    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
-      "visible_if": "{{ section.settings.use_slider }}" },
+    { "type": "header", "content": "t:general.products" },
+    { "type": "collection", "id": "collection", "label": "t:labels.collection" },
+    { "type": "range", "id": "products_to_show", "label": "t:labels.products_to_show", "min": 2, "max": 24, "step": 1, "default": 8 },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.featured_products" },
+    { "type": "checkbox", "id": "show_view_all", "label": "t:labels.show_view_all", "default": true },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
@@ -129,13 +160,16 @@
         { "value": "flex", "label": "t:options.display.flex" },
         { "value": "grid", "label": "t:options.display.grid" }
       ] },
+    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
+    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
     { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
       "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",
       "options": [
         { "value": "vertical", "label": "t:options.direction.vertical" },
         { "value": "horizontal", "label": "t:options.direction.horizontal" }
       ] },
-    { "type": "range", "id": "columns", "label": "t:labels.columns", "min": 1, "max": 6, "step": 1, "default": 3 },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "min": 1, "max": 6, "step": 1, "default": 4 },
     { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
       "options": [
         { "value": "1", "label": "t:options.columns_mobile.one" },
@@ -207,6 +241,10 @@
     { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
     { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
   ],
-  "presets": [{ "name": "t:general.collections_grid" }]
+  "presets": [
+    {
+      "name": "t:general.featured_products"
+    }
+  ]
 }
 {% endschema %}

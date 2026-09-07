@@ -1,0 +1,322 @@
+{% comment %}
+  Slideshow. One slide at a time over a background that belongs to the section,
+  so the backdrop holds still while the slides move across it.
+
+  The background, height, color scheme, overlay, borders, and padding all come
+  from the shared layout settings — "background media" on the section is the
+  global background. Each slide owns only its own image, copy, button, and which
+  side the image sits on.
+
+  Unlike other sections this one omits the Layout mode settings (display,
+  direction, columns, alignment, position, gap). A slideshow is always a
+  one-at-a-time slider, so those cannot apply.
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+  assign has_slides = false
+  if section.blocks.size > 0
+    assign has_slides = true
+  endif
+%}
+
+{{ 'slider.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
+
+<div {% render 'layout-style', s: section.settings, class: 'slideshow full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    {%- if has_slides -%}
+      <slider-carousel
+        class="slider slideshow__carousel"{% if s.slider_loop %} loop{% endif %}
+        style="--slider-per-view: 1; --slider-per-view-mobile: 1;"
+      >
+        <div
+          class="slider__track slideshow__track"
+          data-slider-track
+          tabindex="0"
+          role="region"
+          aria-label="{{ 'general.slideshow.label' | t }}"
+        >
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign b = block.settings
+              assign image = b.image
+            -%}
+            <div
+              class="slideshow__slide slideshow__slide--image-{{ b.image_position }}"
+              role="group"
+              aria-roledescription="{{ 'general.slideshow.slide' | t }}"
+              aria-label="{{ forloop.index }} / {{ section.blocks.size }}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="slideshow__media">
+                {%- if image != blank -%}
+                  {%- liquid
+                    assign focal = image.presentation.focal_point | default: 'center center'
+                    assign focal_style = 'object-position: ' | append: focal | append: ';'
+                    assign alt = image.alt | default: ''
+                    assign loading = 'lazy'
+                    if forloop.first
+                      assign loading = 'eager'
+                    endif
+                  -%}
+                  {{
+                    image
+                    | image_url: width: 1600
+                    | image_tag:
+                      class: 'slideshow__image',
+                      widths: '375, 550, 750, 1100, 1600',
+                      sizes: '(min-width: 750px) 40vw, 90vw',
+                      alt: alt,
+                      loading: loading,
+                      style: focal_style
+                  }}
+                {%- else -%}
+                  {{ 'lifestyle-1' | placeholder_svg_tag: 'slideshow__image slideshow__placeholder' }}
+                {%- endif -%}
+              </div>
+
+              <div class="slideshow__content">
+                {%- if b.heading != blank -%}
+                  <h2 class="slideshow__heading">{{ b.heading }}</h2>
+                {%- endif -%}
+
+                {%- if b.text != blank -%}
+                  <div class="slideshow__text rte">{{ b.text }}</div>
+                {%- endif -%}
+
+                {%- if b.button_label != blank -%}
+                  <a
+                    {% if b.button_link != blank %}
+                      href="{{ b.button_link }}"
+                    {% else %}
+                      href="#"
+                      aria-disabled="true"
+                    {% endif %}
+                    class="button button--secondary slideshow__button"
+                  >
+                    {{- b.button_label -}}
+                  </a>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if s.show_dots and section.blocks.size > 1 -%}
+          <ul class="slider__dots slideshow__dots">
+            {%- for block in section.blocks -%}
+              <li>
+                <button
+                  type="button"
+                  class="slider__dot"
+                  data-slider-dot
+                  aria-label="{{ 'general.slideshow.go_to_slide' | t: index: forloop.index }}"
+                >
+                </button>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </slider-carousel>
+
+    {%- elsif request.design_mode -%}
+      <p class="slideshow__hint">{{ 'general.slideshow.no_slides' | t }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  /* The height set on the section flows down to the slides. */
+  .slideshow__carousel,
+  .slideshow__track,
+  .slideshow__slide {
+    min-height: inherit;
+  }
+
+  .slideshow__slide {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    align-items: center;
+    gap: clamp(1.5rem, 4vw, 4rem);
+    width: 100%;
+    padding-block: clamp(2rem, 6vw, 5rem);
+  }
+
+  /* Image side is a setting, so it swaps with order rather than a second grid. */
+  .slideshow__slide--image-right .slideshow__media {
+    order: 2;
+  }
+
+  .slideshow__media {
+    display: flex;
+  }
+
+  .slideshow__image {
+    width: 100%;
+    max-height: 70svh;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+  }
+
+  .slideshow__placeholder {
+    background-color: var(--color-border);
+    fill: var(--color-background);
+  }
+
+  .slideshow__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    max-width: 34rem;
+  }
+
+  .slideshow__heading {
+    margin: 0;
+  }
+
+  .slideshow__text {
+    margin: 0;
+  }
+
+  .slideshow__hint {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--input-radius);
+  }
+
+  /*
+   * Dots sit vertically against the right edge on desktop, and drop below the
+   * slide on narrow screens where there is no room beside it.
+   */
+  .slideshow__dots {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-end: 0;
+    translate: 0 -50%;
+    flex-direction: column;
+  }
+
+  @media (max-width: 989px) {
+    .slideshow__slide {
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      text-align: center;
+    }
+
+    .slideshow__slide--image-right .slideshow__media {
+      order: 0;
+    }
+
+    .slideshow__content {
+      align-items: center;
+    }
+
+    .slideshow__image {
+      max-height: 45svh;
+      width: auto;
+    }
+
+    .slideshow__dots {
+      position: static;
+      translate: none;
+      flex-direction: row;
+      justify-content: center;
+      margin-block-start: 1rem;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.slideshow",
+  "max_blocks": 8,
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "t:general.slide",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "t:labels.image" },
+        { "type": "select", "id": "image_position", "label": "t:labels.image_position", "default": "left",
+          "options": [
+            { "value": "left", "label": "t:options.alignment.left" },
+            { "value": "right", "label": "t:options.alignment.right" }
+          ] },
+        { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.slide_heading" },
+        { "type": "richtext", "id": "text", "label": "t:labels.text", "default": "t:defaults.slide_text" },
+        { "type": "text", "id": "button_label", "label": "t:labels.button_label", "default": "t:defaults.shop_now" },
+        { "type": "url", "id": "button_link", "label": "t:labels.button_link" }
+      ]
+    }
+  ],
+  "settings": [
+    { "type": "header", "content": "t:general.slideshow" },
+    { "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": true },
+    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": true },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "large",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "paragraph", "content": "t:info.slideshow_background" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.slideshow",
+      "blocks": [
+        { "type": "slide", "settings": { "image_position": "left" } },
+        { "type": "slide", "settings": { "image_position": "right" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

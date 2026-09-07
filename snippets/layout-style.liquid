@@ -1,0 +1,190 @@
+{% doc %}
+  Shared section layout. Emits the `class` and `style` attributes for any element
+  that exposes the standard layout settings, so the mapping from setting value to
+  CSS is written once here and never in a section.
+
+  Every section in this theme must:
+    1. Include the settings JSON below in its schema, verbatim.
+    2. Render its root element with this snippet.
+    3. Render `layout-background` inside the root for background media.
+    4. Wrap its blocks in `.layout__content` > `.layout__blocks`.
+
+  The matching CSS lives in assets/critical.css under "Shared section layout".
+
+  Shopify schemas cannot include or inherit settings, so the JSON has to be
+  pasted. This doc block is the canonical copy: change it here first, then
+  propagate to every section.
+
+  @param {object} s - `section.settings` or `block.settings`.
+  @param {string} [class] - Extra classes for the root element.
+
+  @example
+  <div {% render 'layout-style', s: section.settings, class: 'my-section full-width' %}>
+    {% render 'layout-background', s: section.settings %}
+    <div class="layout__content">
+      <div class="layout__blocks">
+        {% content_for 'blocks' %}
+      </div>
+    </div>
+  </div>
+
+  Canonical settings JSON. Paste into every section schema:
+
+  { "type": "header", "content": "t:general.layout" },
+  { "type": "select", "id": "display", "label": "t:labels.display", "default": "flex",
+    "visible_if": "{{ section.settings.use_slider == false }}",
+    "options": [
+      { "value": "block", "label": "t:options.display.block" },
+      { "value": "flex", "label": "t:options.display.flex" },
+      { "value": "grid", "label": "t:options.display.grid" }
+    ] },
+  { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
+  { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+    "visible_if": "{{ section.settings.use_slider }}" },
+  { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
+    "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",
+    "options": [
+      { "value": "vertical", "label": "t:options.direction.vertical" },
+      { "value": "horizontal", "label": "t:options.direction.horizontal" }
+    ] },
+  { "type": "range", "id": "columns", "label": "t:labels.columns", "min": 1, "max": 6, "step": 1, "default": 3,
+    "visible_if": "{{ section.settings.use_slider or section.settings.display == 'grid' or section.settings.display == 'flex' and section.settings.direction == 'horizontal' }}" },
+  { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
+    "visible_if": "{{ section.settings.use_slider or section.settings.display == 'grid' or section.settings.display == 'flex' and section.settings.direction == 'horizontal' }}",
+    "options": [
+      { "value": "1", "label": "t:options.columns_mobile.one" },
+      { "value": "2", "label": "t:options.columns_mobile.two" }
+    ] },
+  { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "left",
+    "visible_if": "{{ section.settings.use_slider == false and section.settings.display != 'block' }}",
+    "options": [
+      { "value": "left", "label": "t:options.alignment.left" },
+      { "value": "center", "label": "t:options.alignment.center" },
+      { "value": "right", "label": "t:options.alignment.right" }
+    ] },
+  { "type": "select", "id": "position", "label": "t:labels.position", "default": "center",
+    "visible_if": "{{ section.settings.use_slider == false and section.settings.display != 'block' }}",
+    "options": [
+      { "value": "top", "label": "t:options.position.top" },
+      { "value": "center", "label": "t:options.position.center" },
+      { "value": "bottom", "label": "t:options.position.bottom" }
+    ] },
+  { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 12 },
+
+  { "type": "header", "content": "t:general.size" },
+  { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+    "options": [
+      { "value": "page", "label": "t:options.width.page" },
+      { "value": "full", "label": "t:options.width.full" }
+    ] },
+  { "type": "select", "id": "height", "label": "t:labels.height", "default": "fit",
+    "options": [
+      { "value": "fit", "label": "t:options.height.fit" },
+      { "value": "small", "label": "t:options.height.small" },
+      { "value": "medium", "label": "t:options.height.medium" },
+      { "value": "large", "label": "t:options.height.large" },
+      { "value": "full", "label": "t:options.height.full" }
+    ] },
+
+  { "type": "header", "content": "t:general.appearance" },
+  { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+  { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+    "options": [
+      { "value": "none", "label": "t:options.background_media.none" },
+      { "value": "image", "label": "t:options.background_media.image" },
+      { "value": "video", "label": "t:options.background_media.video" }
+    ] },
+  { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+    "visible_if": "{{ section.settings.background_media == 'image' }}" },
+  { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+    "visible_if": "{{ section.settings.background_media == 'video' }}" },
+  { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+  { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+  { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+    "visible_if": "{{ section.settings.background_overlay }}" },
+  { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+    "visible_if": "{{ section.settings.background_overlay }}" },
+
+  { "type": "header", "content": "t:general.borders" },
+  { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+    "options": [
+      { "value": "none", "label": "t:options.border_style.none" },
+      { "value": "solid", "label": "t:options.border_style.solid" }
+    ] },
+  { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+    "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+  { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+  { "type": "header", "content": "t:general.padding" },
+  { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+  { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+  { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+  { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+{% enddoc %}
+
+{%- liquid
+  case s.height
+    when 'small'
+      assign height = '30svh'
+    when 'medium'
+      assign height = '50svh'
+    when 'large'
+      assign height = '75svh'
+    when 'full'
+      assign height = '100svh'
+    else
+      assign height = 'auto'
+  endcase
+
+  case s.alignment
+    when 'center'
+      assign alignment = 'center'
+    when 'right'
+      assign alignment = 'flex-end'
+    else
+      assign alignment = 'flex-start'
+  endcase
+
+  case s.position
+    when 'center'
+      assign position = 'center'
+    when 'bottom'
+      assign position = 'flex-end'
+    else
+      assign position = 'flex-start'
+  endcase
+
+  assign border_width = 0
+  if s.border_style == 'solid'
+    assign border_width = s.border_width | default: 1
+  endif
+
+  assign display = s.display | default: 'flex'
+  assign direction = s.direction | default: 'vertical'
+  assign width = s.width | default: 'page'
+-%}
+class="layout layout--display-{{ display }} layout--{{ direction }} layout--width-{{ width }}
+  {%- if s.background_overlay %} layout--overlay{% endif -%}
+  {%- if s.color_scheme != blank %} color-{{ s.color_scheme }}{% endif -%}
+  {%- if class != blank %} {{ class }}{% endif -%}"
+style="
+  --layout-gap: {{ s.gap | default: 0 }}px;
+  --layout-columns: {{ s.columns | default: 1 }};
+  --layout-columns-mobile: {{ s.columns_mobile | default: 1 }};
+  --layout-height: {{ height }};
+  --layout-alignment: {{ alignment }};
+  --layout-position: {{ position }};
+  --layout-border-width: {{ border_width }}px;
+  --layout-border-radius: {{ s.border_radius | default: 0 }}px;
+  --layout-padding-top: {{ s.padding_top | default: 0 }}px;
+  --layout-padding-bottom: {{ s.padding_bottom | default: 0 }}px;
+  --layout-padding-left: {{ s.padding_left | default: 0 }}px;
+  --layout-padding-right: {{ s.padding_right | default: 0 }}px;
+  {%- if s.background_color != blank %}
+  --layout-background: {{ s.background_color }};
+  {%- endif %}
+  {%- if s.background_overlay %}
+  --layout-overlay: {{ s.overlay_color | default: '#000000' }};
+  --layout-overlay-opacity: {{ s.overlay_opacity | default: 40 | divided_by: 100.0 }};
+  {%- endif %}
+"

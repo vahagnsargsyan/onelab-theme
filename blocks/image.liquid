@@ -1,0 +1,213 @@
+{% doc %}
+  Image block. Responsive by default, honors the editor focal point, and shows
+  Shopify's placeholder graphic until an image is chosen.
+
+  @example
+  {% content_for 'block', type: 'image', id: 'image' %}
+{% enddoc %}
+
+{%- liquid
+  assign s = block.settings
+  assign image = s.image
+
+  case s.ratio
+    when 'square'
+      assign ratio = '1 / 1'
+    when 'portrait'
+      assign ratio = '4 / 5'
+    when 'landscape'
+      assign ratio = '3 / 2'
+    when 'wide'
+      assign ratio = '16 / 9'
+    else
+      assign ratio = 'auto'
+  endcase
+
+  case s.width
+    when 'large'
+      assign width_pct = 75
+    when 'medium'
+      assign width_pct = 50
+    when 'small'
+      assign width_pct = 25
+    else
+      assign width_pct = 100
+  endcase
+
+  assign sizes = '(min-width: 1400px) ' | append: width_pct | append: 'vw, 100vw'
+  assign focal = image.presentation.focal_point | default: 'center center'
+  assign focal_style = 'object-position: ' | append: focal | append: ';'
+  assign alt = image.alt | default: ''
+-%}
+
+<div
+  class="image image--align-{{ s.alignment | default: 'left' }}"
+  style="
+    --image-ratio: {{ ratio }};
+    --image-width: {{ width_pct }}%;
+    --image-fit: {{ s.fit | default: 'cover' }};
+    --image-radius: {{ s.corner_radius | default: 0 }}px;
+    --image-padding-top: {{ s.padding_top | default: 0 }}px;
+    --image-padding-bottom: {{ s.padding_bottom | default: 0 }}px;
+    --image-padding-left: {{ s.padding_left | default: 0 }}px;
+    --image-padding-right: {{ s.padding_right | default: 0 }}px;
+  "
+  {{ block.shopify_attributes }}
+>
+  {%- if s.link != blank -%}
+    <a href="{{ s.link }}" class="image__link">
+  {%- endif -%}
+
+  {%- if image != blank -%}
+    {{
+      image
+      | image_url: width: 3000
+      | image_tag:
+        class: 'image__media',
+        widths: '375, 550, 750, 1100, 1500, 2000, 3000',
+        sizes: sizes,
+        alt: alt,
+        loading: 'lazy',
+        style: focal_style
+    }}
+  {%- else -%}
+    {{ 'image' | placeholder_svg_tag: 'image__media image__placeholder' }}
+  {%- endif -%}
+
+  {%- if s.link != blank -%}
+    </a>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .image {
+    display: flex;
+    width: 100%;
+    padding-block: var(--image-padding-top) var(--image-padding-bottom);
+    padding-inline: var(--image-padding-left) var(--image-padding-right);
+  }
+  .image--align-left {
+    justify-content: flex-start;
+  }
+  .image--align-center {
+    justify-content: center;
+  }
+  .image--align-right {
+    justify-content: flex-end;
+  }
+
+  .image__link {
+    display: block;
+    width: var(--image-width);
+  }
+  .image__link:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .image__media {
+    display: block;
+    width: var(--image-width);
+    aspect-ratio: var(--image-ratio);
+    object-fit: var(--image-fit);
+    border-radius: var(--image-radius);
+  }
+  .image__link .image__media {
+    width: 100%;
+  }
+
+  .image__placeholder {
+    background-color: var(--color-border);
+    fill: var(--color-background);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.image",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "t:labels.image"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "t:labels.link"
+    },
+
+    { "type": "header", "content": "t:general.size" },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:labels.width",
+      "default": "full",
+      "options": [
+        { "value": "full", "label": "t:options.image_width.full" },
+        { "value": "large", "label": "t:options.image_width.large" },
+        { "value": "medium", "label": "t:options.image_width.medium" },
+        { "value": "small", "label": "t:options.image_width.small" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "t:labels.alignment",
+      "default": "left",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "ratio",
+      "label": "t:labels.image_ratio",
+      "default": "adapt",
+      "options": [
+        { "value": "adapt", "label": "t:options.image_ratio.adapt" },
+        { "value": "square", "label": "t:options.image_ratio.square" },
+        { "value": "portrait", "label": "t:options.image_ratio.portrait" },
+        { "value": "landscape", "label": "t:options.image_ratio.landscape" },
+        { "value": "wide", "label": "t:options.image_ratio.wide" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "fit",
+      "label": "t:labels.image_fit",
+      "default": "cover",
+      "visible_if": "{{ block.settings.ratio != 'adapt' }}",
+      "options": [
+        { "value": "cover", "label": "t:options.image_fit.cover" },
+        { "value": "contain", "label": "t:options.image_fit.contain" }
+      ]
+    },
+
+    { "type": "header", "content": "t:general.borders" },
+    {
+      "type": "range",
+      "id": "corner_radius",
+      "label": "t:labels.corner_radius",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.image"
+    }
+  ]
+}
+{% endschema %}

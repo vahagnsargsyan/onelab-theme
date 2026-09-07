@@ -208,6 +208,33 @@ Mobile: Mobile Safari (latest 2, iOS), Chrome Mobile (latest 3, Android + iOS),
 Samsung Internet (latest 2, Android).
 Webviews: Instagram, Facebook, Pinterest — latest release, Android + iOS.
 
+## Theme conventions (Onelab)
+
+These are project rules on top of the Theme Store requirements. Treat a
+violation the same way as a requirement violation: flag it, don't ship it.
+
+- **Every section uses the shared layout.** The root element is rendered with
+  `{% render 'layout-style', s: section.settings, class: '...' %}`, followed by
+  `{% render 'layout-background', s: section.settings %}`, with blocks wrapped
+  in `.layout__content > .layout__blocks`. The section's schema includes the
+  canonical settings JSON from the `{% doc %}` block of
+  `snippets/layout-style.liquid`, verbatim. Sections own no layout, padding,
+  border, background, or color-scheme CSS of their own —
+  `sections/custom-section.liquid` is the reference.
+- **Change shared settings in one place.** Edit the canonical JSON in
+  `layout-style.liquid` first, then propagate to every section. Schemas cannot
+  include each other, so this is a manual sync — grep for `"id": "padding_top"`
+  to find every copy.
+- **Sections read custom properties, never `settings.*`.** Typography comes from
+  `--text-{style}-*`, colors from `--color-*`, layout from `--layout-*`. A section
+  reading `settings.h1_size` directly is a bug.
+- **Text is one block.** Headings, subheadings, and paragraphs all use
+  `blocks/text.liquid` with the Preset setting; do not add separate heading or
+  paragraph blocks. The visual preset and the HTML tag stay independent settings.
+- **Every section accepts `@theme` and `@app` blocks.**
+- **Every new `t:` key lands in `locales/en.default.schema.json` in the same
+  change.** Theme check enforces this; don't leave it for later.
+
 ## Working agreement
 
 1. Before writing code for a template or feature, restate which requirements

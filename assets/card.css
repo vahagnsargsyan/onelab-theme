@@ -1,0 +1,106 @@
+/**
+ * Product card. Loaded by any section that renders snippets/product-card.liquid.
+ *
+ * Ratio and fit come from the theme settings "Product cards" group via
+ * --card-image-ratio and --card-image-fit, set on the card itself.
+ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-width: 0;
+}
+
+.card__media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--card-radius, 0);
+}
+
+/*
+ * A fixed aspect-ratio is what keeps a grid of mixed-shape product photos from
+ * breaking. "Adapt to image" resolves to auto, where the intrinsic ratio wins.
+ */
+.card__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--card-image-ratio, 1 / 1);
+  object-fit: var(--card-image-fit, cover);
+}
+
+.card__placeholder {
+  background-color: var(--color-border);
+  fill: var(--color-background);
+}
+
+.card__badge {
+  position: absolute;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+  color: var(--color-background);
+  background-color: var(--color-foreground);
+  border-radius: var(--input-radius, 0);
+}
+
+.card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/*
+ * The title link stretches over the whole card so the entire card is clickable,
+ * while the accessible name stays the product title alone.
+ */
+.card__title {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card__title::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.card {
+  position: relative;
+}
+
+.card__title:focus-visible {
+  outline: none;
+}
+
+.card:has(.card__title:focus-visible) {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.card__vendor,
+.card__unit-price,
+.card__meta {
+  font-size: var(--text-h6-size);
+  opacity: 0.75;
+}
+
+.card__description {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.card__price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.card__price-compare {
+  opacity: 0.7;
+}
