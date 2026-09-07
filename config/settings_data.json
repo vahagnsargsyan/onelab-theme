@@ -9,6 +9,7 @@
  */
 {
   "current": {
+    "logo": "shopify://shop_images/Solea.svg",
     "social_instagram": "#",
     "social_facebook": "#",
     "social_x": "#",
@@ -72,6 +73,18 @@
           "secondary_button_label": "#ffffff",
           "borders": "#ffffff",
           "shadow": "#ffffff"
+        }
+      },
+      "scheme-04aa7079-9788-4d1c-80a2-e7ba6d2942f7": {
+        "settings": {
+          "background": "#00000000",
+          "background_gradient": "",
+          "text": "#171717",
+          "button": "#171717",
+          "button_label": "#ffffff",
+          "secondary_button_label": "#171717",
+          "borders": "#767676",
+          "shadow": "#171717"
         }
       }
     }
