@@ -165,6 +165,7 @@
     "products_per_page": "Products per page",
     "products_to_show": "Products to show",
     "profile_url": "Profile link",
+    "quick_add": "Quick add",
     "secondary_button_text": "Secondary button text",
     "secondary_image": "Overlapping image",
     "secondary_image_width": "Overlapping image width",
@@ -224,6 +225,7 @@
     "instagram_item_link": "Leave empty to use the profile link.",
     "instagram_not_a_feed": "Images are uploaded here, not pulled from Instagram. A live feed needs a third-party app.",
     "menu_position": "Search, account, cart, and the selectors fill whichever slot the logo and navigation leave free.",
+    "quick_add": "Adds single-variant products straight to the cart. Products with options link to the product page instead.",
     "secondary_image": "Sits beside the text, on the side away from the main image. Stacks below the text on mobile.",
     "show_instagram_icon": "Needs a profile link. Sits over the center of the row.",
     "show_read_more": "When hidden, the whole card links to the post instead.",
@@ -381,6 +383,10 @@
       "default": "Default",
       "paragraph": "Paragraph",
       "custom": "Custom"
+    },
+    "quick_add": {
+      "none": "None",
+      "icon": "Icon button"
     },
     "tag": {
       "p": "Paragraph",

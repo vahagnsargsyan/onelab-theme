@@ -944,6 +944,23 @@
     "settings": [
       {
         "type": "select",
+        "id": "card_quick_add",
+        "label": "t:labels.quick_add",
+        "info": "t:info.quick_add",
+        "default": "icon",
+        "options": [
+          {
+            "value": "none",
+            "label": "t:options.quick_add.none"
+          },
+          {
+            "value": "icon",
+            "label": "t:options.quick_add.icon"
+          }
+        ]
+      },
+      {
+        "type": "select",
         "id": "card_image_ratio",
         "label": "t:labels.image_ratio",
         "default": "portrait",

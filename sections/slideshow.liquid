@@ -105,20 +105,8 @@
           {%- endfor -%}
         </div>
 
-        {%- if s.show_dots and section.blocks.size > 1 -%}
-          <ul class="slider__dots slideshow__dots">
-            {%- for block in section.blocks -%}
-              <li>
-                <button
-                  type="button"
-                  class="slider__dot"
-                  data-slider-dot
-                  aria-label="{{ 'general.slideshow.go_to_slide' | t: index: forloop.index }}"
-                >
-                </button>
-              </li>
-            {%- endfor -%}
-          </ul>
+        {%- if s.show_dots -%}
+          {% render 'slider-dots', count: section.blocks.size %}
         {%- endif -%}
       </slider-carousel>
 
@@ -193,7 +181,7 @@
    * Dots sit vertically against the right edge on desktop, and drop below the
    * slide on narrow screens where there is no room beside it.
    */
-  .slideshow__dots {
+  .slideshow__carousel .slider__dots {
     position: absolute;
     inset-block-start: 50%;
     inset-inline-end: 0;
@@ -221,7 +209,7 @@
       width: auto;
     }
 
-    .slideshow__dots {
+    .slideshow__carousel .slider__dots {
       position: static;
       translate: none;
       flex-direction: row;

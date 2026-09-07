@@ -85,6 +85,55 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/*
+ * Quick add.
+ *
+ * Sits above the stretched title link on a `.card--linked` card. Unlike the
+ * article card's Read more — which goes to the same place as the card itself,
+ * so the stretch is simply dropped — this is a different action, so the card
+ * stays clickable and the button is raised over it.
+ */
+.card__quick-add {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: 0.75rem;
+  inset-inline-end: 0.75rem;
+}
+
+.card__add {
+  display: grid;
+  place-items: center;
+  /* 44px keeps the target well above the 24px minimum. */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--color-button-text);
+  background-color: var(--color-button);
+  border: var(--button-border-width) solid var(--color-button);
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.card__add svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.card__add:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.card__add[disabled] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+product-add.is-busy .card__add {
+  opacity: 0.6;
+}
+
 .card__excerpt {
   margin: 0;
   opacity: 0.85;

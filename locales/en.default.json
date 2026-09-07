@@ -67,7 +67,8 @@
     "slider": {
       "previous": "Previous",
       "next": "Next",
-      "label": "Slider"
+      "label": "Slider",
+      "go_to_slide": "Go to slide {{ index }}"
     },
     "pagination": {
       "label": "Pagination"
@@ -75,7 +76,6 @@
     "slideshow": {
       "label": "Slideshow",
       "slide": "Slide",
-      "go_to_slide": "Go to slide {{ index }}",
       "no_slides": "Add a slide to get started."
     },
     "instagram": {
@@ -128,7 +128,12 @@
       "on_sale": "Sale",
       "from_price_html": "From {{ price }}",
       "regular_price": "Regular price",
-      "unit_price_separator": "per"
+      "unit_price_separator": "per",
+      "add_to_cart_for": "Add {{ title }} to cart",
+      "choose_options_for": "Choose options for {{ title }}",
+      "sold_out_for": "{{ title }} is sold out",
+      "added": "{{ title }} added to cart",
+      "add_error": "Something went wrong. Please try again."
     }
   },
   "search": {

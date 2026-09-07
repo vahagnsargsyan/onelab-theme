@@ -15,6 +15,11 @@
   assign blog = s.blog
   assign limit = s.posts_to_show | default: 3
 
+  assign dot_count = blog.articles.size
+  if dot_count > limit
+    assign dot_count = limit
+  endif
+
   assign has_posts = false
   if blog.articles.size > 0
     assign has_posts = true
@@ -74,7 +79,10 @@
                 </li>
               {%- endfor -%}
             </ul>
-          </slider-carousel>
+
+            {% render 'slider-dots', count: dot_count %}
+    
+      </slider-carousel>
         {%- else -%}
           <ul class="layout__blocks blog-posts__grid list-unstyled">
             {%- for article in blog.articles limit: limit -%}
@@ -167,6 +175,8 @@
       ] },
     { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
     { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+{ "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": false,
       "visible_if": "{{ section.settings.use_slider }}" },
     { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
       "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",

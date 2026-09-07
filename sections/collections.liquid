@@ -11,6 +11,11 @@
 {% liquid
   assign s = section.settings
   assign per_page = s.collections_per_page | default: 12
+  assign dot_count = collections.size
+  if dot_count > per_page
+    assign dot_count = per_page
+  endif
+
   assign has_collections = false
   if collections.size > 0
     assign has_collections = true
@@ -58,7 +63,10 @@
                 </li>
               {%- endfor -%}
             </ul>
-          </slider-carousel>
+
+            {% render 'slider-dots', count: dot_count %}
+    
+      </slider-carousel>
         {%- else -%}
           {% paginate collections by per_page %}
             <ul class="layout__blocks collections__grid list-unstyled">
@@ -119,6 +127,8 @@
     { "type": "checkbox", "id": "show_product_count", "label": "t:labels.show_product_count", "default": false },
     { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
     { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+{ "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": false,
       "visible_if": "{{ section.settings.use_slider }}" },
 
     { "type": "header", "content": "t:general.layout" },

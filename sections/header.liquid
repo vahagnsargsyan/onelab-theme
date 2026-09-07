@@ -146,12 +146,20 @@
           <a href="{{ routes.cart_url }}" class="header__action">
             {{- 'icon-cart.svg' | inline_asset_content -}}
             <span class="visually-hidden">{{ 'cart.title' | t }}</span>
-            {%- if cart.item_count > 0 -%}
-              <span class="header__cart-count" aria-hidden="true">{{ cart.item_count }}</span>
-              <span class="visually-hidden">
-                {{- 'cart.item_count' | t: count: cart.item_count -}}
-              </span>
-            {%- endif -%}
+            {%- comment -%}
+              Always rendered, hidden at zero, so quick add has something to
+              update without having to build the element.
+            {%- endcomment -%}
+            <span
+              class="header__cart-count"
+              data-cart-count
+              aria-hidden="true"
+              {% if cart.item_count == 0 %}
+                hidden
+              {% endif %}
+            >
+              {{- cart.item_count -}}
+            </span>
           </a>
 
           <button
@@ -196,6 +204,12 @@
     %}
   </dialog>
 </site-header>
+
+{%- comment -%}
+  Shared live region. Quick add speaks through this, so a customer using a
+  screen reader hears that something reached the cart.
+{%- endcomment -%}
+<p class="visually-hidden" role="status" aria-live="polite" data-cart-status></p>
 
 {%- comment -%}
   A fixed header is out of flow, so the page needs the height back. Not when it

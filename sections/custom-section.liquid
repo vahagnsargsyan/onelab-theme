@@ -9,6 +9,8 @@
 
 {% liquid
   assign s = section.settings
+  assign dot_count = section.blocks.size
+
 %}
 
 {%- if s.use_slider -%}
@@ -36,6 +38,8 @@
         >
           {% content_for 'blocks' %}
         </div>
+
+        {% render 'slider-dots', count: dot_count %}
       </slider-carousel>
     {%- else -%}
       <div class="layout__blocks">
@@ -60,6 +64,8 @@
       ] },
     { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
     { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+{ "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": false,
       "visible_if": "{{ section.settings.use_slider }}" },
     { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
       "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",

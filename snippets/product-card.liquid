@@ -26,6 +26,11 @@
     assign loading = 'eager'
   endif
 
+  assign quick_add = false
+  if settings.card_quick_add == 'icon'
+    assign quick_add = true
+  endif
+
   assign ratio = settings.card_image_ratio
   case ratio
     when 'square'
@@ -70,6 +75,48 @@
     {%- elsif on_sale -%}
       <span class="card__badge">{{ 'products.card.on_sale' | t }}</span>
     {%- endunless -%}
+
+    {%- if quick_add -%}
+      <div class="card__quick-add">
+        {%- if product.available == false -%}
+          <button type="button" class="card__add" disabled>
+            {{- 'icon-bag-add.svg' | inline_asset_content -}}
+            <span class="visually-hidden">
+              {{- 'products.card.sold_out_for' | t: title: product.title -}}
+            </span>
+          </button>
+
+        {%- elsif product.variants.size > 1 -%}
+          {%- comment -%}
+            More than one variant means a choice the theme cannot make. Link to
+            the product page rather than silently adding an arbitrary variant.
+          {%- endcomment -%}
+          <a href="{{ product.url }}" class="card__add">
+            {{- 'icon-bag-add.svg' | inline_asset_content -}}
+            <span class="visually-hidden">
+              {{- 'products.card.choose_options_for' | t: title: product.title -}}
+            </span>
+          </a>
+
+        {%- else -%}
+          <product-add
+            data-added-message="{{ 'products.card.added' | t: title: product.title | escape }}"
+            data-error-message="{{ 'products.card.add_error' | t | escape }}"
+          >
+            <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data">
+              <input type="hidden" name="id" value="{{ variant.id }}">
+              <input type="hidden" name="quantity" value="1">
+              <button type="submit" class="card__add" data-cart-add-button>
+                {{- 'icon-bag-add.svg' | inline_asset_content -}}
+                <span class="visually-hidden">
+                  {{- 'products.card.add_to_cart_for' | t: title: product.title -}}
+                </span>
+              </button>
+            </form>
+          </product-add>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
   </div>
 
   <div class="card__content">

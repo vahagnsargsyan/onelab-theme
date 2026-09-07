@@ -12,6 +12,11 @@
 {% liquid
   assign s = section.settings
   assign per_page = s.products_per_page | default: 12
+  assign dot_count = collection.products.size
+  if dot_count > per_page
+    assign dot_count = per_page
+  endif
+
   assign has_products = false
   if collection.products.size > 0
     assign has_products = true
@@ -19,6 +24,9 @@
 %}
 
 {{ 'card.css' | asset_url | stylesheet_tag }}
+{%- if settings.card_quick_add != 'none' -%}
+  <script src="{{ 'cart-add.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
 {%- if s.use_slider -%}
   {{ 'slider.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
@@ -58,7 +66,10 @@
                 </li>
               {%- endfor -%}
             </ul>
-          </slider-carousel>
+
+            {% render 'slider-dots', count: dot_count %}
+    
+      </slider-carousel>
         {%- else -%}
           {% paginate collection.products by per_page %}
             <ul class="layout__blocks collection__grid list-unstyled">
@@ -113,6 +124,8 @@
     { "type": "checkbox", "id": "show_description", "label": "t:labels.show_collection_description", "default": true },
     { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
     { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+{ "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": false,
       "visible_if": "{{ section.settings.use_slider }}" },
 
     { "type": "header", "content": "t:general.layout" },
