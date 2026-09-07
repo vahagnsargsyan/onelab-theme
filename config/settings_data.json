@@ -20,7 +20,7 @@
           "background": "#ffffff",
           "background_gradient": "",
           "text": "#171717",
-          "button": "#171717",
+          "button": "#19392D",
           "button_label": "#ffffff",
           "secondary_button_label": "#171717",
           "borders": "#767676",
@@ -77,7 +77,7 @@
       },
       "scheme-04aa7079-9788-4d1c-80a2-e7ba6d2942f7": {
         "settings": {
-          "background": "#00000000",
+          "background": "rgba(0,0,0,0)",
           "background_gradient": "",
           "text": "#171717",
           "button": "#171717",
