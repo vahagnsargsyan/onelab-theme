@@ -81,7 +81,7 @@
         "show_description": false,
         "show_product_count": false,
         "use_slider": true,
-        "slider_loop": false,
+        "slider_loop": true,
         "display": "grid",
         "direction": "vertical",
         "columns": 3,
