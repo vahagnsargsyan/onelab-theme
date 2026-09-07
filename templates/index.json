@@ -177,12 +177,93 @@
         "padding_left": 0,
         "padding_right": 0
       }
+    },
+    "instagram_gallery_ik3zCD": {
+      "type": "instagram-gallery",
+      "blocks": {
+        "image_item_C87VQR": {
+          "type": "image_item",
+          "settings": {
+            "image": "shopify://shop_images/image_11.png",
+            "link": ""
+          }
+        },
+        "image_item_nWBXwm": {
+          "type": "image_item",
+          "settings": {
+            "image": "shopify://shop_images/anastasia-anastasia-cTM8psdeOTQ-unsplash_1.png",
+            "link": ""
+          }
+        },
+        "image_item_MC47Cd": {
+          "type": "image_item",
+          "settings": {
+            "image": "shopify://shop_images/image_56.png",
+            "link": ""
+          }
+        },
+        "image_item_kzLXNY": {
+          "type": "image_item",
+          "settings": {
+            "image": "shopify://shop_images/r-g-90rlvUZ3fQ4-unsplash_1.png",
+            "link": ""
+          }
+        },
+        "image_item_hGAFeN": {
+          "type": "image_item",
+          "settings": {
+            "image": "shopify://shop_images/hero_image.png",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "image_item_C87VQR",
+        "image_item_nWBXwm",
+        "image_item_MC47Cd",
+        "image_item_kzLXNY",
+        "image_item_hGAFeN"
+      ],
+      "name": "t:general.instagram",
+      "settings": {
+        "subheading": "Join us",
+        "heading": "@Soléa",
+        "profile_url": "",
+        "show_icon": true,
+        "stagger": true,
+        "stagger_offset": 40,
+        "display": "flex",
+        "use_slider": false,
+        "slider_loop": false,
+        "direction": "horizontal",
+        "columns": 5,
+        "columns_mobile": "2",
+        "alignment": "center",
+        "position": "top",
+        "gap": 20,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "scheme-1",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 60,
+        "padding_bottom": 60,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
     "slideshow_F68c7G",
     "collections_A8Kaxc",
     "featured_products_MczVn9",
-    "blog_posts_kpKz4n"
+    "blog_posts_kpKz4n",
+    "instagram_gallery_ik3zCD"
   ]
 }
