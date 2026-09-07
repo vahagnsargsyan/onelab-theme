@@ -9,12 +9,106 @@
  */
 {
   "sections": {
-    "main": {
-      "type": "hello-world",
-      "settings": {}
+    "slideshow_F68c7G": {
+      "type": "slideshow",
+      "blocks": {
+        "slide_xhV8M3": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/hero_image.png",
+            "image_position": "left",
+            "heading": "Timeless Elegance in Every Detail",
+            "text": "<p>Discover handcrafted jewelry designed to bring effortless beauty to your everyday style.</p>",
+            "button_label": "Shop now",
+            "button_link": ""
+          }
+        },
+        "slide_3AyfHK": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/hero_image.png",
+            "image_position": "left",
+            "heading": "Timeless Elegance in Every Detail",
+            "text": "<p>Discover handcrafted jewelry designed to bring effortless beauty to your everyday style.</p>",
+            "button_label": "Shop now",
+            "button_link": ""
+          }
+        },
+        "slide_GcWTiA": {
+          "type": "slide",
+          "settings": {
+            "image": "shopify://shop_images/hero_image.png",
+            "image_position": "left",
+            "heading": "Timeless Elegance in Every Detail",
+            "text": "<p>Discover handcrafted jewelry designed to bring effortless beauty to your everyday style.</p>",
+            "button_label": "Shop now",
+            "button_link": ""
+          }
+        }
+      },
+      "block_order": [
+        "slide_xhV8M3",
+        "slide_3AyfHK",
+        "slide_GcWTiA"
+      ],
+      "name": "t:general.slideshow",
+      "settings": {
+        "show_dots": true,
+        "slider_loop": true,
+        "width": "page",
+        "height": "full",
+        "color_scheme": "scheme-87f1c7af-f3b8-4666-9107-e6eefca1b7cf",
+        "background_media": "image",
+        "background_image": "shopify://shop_images/bacground_img.png",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "padding_left": 0,
+        "padding_right": 0
+      }
+    },
+    "collections_A8Kaxc": {
+      "type": "collections",
+      "name": "t:general.collections_grid",
+      "settings": {
+        "collections_per_page": 12,
+        "show_description": false,
+        "show_product_count": false,
+        "use_slider": false,
+        "slider_loop": false,
+        "display": "grid",
+        "direction": "vertical",
+        "columns": 3,
+        "columns_mobile": "1",
+        "alignment": "left",
+        "position": "top",
+        "gap": 16,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
-    "main"
+    "slideshow_F68c7G",
+    "collections_A8Kaxc"
   ]
 }
