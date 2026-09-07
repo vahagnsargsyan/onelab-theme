@@ -1,0 +1,44 @@
+{% doc %}
+  Social media links, driven entirely by the theme settings "Social media" group.
+
+  A platform renders only when the merchant has filled in its URL — the defaults
+  are empty on purpose, since the Theme Store forbids shipping placeholder social
+  links. Each link carries a visible-to-screen-readers name; the icon alone is
+  not an accessible name.
+
+  @example
+  {% render 'social-icons' %}
+{% enddoc %}
+
+{%- liquid
+  assign platforms = 'instagram,facebook,x,tiktok,pinterest,youtube,linkedin' | split: ','
+  assign has_any = false
+  for platform in platforms
+    assign key = 'social_' | append: platform
+    if settings[key] != blank
+      assign has_any = true
+      break
+    endif
+  endfor
+-%}
+
+{%- if has_any -%}
+  <ul class="social list-unstyled">
+    {%- for platform in platforms -%}
+      {%- liquid
+        assign key = 'social_' | append: platform
+        assign url = settings[key]
+        assign icon = 'icon-' | append: platform | append: '.svg'
+        assign name_key = 'general.social.' | append: platform
+      -%}
+      {%- if url != blank -%}
+        <li>
+          <a href="{{ url }}" class="social__link" target="_blank" rel="noopener">
+            {{- icon | inline_asset_content -}}
+            <span class="visually-hidden">{{ name_key | t }}</span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+{%- endif -%}

@@ -85,7 +85,24 @@
     "navigation": {
       "primary": "Primary",
       "open_menu": "Open menu",
-      "close_menu": "Close menu"
+      "close_menu": "Close menu",
+      "legal": "Legal"
+    },
+    "newsletter": {
+      "label": "Email",
+      "placeholder": "Email address",
+      "submit": "Subscribe",
+      "success": "Thanks for subscribing."
+    },
+    "payment_methods": "Payment methods",
+    "social": {
+      "instagram": "Instagram",
+      "facebook": "Facebook",
+      "x": "X",
+      "tiktok": "TikTok",
+      "pinterest": "Pinterest",
+      "youtube": "YouTube",
+      "linkedin": "LinkedIn"
     }
   },
   "gift_card": {
