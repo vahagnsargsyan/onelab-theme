@@ -25,6 +25,8 @@
         "transparent_scrim": true,
         "color_scheme": "scheme-04aa7079-9788-4d1c-80a2-e7ba6d2942f7",
         "show_search": true,
+        "search_style": "drawer",
+        "search_results_count": 6,
         "show_country": true,
         "show_language": true
       }
