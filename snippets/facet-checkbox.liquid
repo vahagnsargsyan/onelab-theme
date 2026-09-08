@@ -1,0 +1,27 @@
+{% doc %}
+  One filter value, as a checkbox.
+
+  Shared by list and boolean filters so the two never drift apart.
+
+  @param {object} value - A `filter_value`.
+
+  @example
+  {% render 'facet-checkbox', value: value %}
+{% enddoc %}
+
+<label class="facet__item">
+  <input
+    type="checkbox"
+    class="facet__checkbox"
+    name="{{ value.param_name }}"
+    value="{{ value.value }}"
+    {% if value.active %}checked{% endif %}
+    {%- comment -%}
+      A value that would return nothing is disabled rather than hidden, so the
+      list does not reshuffle under the customer as they tick boxes. An active
+      one stays enabled — it has to be possible to untick it.
+    {%- endcomment -%}
+    {% if value.count == 0 and value.active == false %}disabled{% endif %}
+  >
+  <span class="facet__label">{{ value.label }}</span>
+</label>

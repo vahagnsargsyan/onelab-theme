@@ -50,7 +50,9 @@
     {%- if s.use_slider -%}
         </div>
 
-        {% render 'slider-dots', count: dot_count %}
+        {%- if s.show_dots -%}
+          {% render 'slider-dots', count: dot_count %}
+        {%- endif -%}
       </slider-carousel>
     {%- else -%}
       </div>

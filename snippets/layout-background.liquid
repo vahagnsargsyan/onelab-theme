@@ -6,17 +6,30 @@
   chosen in the theme editor. Video autoplays muted; reduced-motion hides it.
 
   @param {object} s - `section.settings` or `block.settings`.
+  @param {object} [image] - An image to use instead of the Background image
+    setting, for a section whose background comes from a resource — the
+    collection banner uses `collection.image`. Blank falls back to the setting.
 
   @example
   {% render 'layout-background', s: section.settings %}
 {% enddoc %}
 
 {%- liquid
-  assign image = s.background_image
   assign video = s.background_video
+
+  assign media = s.background_media
+  if image != blank
+    comment
+      A passed image is the section saying "use this", so it does not also have
+      to set Background media to Image to be shown.
+    endcomment
+    assign media = 'image'
+  else
+    assign image = s.background_image
+  endif
 -%}
 
-{%- if s.background_media == 'image' and image != blank -%}
+{%- if media == 'image' and image != blank -%}
   {%- liquid
     assign focal = image.presentation.focal_point | default: 'center center'
     assign focal_style = 'object-position: ' | append: focal | append: ';'
@@ -35,7 +48,7 @@
         style: focal_style
     }}
   </div>
-{%- elsif s.background_media == 'video' and video != blank -%}
+{%- elsif media == 'video' and video != blank -%}
   <div class="layout__background">
     {{
       video

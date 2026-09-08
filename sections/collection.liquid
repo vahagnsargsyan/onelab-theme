@@ -1,6 +1,15 @@
 {% comment %}
-  Collection template. Renders the collection header and its products, either as
-  a grid or as a scroll-snap slider.
+  Collection product listing: toolbar, filters, grid, pagination.
+
+  The collection title and hero live in sections/collection-banner.liquid, so
+  this section is only the listing and can be reordered or restyled on its own.
+
+  Filtering and sorting are one GET form. Every control carries the parameter
+  name Shopify expects, so the page filters correctly with no script at all;
+  assets/facets.js then intercepts the submit and swaps the results in place
+  through the Section Rendering API. The sort control sits in the toolbar rather
+  than the drawer and joins the form with a `form` attribute — the same form,
+  two places on the page.
 
   Layout, size, appearance, borders, and padding come from the shared snippets.
   The slider reuses the shared Columns settings as items per view, so a merchant
@@ -12,20 +21,55 @@
 {% liquid
   assign s = section.settings
   assign per_page = s.products_per_page | default: 12
+  assign form_id = 'facets-' | append: section.id
+
   assign dot_count = collection.products.size
   if dot_count > per_page
     assign dot_count = per_page
   endif
 
-  assign has_products = false
-  if collection.products.size > 0
-    assign has_products = true
+  comment
+    Filters are set up in the store's search and discovery settings. With none
+    set up the list is empty and the whole drawer disappears — the theme never
+    depends on that being configured.
+  endcomment
+  assign has_filters = false
+  if s.show_filters and collection.filters.size > 0
+    assign has_filters = true
+  endif
+
+  assign filters_active = false
+  for filter in collection.filters
+    if filter.active_values.size > 0 or filter.min_value.value or filter.max_value.value
+      assign filters_active = true
+    endif
+  endfor
+
+  assign sort = collection.sort_by | default: collection.default_sort_by
+
+  comment
+    The roomy view is half the configured column count, so the toggle always
+    means something whatever the merchant set. It never drops below one.
+  endcomment
+  assign columns = s.columns | default: 4
+  assign roomy = columns | divided_by: 2
+  if roomy < 1
+    assign roomy = 1
+  endif
+
+  assign show_toolbar = false
+  if s.show_view_toggle or s.show_sorting or has_filters
+    assign show_toolbar = true
   endif
 %}
 
 {{ 'card.css' | asset_url | stylesheet_tag }}
+{{ 'collection.css' | asset_url | stylesheet_tag }}
 {%- if settings.card_quick_add != 'none' -%}
   <script src="{{ 'cart-add.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+{%- if has_filters or s.show_sorting -%}
+  <script src="{{ 'facets.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 {%- if s.use_slider -%}
   {{ 'slider.css' | asset_url | stylesheet_tag }}
@@ -36,92 +80,170 @@
   {% render 'layout-background', s: section.settings %}
 
   <div class="layout__content">
-    <div class="collection__inner">
-      <header class="collection__header">
-        <h1 class="collection__title">{{ collection.title }}</h1>
+    <facet-filters
+      class="collection__inner"
+      data-section-id="{{ section.id }}"
+      style="--columns-roomy: repeat({{ roomy }}, minmax(0, 1fr));"
+    >
+      {%- if show_toolbar -%}
+        <div class="collection__toolbar">
+          {%- if s.show_view_toggle -%}
+            {%- comment -%}
+              Two radios and a :has() rule — the density toggle needs no script,
+              keeps its keyboard semantics, and cannot get out of step with what
+              is on screen.
+            {%- endcomment -%}
+            <fieldset class="density">
+              <legend class="visually-hidden">{{ 'collections.view.label' | t }}</legend>
 
-        {%- if s.show_description and collection.description != blank -%}
-          <div class="collection__description rte">{{ collection.description }}</div>
-        {%- endif -%}
-      </header>
+              <label class="density__option">
+                <input
+                  type="radio"
+                  class="visually-hidden density__input"
+                  name="density-{{ section.id }}"
+                  value="roomy"
+                  data-density="roomy"
+                >
+                <span class="density__icon">{{ 'icon-grid-roomy.svg' | inline_asset_content }}</span>
+                <span class="visually-hidden">{{ 'collections.view.option' | t: count: roomy }}</span>
+              </label>
 
-      {%- if has_products -%}
-        {%- if s.use_slider -%}
-          <slider-carousel
-            class="slider"{% if s.slider_loop %} loop{% endif %}
-            style="--slider-per-view: {{ s.columns | default: 4 }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 1 }};"
-          >
-            {% render 'slider-controls' %}
+              <label class="density__option">
+                <input
+                  type="radio"
+                  class="visually-hidden density__input"
+                  name="density-{{ section.id }}"
+                  value="dense"
+                  data-density="dense"
+                  checked
+                >
+                <span class="density__icon">{{ 'icon-grid-dense.svg' | inline_asset_content }}</span>
+                <span class="visually-hidden">{{ 'collections.view.option' | t: count: columns }}</span>
+              </label>
+            </fieldset>
+          {%- endif -%}
 
-            <ul
-              class="slider__track list-unstyled"
-              data-slider-track
-              tabindex="0"
-              role="region"
-              aria-label="{{ collection.title | escape }}"
-            >
-              {%- for product in collection.products limit: per_page -%}
-                <li>
-                  {% render 'product-card', product: product, index: forloop.index0 %}
-                </li>
-              {%- endfor -%}
-            </ul>
+          <div class="collection__tools">
+            {%- if s.show_sorting -%}
+              <div class="sort">
+                <label class="visually-hidden" for="sort-{{ section.id }}">
+                  {{- 'collections.sort.label' | t -}}
+                </label>
+                <select
+                  id="sort-{{ section.id }}"
+                  class="sort__select"
+                  name="sort_by"
+                  form="{{ form_id }}"
+                  data-facet-sort
+                >
+                  {%- for option in collection.sort_options -%}
+                    <option value="{{ option.value }}" {% if option.value == sort %}selected{% endif %}>
+                      {{- option.name -}}
+                    </option>
+                  {%- endfor -%}
+                </select>
+                {{ 'icon-caret.svg' | inline_asset_content }}
 
-            {% render 'slider-dots', count: dot_count %}
-    
-      </slider-carousel>
-        {%- else -%}
-          {% paginate collection.products by per_page %}
-            <ul class="layout__blocks collection__grid list-unstyled">
-              {%- for product in collection.products -%}
-                <li>
-                  {% render 'product-card', product: product, index: forloop.index0 %}
-                </li>
-              {%- endfor -%}
-            </ul>
-
-            {%- if paginate.pages > 1 -%}
-              <nav class="collection__pagination" aria-label="{{ 'general.pagination.label' | t }}">
-                {{ paginate | default_pagination }}
-              </nav>
+                {%- comment -%}
+                  With the script running, changing the select applies the sort.
+                  Without it, the customer needs something to press.
+                {%- endcomment -%}
+                <noscript>
+                  <button type="submit" form="{{ form_id }}" class="button button--small">
+                    {{- 'collections.sort.apply' | t -}}
+                  </button>
+                </noscript>
+              </div>
             {%- endif -%}
-          {% endpaginate %}
-        {%- endif -%}
-      {%- else -%}
-        <p class="collection__empty">{{ 'collections.empty' | t }}</p>
+
+            {%- if has_filters -%}
+              <button type="button" class="button button--secondary collection__filters" data-facet-open>
+                {{- 'collections.filters.open' | t -}}
+              </button>
+            {%- endif -%}
+          </div>
+        </div>
       {%- endif -%}
-    </div>
+
+      {%- if has_filters -%}
+        {% render 'facet-filters', results: collection, form_id: form_id %}
+      {%- elsif s.show_sorting -%}
+        {%- comment -%}
+          No filters, but the sort control still needs a form to belong to.
+        {%- endcomment -%}
+        <form id="{{ form_id }}" action="{{ collection.url }}" method="get" hidden data-facet-form></form>
+      {%- endif -%}
+
+      <div class="collection__results" data-facet-results>
+        {%- if collection.products.size > 0 -%}
+          {%- if s.use_slider -%}
+            <slider-carousel
+              class="slider"{% if s.slider_loop %} loop{% endif %}
+              style="--slider-per-view: {{ columns }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 1 }};"
+            >
+              {% render 'slider-controls' %}
+
+              <ul
+                class="slider__track list-unstyled"
+                data-slider-track
+                tabindex="0"
+                role="region"
+                aria-label="{{ collection.title | escape }}"
+              >
+                {%- for product in collection.products limit: per_page -%}
+                  <li>
+                    {% render 'product-card', product: product, index: forloop.index0 %}
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {%- if s.show_dots -%}
+                {% render 'slider-dots', count: dot_count %}
+              {%- endif -%}
+            </slider-carousel>
+          {%- else -%}
+            {% paginate collection.products by per_page %}
+              <ul class="layout__blocks collection__grid list-unstyled">
+                {%- for product in collection.products -%}
+                  <li>
+                    {% render 'product-card', product: product, index: forloop.index0 %}
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {% render 'pagination', paginate: paginate %}
+            {% endpaginate %}
+          {%- endif -%}
+
+        {%- elsif filters_active -%}
+          {%- comment -%}
+            "Nothing matches" and "nothing here yet" are different problems, and
+            only one of them has a way out.
+          {%- endcomment -%}
+          <div class="collection__empty">
+            <p>{{ 'collections.no_matches' | t }}</p>
+            <a href="{{ collection.url }}" class="button button--secondary" data-facet-clear>
+              {{- 'collections.filters.clear' | t -}}
+            </a>
+          </div>
+
+        {%- else -%}
+          <p class="collection__empty">{{ 'collections.empty' | t }}</p>
+        {%- endif -%}
+      </div>
+    </facet-filters>
   </div>
 </div>
 
-{% stylesheet %}
-  .collection__inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--section-spacing);
-    width: 100%;
-    min-width: 0;
-  }
-
-  .collection__header {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .collection__pagination {
-    display: flex;
-    justify-content: center;
-  }
-{% endstylesheet %}
-
 {% schema %}
 {
-  "name": "t:general.collection",
+  "name": "t:general.collection_products",
   "settings": [
     { "type": "header", "content": "t:general.products" },
     { "type": "range", "id": "products_per_page", "label": "t:labels.products_per_page", "min": 4, "max": 48, "step": 4, "default": 12 },
-    { "type": "checkbox", "id": "show_description", "label": "t:labels.show_collection_description", "default": true },
+    { "type": "checkbox", "id": "show_filters", "label": "t:labels.show_filters", "info": "t:info.show_filters", "default": true },
+    { "type": "checkbox", "id": "show_sorting", "label": "t:labels.show_sorting", "default": true },
+    { "type": "checkbox", "id": "show_view_toggle", "label": "t:labels.show_view_toggle", "info": "t:info.show_view_toggle", "default": true },
     { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
     { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
       "visible_if": "{{ section.settings.use_slider }}" },
@@ -143,7 +265,7 @@
         { "value": "horizontal", "label": "t:options.direction.horizontal" }
       ] },
     { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 4 },
-    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "2",
       "options": [
         { "value": "1", "label": "t:options.columns_mobile.one" },
         { "value": "2", "label": "t:options.columns_mobile.two" }
@@ -209,8 +331,8 @@
     { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.padding" },
-    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
-    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
     { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
     { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
   ]

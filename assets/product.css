@@ -55,26 +55,6 @@
   text-transform: var(--text-h6-case);
 }
 
-/* Breadcrumbs */
-
-.breadcrumbs__list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  font-size: var(--text-h6-size);
-}
-
-.breadcrumbs__list li + li::before {
-  content: '/';
-  margin-inline-end: 0.5rem;
-  opacity: 0.5;
-}
-
-.breadcrumbs a {
-  color: inherit;
-  opacity: 0.75;
-}
-
 /* Gallery */
 
 .gallery__grid {

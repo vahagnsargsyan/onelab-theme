@@ -1,0 +1,188 @@
+{% doc %}
+  The filter drawer for a product listing.
+
+  The drawer is a real GET form: every control carries the parameter name
+  Shopify expects, so Apply submits and filters the page with no script at all.
+  assets/facets.js then intercepts the submit and swaps the results in place.
+
+  Filters come from the store's search and discovery settings. When a store has
+  none set up, `results.filters` is empty and nothing here renders — the theme
+  never depends on that being configured.
+
+  @param {object} results - `collection` or `search`.
+  @param {string} form_id - Id for the form, so the sort control outside the
+    drawer can join it with a `form` attribute.
+  @param {string} [terms] - Search terms, preserved as a hidden `q` input.
+
+  @example
+  {% render 'facet-filters', results: collection, form_id: form_id %}
+{% enddoc %}
+
+{%- liquid
+  assign sort = results.sort_by | default: results.default_sort_by
+  assign clear_url = results.url | append: '?sort_by=' | append: sort
+  if terms != blank
+    assign encoded = terms | url_encode
+    assign clear_url = clear_url | append: '&q=' | append: encoded
+  endif
+-%}
+
+<dialog class="facets-dialog" aria-label="{{ 'collections.filters.title' | t }}" scroll-lock data-facet-dialog>
+  <form
+    id="{{ form_id }}"
+    class="facets-dialog__inner"
+    action="{{ results.url }}"
+    method="get"
+    data-facet-form
+  >
+    {%- if terms != blank -%}
+      <input type="hidden" name="q" value="{{ terms | escape }}">
+    {%- endif -%}
+
+    <header class="facets-dialog__head">
+      <h2 class="facets-dialog__title">{{ 'collections.filters.title' | t }}</h2>
+      <button type="button" class="facets-dialog__close" data-facet-close>
+        {{- 'icon-close.svg' | inline_asset_content -}}
+        <span class="visually-hidden">{{ 'collections.filters.close' | t }}</span>
+      </button>
+    </header>
+
+    <div class="facets-dialog__body">
+      {%- for filter in results.filters -%}
+        {%- comment -%}
+          <details> gives a group that opens and closes from the keyboard with
+          no script behind it. They start open, matching the design.
+        {%- endcomment -%}
+        <details class="facet" open>
+          <summary class="facet__head">
+            <span class="facet__name">{{ filter.label }}</span>
+            {{- 'icon-caret.svg' | inline_asset_content -}}
+          </summary>
+
+          <div class="facet__body">
+            {%- case filter.type -%}
+              {%- when 'price_range' -%}
+                {%- liquid
+                  assign currency = cart.currency.symbol
+                  assign bound_max = filter.range_max | money_without_currency | replace: ',', ''
+
+                  assign from_value = 0
+                  if filter.min_value.value
+                    assign from_value = filter.min_value.value | money_without_currency | replace: ',', ''
+                  endif
+
+                  assign to_value = bound_max
+                  if filter.max_value.value
+                    assign to_value = filter.max_value.value | money_without_currency | replace: ',', ''
+                  endif
+                -%}
+
+                {%- comment -%}
+                  The two sliders are the real controls — they carry the
+                  parameter names, so dragging one and pressing Apply filters
+                  the page without any script. The number fields mirror them;
+                  the script makes them editable, which is why they start
+                  read-only rather than looking editable and doing nothing.
+                {%- endcomment -%}
+                <price-range class="price-range" data-bound-min="0" data-bound-max="{{ bound_max }}">
+                  <div class="price-range__track">
+                    <input
+                      type="range"
+                      class="price-range__slider"
+                      name="{{ filter.min_value.param_name }}"
+                      value="{{ from_value }}"
+                      min="0"
+                      max="{{ bound_max }}"
+                      step="1"
+                      aria-label="{{ 'collections.filters.price_from' | t }}"
+                      data-price-from
+                    >
+                    <input
+                      type="range"
+                      class="price-range__slider"
+                      name="{{ filter.max_value.param_name }}"
+                      value="{{ to_value }}"
+                      min="0"
+                      max="{{ bound_max }}"
+                      step="1"
+                      aria-label="{{ 'collections.filters.price_to' | t }}"
+                      data-price-to
+                    >
+                  </div>
+
+                  <div class="price-range__fields">
+                    <label class="price-range__field">
+                      <span class="price-range__label">{{ 'collections.filters.from' | t }}</span>
+                      <span class="price-range__input">
+                        <span class="price-range__currency">{{ currency }}</span>
+                        <input type="number" value="{{ from_value }}" min="0" max="{{ bound_max }}" step="1" readonly data-price-from-text>
+                      </span>
+                    </label>
+
+                    <label class="price-range__field">
+                      <span class="price-range__label">{{ 'collections.filters.to' | t }}</span>
+                      <span class="price-range__input">
+                        <span class="price-range__currency">{{ currency }}</span>
+                        <input type="number" value="{{ to_value }}" min="0" max="{{ bound_max }}" step="1" readonly data-price-to-text>
+                      </span>
+                    </label>
+                  </div>
+                </price-range>
+
+              {%- when 'boolean' -%}
+                <div class="facet__list">
+                  {% render 'facet-checkbox', value: filter.true_value %}
+                  {% render 'facet-checkbox', value: filter.false_value %}
+                </div>
+
+              {%- else -%}
+                {%- if filter.presentation == 'swatch' -%}
+                  <div class="facet__swatches">
+                    {%- for value in filter.values -%}
+                      {%- liquid
+                        assign swatch = ''
+                        if value.swatch.image
+                          assign swatch_url = value.swatch.image | image_url: width: 80
+                          assign swatch = 'url(' | append: swatch_url | append: ') center / cover'
+                        elsif value.swatch.color
+                          assign swatch = value.swatch.color
+                        endif
+                      -%}
+                      <label class="facet__swatch-item">
+                        <input
+                          type="checkbox"
+                          class="visually-hidden"
+                          name="{{ value.param_name }}"
+                          value="{{ value.value }}"
+                          {% if value.active %}checked{% endif %}
+                          {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                        >
+                        <span class="facet__swatch" style="--swatch: {{ swatch }};" aria-hidden="true"></span>
+                        <span class="facet__tooltip" aria-hidden="true">{{ value.label }}</span>
+                        <span class="visually-hidden">{{ value.label }}</span>
+                      </label>
+                    {%- endfor -%}
+                  </div>
+                {%- else -%}
+                  <div class="facet__list">
+                    {%- for value in filter.values -%}
+                      {% render 'facet-checkbox', value: value %}
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+            {%- endcase -%}
+          </div>
+        </details>
+      {%- endfor -%}
+    </div>
+
+    <footer class="facets-dialog__foot">
+      <button type="submit" class="button facets-dialog__apply">
+        {{- 'collections.filters.apply' | t -}}
+      </button>
+      <a href="{{ clear_url }}" class="facets-dialog__clear" data-facet-clear>
+        {{- 'collections.filters.clear' | t -}}
+      </a>
+    </footer>
+  </form>
+</dialog>

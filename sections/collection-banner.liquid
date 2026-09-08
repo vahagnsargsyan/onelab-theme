@@ -1,0 +1,173 @@
+{% comment %}
+  Collection banner: the collection's own image as a hero, with breadcrumbs and
+  the collection title over it.
+
+  Split from the product listing the way Shopify's own templates split them, so
+  a merchant can reorder, restyle, or remove the hero without touching the grid.
+  The listing section carries no heading of its own, so this is where
+  `collection.title` lives.
+
+  Deviation from the canonical layout settings, per the rule in
+  snippets/layout-style.liquid: Display, Use slider, Direction, and the Columns
+  settings are omitted. A hero is a stack of three things — there is nothing to
+  lay out in a grid or scroll sideways. Alignment and Position stay, and are
+  what place the title over the image, so their `visible_if` conditions drop the
+  clauses that referenced the omitted settings.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/collection
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+
+  comment
+    Blank falls through to the shared Background image setting inside
+    layout-background, so this is one call rather than a branch.
+  endcomment
+  assign banner_image = ''
+  if s.use_collection_image
+    assign banner_image = collection.image
+  endif
+
+  comment
+    Alignment places the boxes; this makes the text inside them follow, so a
+    centered banner does not end up with a left-ragged description.
+  endcomment
+  assign text_align = s.alignment | default: 'center'
+%}
+
+<div {% render 'layout-style', s: section.settings, class: 'collection-banner full-width' %}>
+  {% render 'layout-background', s: section.settings, image: banner_image %}
+
+  <div class="layout__content">
+    <div class="layout__blocks collection-banner__inner" style="--banner-align: {{ text_align }};">
+      {%- if s.show_breadcrumbs -%}
+        {% render 'breadcrumbs' %}
+      {%- endif -%}
+
+      <h1
+        class="collection-banner__title"
+        {% render 'text-preset-style', preset: s.title_preset %}
+      >
+        {{- collection.title -}}
+      </h1>
+
+      {%- if s.show_description and collection.description != blank -%}
+        <div class="collection-banner__description rte">{{ collection.description }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  /*
+   * The banner runs full bleed, so its content needs the page margin that the
+   * content grid would otherwise have given it.
+   */
+  .collection-banner__inner {
+    padding-inline: var(--page-margin);
+    text-align: var(--banner-align, center);
+  }
+
+  .collection-banner__title {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  .collection-banner__description {
+    max-width: 60ch;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.collection_banner",
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "checkbox", "id": "use_collection_image", "label": "t:labels.use_collection_image", "info": "t:info.use_collection_image", "default": true },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "t:labels.show_breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_description", "label": "t:labels.show_collection_description", "default": false },
+    { "type": "select", "id": "title_preset", "label": "t:labels.preset", "default": "h1",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "center",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 12 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "full",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "medium",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": true },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 20,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ]
+}
+{% endschema %}

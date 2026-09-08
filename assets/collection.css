@@ -1,0 +1,474 @@
+/**
+ * Collection listing: toolbar, density toggle, filter drawer.
+ *
+ * The grid itself is the shared .layout__blocks, so nothing here sets columns
+ * except the density toggle, which overrides the one custom property the
+ * shared rule reads.
+ */
+
+.collection__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.collection__results {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.collection__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 1rem;
+}
+
+/* Toolbar */
+
+.collection__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 0.75rem;
+  border-block: 1px solid var(--color-border);
+}
+
+.collection__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-inline-start: auto;
+}
+
+.collection__filters {
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+}
+
+/*
+ * Density toggle.
+ *
+ * Two radios and a :has() rule — no script, so it cannot get out of step with
+ * what is on screen, and it keeps the keyboard behavior radios already have.
+ */
+.density {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.density__option {
+  display: grid;
+  place-items: center;
+  /* 24px is the smallest target the requirements allow; this clears it. */
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  opacity: 0.35;
+}
+
+.density__option:has(.density__input:checked) {
+  opacity: 1;
+}
+
+.density__option:has(.density__input:focus-visible) {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.density__icon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.collection__inner:has(.density__input[value='roomy']:checked) .collection__grid {
+  --layout-grid-columns: var(--columns-roomy);
+}
+
+@media (max-width: 749px) {
+  .collection__inner:has(.density__input[value='roomy']:checked) .collection__grid {
+    --layout-grid-columns-mobile: repeat(1, minmax(0, 1fr));
+  }
+}
+
+/* Sort */
+
+.sort {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort__select {
+  min-height: 44px;
+  /* Room for the caret sitting on top of the select. */
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  color: inherit;
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+  background-color: transparent;
+  border: var(--input-border-width) solid var(--color-border);
+  appearance: none;
+}
+
+.sort > svg {
+  position: absolute;
+  inset-inline-end: 0.75rem;
+  width: 0.9rem;
+  height: 0.9rem;
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+
+.sort__select:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Filter drawer */
+
+.facets-dialog {
+  width: min(26rem, 100%);
+  max-width: 100%;
+  height: 100%;
+  max-height: 100svh;
+  /* Pinned to the trailing edge, like the cart drawer. */
+  margin: 0 0 0 auto;
+  padding: 0;
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+  border: 0;
+}
+
+.facets-dialog::backdrop {
+  background-color: rgb(0 0 0 / 45%);
+}
+
+.facets-dialog__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100svh;
+}
+
+.facets-dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.facets-dialog__title {
+  margin: 0;
+  font-family: var(--text-h5-family);
+  font-size: var(--text-h5-size);
+}
+
+.facets-dialog__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.facets-dialog__close svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.facets-dialog__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding-inline: 1.25rem;
+}
+
+.facets-dialog__foot {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  padding: 1.25rem;
+}
+
+.facets-dialog__apply {
+  width: 100%;
+}
+
+.facets-dialog__clear {
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+}
+
+/* Filter group */
+
+.facet {
+  border-block-end: 1px solid var(--color-border);
+}
+
+.facet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 44px;
+  padding-block: 0.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Safari still paints its own marker without this. */
+.facet__head::-webkit-details-marker {
+  display: none;
+}
+
+.facet__head svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  transform: rotate(-90deg);
+}
+
+.facet[open] > .facet__head svg {
+  transform: rotate(90deg);
+}
+
+.facet__name {
+  font-family: var(--text-h6-family);
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+}
+
+.facet__body {
+  padding-block-end: 1rem;
+}
+
+.facet__list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.facet__item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 24px;
+  cursor: pointer;
+}
+
+.facet__item:has(.facet__checkbox:disabled) {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.facet__checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-foreground);
+}
+
+.facet__label {
+  font-size: var(--text-h6-size);
+}
+
+/* Swatches */
+
+.facet__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.facet__swatch-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  /* The visible dot is small, so the label carries the touch target. */
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.facet__swatch {
+  width: 16px;
+  height: 16px;
+  background: var(--swatch, var(--color-border));
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+}
+
+.facet__swatch-item:has(input:checked) .facet__swatch {
+  outline: 1px solid var(--color-foreground);
+  outline-offset: 2px;
+}
+
+.facet__swatch-item:has(input:focus-visible) .facet__swatch {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.facet__swatch-item:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.facet__tooltip {
+  position: absolute;
+  inset-block-end: calc(100% + 0.25rem);
+  z-index: 1;
+  padding: 0.15rem 0.5rem;
+  color: var(--color-background);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  background-color: var(--color-foreground);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s;
+}
+
+.facet__swatch-item:hover .facet__tooltip,
+.facet__swatch-item:has(input:focus-visible) .facet__tooltip {
+  opacity: 1;
+}
+
+/* Price range */
+
+.price-range {
+  display: grid;
+  gap: 1rem;
+  padding-block-start: 0.5rem;
+}
+
+/*
+ * Two sliders stacked on one track. Only the thumbs take pointer events, so
+ * whichever thumb is under the cursor is the one that moves.
+ */
+.price-range__track {
+  position: relative;
+  height: 1.5rem;
+}
+
+.price-range__slider {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  background: none;
+  appearance: none;
+  pointer-events: none;
+}
+
+.price-range__slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background-color: var(--color-border);
+}
+
+.price-range__slider::-moz-range-track {
+  height: 2px;
+  background-color: var(--color-border);
+}
+
+.price-range__slider::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-block-start: -6px;
+  background-color: var(--color-foreground);
+  border: 0;
+  border-radius: 50%;
+  appearance: none;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.price-range__slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background-color: var(--color-foreground);
+  border: 0;
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.price-range__slider:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.price-range__fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.price-range__field {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.price-range__label {
+  font-size: var(--text-h6-size);
+}
+
+.price-range__input {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  min-height: 44px;
+  padding-inline: 0.6rem;
+  border: var(--input-border-width) solid var(--color-border);
+}
+
+.price-range__input input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+.price-range__input input:focus-visible {
+  outline: none;
+}
+
+.price-range__input:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+@media (max-width: 749px) {
+  .collection__toolbar {
+    gap: 0.5rem;
+  }
+
+  .collection__tools {
+    width: 100%;
+  }
+
+  .sort {
+    flex: 1 1 auto;
+  }
+
+  .sort__select {
+    width: 100%;
+  }
+}

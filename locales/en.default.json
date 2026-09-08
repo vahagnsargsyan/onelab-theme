@@ -64,6 +64,26 @@
     "title": "Collections",
     "empty": "There are no products in this collection yet.",
     "empty_list": "There are no collections to show yet.",
+    "no_matches": "No products match the filters you chose.",
+    "filters": {
+      "title": "Filters",
+      "open": "Filters",
+      "close": "Close filters",
+      "apply": "Apply",
+      "clear": "Clear all",
+      "from": "From",
+      "to": "To",
+      "price_from": "Lowest price",
+      "price_to": "Highest price"
+    },
+    "sort": {
+      "label": "Sort by",
+      "apply": "Sort"
+    },
+    "view": {
+      "label": "Products per row",
+      "option": "Show {{ count }} products per row"
+    },
     "card": {
       "product_count": {
         "one": "{{ count }} product",
@@ -90,7 +110,9 @@
       "go_to_slide": "Go to slide {{ index }}"
     },
     "pagination": {
-      "label": "Pagination"
+      "label": "Pagination",
+      "previous": "Previous",
+      "next": "Next"
     },
     "slideshow": {
       "label": "Slideshow",

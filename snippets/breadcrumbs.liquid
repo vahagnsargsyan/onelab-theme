@@ -1,0 +1,44 @@
+{% doc %}
+  Breadcrumbs for the current page.
+
+  The trail is derived from `request.page_type` rather than passed in, so a
+  section only has to decide whether to show it, not what it should say.
+
+  @example
+  {% render 'breadcrumbs' %}
+{% enddoc %}
+
+<nav class="breadcrumbs" aria-label="{{ 'general.breadcrumbs' | t }}">
+  <ol class="breadcrumbs__list list-unstyled" role="list">
+    <li><a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a></li>
+
+    {%- case request.page_type -%}
+      {%- when 'product' -%}
+        {%- comment -%} Present only when the customer arrived from a collection. {%- endcomment -%}
+        {%- if collection -%}
+          <li><a href="{{ collection.url }}">{{ collection.title }}</a></li>
+        {%- endif -%}
+        <li><span aria-current="page">{{ product.title }}</span></li>
+
+      {%- when 'collection' -%}
+        <li><a href="{{ routes.collections_url }}">{{ 'collections.title' | t }}</a></li>
+        <li><span aria-current="page">{{ collection.title }}</span></li>
+
+      {%- when 'list-collections' -%}
+        <li><span aria-current="page">{{ 'collections.title' | t }}</span></li>
+
+      {%- when 'article' -%}
+        <li><a href="{{ blog.url }}">{{ blog.title }}</a></li>
+        <li><span aria-current="page">{{ article.title }}</span></li>
+
+      {%- when 'blog' -%}
+        <li><span aria-current="page">{{ blog.title }}</span></li>
+
+      {%- when 'page' -%}
+        <li><span aria-current="page">{{ page.title }}</span></li>
+
+      {%- when 'search' -%}
+        <li><span aria-current="page">{{ 'search.title' | t }}</span></li>
+    {%- endcase -%}
+  </ol>
+</nav>

@@ -44,15 +44,7 @@
   <div class="layout__content">
 <div class="product product--gallery-{{ s.gallery_layout }}" style="--product-media-width: {{ media_track }};">
   {%- if s.show_breadcrumbs -%}
-    <nav class="breadcrumbs" aria-label="{{ 'general.breadcrumbs' | t }}">
-      <ol class="breadcrumbs__list list-unstyled" role="list">
-        <li><a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a></li>
-        {%- if collection -%}
-          <li><a href="{{ collection.url }}">{{ collection.title }}</a></li>
-        {%- endif -%}
-        <li><span aria-current="page">{{ product.title }}</span></li>
-      </ol>
-    </nav>
+    {% render 'breadcrumbs' %}
   {%- endif -%}
 
   <div class="product__layout">

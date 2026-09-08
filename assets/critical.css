@@ -268,6 +268,71 @@ h6 {
   padding: 0;
 }
 
+/*
+ * Breadcrumbs and pagination. Shared utilities: the product page, the
+ * collection banner, and every paginated listing use them, so they cannot live
+ * in one section's stylesheet.
+ */
+.breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: inherit;
+  gap: 0.5rem;
+  font-size: var(--text-h6-size);
+}
+
+.breadcrumbs__list li + li::before {
+  content: '/';
+  margin-inline-end: 0.5rem;
+  opacity: 0.5;
+}
+
+.breadcrumbs a {
+  color: inherit;
+  opacity: 0.75;
+}
+
+.pagination__list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.pagination__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  /* Comfortably past the 24px minimum target the requirements set. */
+  min-width: 34px;
+  min-height: 34px;
+  padding-inline: 0.5rem;
+  color: inherit;
+  font-size: var(--text-h6-size);
+  text-decoration: none;
+}
+
+.pagination__link.is-current {
+  color: var(--color-background);
+  background-color: var(--color-foreground);
+}
+
+.pagination__link svg {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.pagination__link--next svg {
+  transform: scaleX(-1);
+}
+
+.pagination__gap {
+  padding-inline: 0.35rem;
+  opacity: 0.5;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
