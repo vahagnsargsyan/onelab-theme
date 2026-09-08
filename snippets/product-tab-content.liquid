@@ -1,0 +1,21 @@
+{% doc %}
+  Resolves the body of one product tab.
+
+  The tab strip and the panels both need to know whether a tab has anything in
+  it, so the choice of source lives here rather than being written out twice.
+
+  @param {object} block - The `tab` block.
+  @param {object} product - The product the tab belongs to.
+
+  @example
+  {% capture body %}{% render 'product-tab-content', block: block, product: product %}{% endcapture %}
+{% enddoc %}
+
+{%- case block.settings.content -%}
+  {%- when 'description' -%}
+    {{- product.description -}}
+  {%- when 'page' -%}
+    {{- pages[block.settings.page].content -}}
+  {%- else -%}
+    {{- block.settings.text -}}
+{%- endcase -%}
