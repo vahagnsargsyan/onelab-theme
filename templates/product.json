@@ -71,7 +71,7 @@
             "heading": "Shipping",
             "content": "page",
             "text": "",
-            "page": "ring-premier"
+            "page": "shipping"
           }
         },
         "tab_return": {
@@ -80,7 +80,7 @@
             "heading": "Return",
             "content": "page",
             "text": "",
-            "page": ""
+            "page": "return"
           }
         }
       },
