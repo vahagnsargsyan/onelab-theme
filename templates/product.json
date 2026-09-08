@@ -100,7 +100,7 @@
       ],
       "settings": {
         "gallery_layout": "grid",
-        "media_width": "half",
+        "media_width": "two_thirds",
         "show_breadcrumbs": true,
         "tabs_alignment": "center",
         "tabs_preset": "default",
