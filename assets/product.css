@@ -1,0 +1,375 @@
+/** Product page: gallery, lightbox, variant picker, buy area. */
+
+.product {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-spacing);
+  padding-block: 1.5rem var(--section-spacing);
+}
+
+.product__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.product__info {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  /* Stays alongside a tall grid of images instead of scrolling away. */
+  position: sticky;
+  top: calc(var(--header-height, 0px) + 1rem);
+}
+
+.product__title {
+  margin: 0;
+}
+
+.product__label {
+  display: block;
+  margin: 0;
+  font-family: var(--text-h6-family);
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+}
+
+/* Breadcrumbs */
+
+.breadcrumbs__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: var(--text-h6-size);
+}
+
+.breadcrumbs__list li + li::before {
+  content: '/';
+  margin-inline-end: 0.5rem;
+  opacity: 0.5;
+}
+
+.breadcrumbs a {
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* Gallery */
+
+.gallery__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.gallery__stage {
+  position: relative;
+}
+
+.gallery__zoom {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: zoom-in;
+}
+
+.gallery__image,
+.gallery__media {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/*
+ * Mixed aspect ratios must not break the tiling, so every tile is square and
+ * the image fills it. The lightbox shows the full uncropped image.
+ */
+.gallery--grid .gallery__image {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.gallery__placeholder {
+  background-color: var(--color-border);
+  fill: var(--color-background);
+}
+
+.gallery__thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-block-start: 1rem;
+}
+
+.gallery__thumb {
+  width: 4.5rem;
+  padding: 0;
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.gallery__thumb img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.gallery__thumb[aria-current='true'] {
+  border-color: var(--color-foreground);
+}
+
+.gallery__zoom:focus-visible,
+.gallery__thumb:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Lightbox */
+
+.lightbox {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100svh;
+  padding: 0;
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+  border: 0;
+}
+
+.lightbox::backdrop {
+  background-color: rgb(0 0 0 / 80%);
+}
+
+.lightbox__stage {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 3rem 1rem 5rem;
+}
+
+.lightbox__item {
+  margin: 0;
+}
+
+.lightbox__image {
+  max-width: 100%;
+  max-height: 78svh;
+  width: auto;
+  object-fit: contain;
+}
+
+.lightbox__close {
+  position: absolute;
+  inset-block-start: 1rem;
+  inset-inline-end: 1rem;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  background: none;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.lightbox__controls {
+  position: absolute;
+  inset-block-end: 1rem;
+  inset-inline: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.lightbox__button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  background: none;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.lightbox__button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.lightbox__button--next svg {
+  transform: scaleX(-1);
+}
+
+.lightbox__close:focus-visible,
+.lightbox__button:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* Price */
+
+.price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.price__current {
+  font-family: var(--text-h4-family);
+  font-size: var(--text-h4-size);
+}
+
+.price__compare {
+  opacity: 0.6;
+}
+
+.price__badge {
+  padding: 0.15rem 0.4rem;
+  font-size: var(--text-h6-size);
+  background-color: var(--color-border);
+}
+
+.price__unit {
+  flex: 1 0 100%;
+  font-size: var(--text-h6-size);
+  opacity: 0.75;
+}
+
+/* Variant picker */
+
+.variant-picker {
+  display: grid;
+  gap: 1rem;
+}
+
+.variant-option {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.variant-option__label {
+  padding: 0;
+  margin-block-end: 0.4rem;
+  font-size: var(--text-h6-size);
+}
+
+.variant-option__select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  color: inherit;
+  background-color: transparent;
+  border: var(--input-border-width) solid var(--color-border);
+  border-radius: var(--input-radius);
+}
+
+.variant-option__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.variant-option__swatch {
+  display: block;
+  /* 44px keeps each swatch a comfortable target. */
+  width: 44px;
+  height: 44px;
+  background: var(--swatch, var(--color-border)) center / cover no-repeat;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+}
+
+.variant-option__input:checked + .variant-option__swatch {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 2px;
+}
+
+.variant-option__input:focus-visible + .variant-option__swatch {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.variant-option__input:disabled + .variant-option__swatch {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Inventory */
+
+.inventory {
+  margin: 0;
+  font-size: var(--text-h6-size);
+}
+
+.inventory--out {
+  opacity: 0.75;
+}
+
+.inventory__track {
+  height: 3px;
+  margin-block-start: 0.4rem;
+  overflow: hidden;
+  background-color: var(--color-border);
+}
+
+.inventory__fill {
+  height: 100%;
+  background-color: var(--color-foreground);
+}
+
+/* Buy */
+
+.product__buy form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.product__add {
+  width: 100%;
+}
+
+.product__recipient {
+  display: grid;
+  gap: 0.35rem;
+  margin-block-end: 0.5rem;
+}
+
+.product__recipient input,
+.product__recipient textarea {
+  min-height: 44px;
+  padding: 0.5rem;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: var(--input-border-width) solid var(--color-border);
+  border-radius: var(--input-radius);
+}
+
+.product__complementary {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (max-width: 989px) {
+  .product__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .product__info {
+    position: static;
+  }
+
+  .gallery__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

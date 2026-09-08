@@ -1,0 +1,323 @@
+{% comment %}
+  Product page.
+
+  Media on one side, an info column built from blocks on the other. Blocks are
+  local to this section because they are product-specific, and `@app` is among
+  them — the Theme Store requires app blocks in the main product section, with
+  Custom Liquid blocks as further insertion points.
+
+  Gallery layout is a setting: grid tiles every image, carousel shows one large
+  image with thumbnails. Both open the same lightbox.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/product
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+  assign variant = product.selected_or_first_available_variant
+%}
+
+{{ 'product.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+
+<div class="product product--gallery-{{ s.gallery_layout }}">
+  {%- if s.show_breadcrumbs -%}
+    <nav class="breadcrumbs" aria-label="{{ 'general.breadcrumbs' | t }}">
+      <ol class="breadcrumbs__list list-unstyled" role="list">
+        <li><a href="{{ routes.root_url }}">{{ 'general.home' | t }}</a></li>
+        {%- if collection -%}
+          <li><a href="{{ collection.url }}">{{ collection.title }}</a></li>
+        {%- endif -%}
+        <li><span aria-current="page">{{ product.title }}</span></li>
+      </ol>
+    </nav>
+  {%- endif -%}
+
+  <div class="product__layout">
+    <div class="product__media">
+      {% render 'product-media-gallery', product: product, layout: s.gallery_layout %}
+    </div>
+
+    <div class="product__info">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'title' -%}
+            <h1 class="product__title" {{ block.shopify_attributes }}>{{ product.title }}</h1>
+
+          {%- when 'price' -%}
+            <div class="product__price" data-product-price {{ block.shopify_attributes }}>
+              {% render 'product-price', variant: variant, show_badge: block.settings.show_badge %}
+            </div>
+
+          {%- when 'quantity' -%}
+            <div class="product__quantity" {{ block.shopify_attributes }}>
+              <label for="product-quantity" class="product__label">{{ 'products.quantity' | t }}</label>
+              <div class="quantity">
+                <button
+                  type="button"
+                  class="quantity__button"
+                  data-quantity-step="-1"
+                  aria-label="{{ 'products.decrease' | t }}"
+                >
+                  &minus;
+                </button>
+                <input
+                  id="product-quantity"
+                  class="quantity__input"
+                  type="number"
+                  name="quantity"
+                  form="product-form-{{ section.id }}"
+                  value="1"
+                  min="1"
+                  step="1"
+                  inputmode="numeric"
+                  data-quantity-input
+                >
+                <button
+                  type="button"
+                  class="quantity__button"
+                  data-quantity-step="1"
+                  aria-label="{{ 'products.increase' | t }}"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+          {%- when 'variant_picker' -%}
+            <div {{ block.shopify_attributes }}>
+              {% render 'product-variant-picker', product: product, block: block, section_id: section.id %}
+            </div>
+
+          {%- when 'description' -%}
+            <div class="product__description rte" {{ block.shopify_attributes }}>
+              {{ product.description }}
+            </div>
+
+          {%- when 'inventory' -%}
+            <div class="product__inventory" data-product-inventory {{ block.shopify_attributes }}>
+              {%- if variant.available -%}
+                <p class="inventory">{{ 'products.in_stock' | t }}</p>
+                {%- comment -%}
+                  A bar, not a number. Publishing exact stock counts is how
+                  themes drift into false-urgency territory; this only says
+                  "plenty" or "running low".
+                {%- endcomment -%}
+                {%- if variant.inventory_management != blank and variant.inventory_quantity > 0 -%}
+                  {%- liquid
+                    assign level = variant.inventory_quantity | times: 100 | divided_by: block.settings.inventory_threshold
+                    if level > 100
+                      assign level = 100
+                    endif
+                  -%}
+                  <div class="inventory__track" aria-hidden="true">
+                    <div class="inventory__fill" style="width: {{ level }}%;"></div>
+                  </div>
+                {%- endif -%}
+              {%- else -%}
+                <p class="inventory inventory--out">{{ 'products.sold_out' | t }}</p>
+              {%- endif -%}
+            </div>
+
+          {%- when 'buy_buttons' -%}
+            <div class="product__buy" data-product-buy {{ block.shopify_attributes }}>
+              <product-form
+                data-added-message="{{ 'products.card.added' | t: title: product.title | escape }}"
+                data-error-message="{{ 'products.card.add_error' | t | escape }}"
+              >
+                {%- comment -%}
+                  The id is built first. A filter inside a tag's arguments is
+                  not parsed as a filter — Liquid would read the appended string
+                  as the form type and reject it.
+                {%- endcomment -%}
+                {%- assign product_form_id = 'product-form-' | append: section.id -%}
+                {%- form 'product', product, id: product_form_id, novalidate: 'novalidate' -%}
+                  <input type="hidden" name="id" value="{{ variant.id }}">
+
+                  {%- if product.gift_card? -%}
+                    {%- comment -%}
+                      Gift cards must be able to carry a recipient, which is a
+                      Theme Store requirement in its own right.
+                    {%- endcomment -%}
+                    <div class="product__recipient">
+                      <label for="recipient-email">{{ 'products.gift_card.email' | t }}</label>
+                      <input id="recipient-email" type="email" name="properties[Recipient email]" autocomplete="email">
+
+                      <label for="recipient-name">{{ 'products.gift_card.name' | t }}</label>
+                      <input id="recipient-name" type="text" name="properties[Recipient name]">
+
+                      <label for="recipient-message">{{ 'products.gift_card.message' | t }}</label>
+                      <textarea id="recipient-message" name="properties[Message]" rows="3"></textarea>
+
+                      <label for="recipient-send-on">{{ 'products.gift_card.send_on' | t }}</label>
+                      <input id="recipient-send-on" type="date" name="properties[Send on]">
+                    </div>
+                  {%- endif -%}
+
+                  <button
+                    type="submit"
+                    name="add"
+                    class="button product__add"
+                    data-add-button
+                    {% unless variant.available %}
+                      disabled
+                    {% endunless %}
+                  >
+                    {%- if variant.available -%}
+                      {{ 'products.add_to_cart' | t }}
+                    {%- else -%}
+                      {{ 'products.sold_out' | t }}
+                    {%- endif -%}
+                  </button>
+
+                  {%- comment -%}
+                    Accelerated checkout, on by default. Branded colors are
+                    never restyled — the requirements forbid it.
+                  {%- endcomment -%}
+                  {%- if block.settings.show_dynamic_checkout -%}
+                    {{ form | payment_button }}
+                  {%- endif -%}
+
+                  {%- comment -%} Shop Pay Installments banner. {%- endcomment -%}
+                  {{ form | payment_terms }}
+                {%- endform -%}
+              </product-form>
+            </div>
+
+          {%- when 'pickup' -%}
+            {%- comment -%}
+              Rendered straight from `variant.store_availabilities`, so it needs
+              no script and is correct on first paint. product.js swaps this
+              block on a variant change along with price and availability.
+            {%- endcomment -%}
+            <div class="product__pickup" data-product-pickup {{ block.shopify_attributes }}>
+              {%- if variant.store_availabilities.size > 0 -%}
+                <ul class="pickup list-unstyled" role="list">
+                  {%- for availability in variant.store_availabilities -%}
+                    <li class="pickup__item">
+                      {%- if availability.available -%}
+                        {{ 'products.pickup.available_at_html' | t: location: availability.location.name }}
+                        {%- if availability.pick_up_time != blank -%}
+                          <span class="pickup__time">{{ availability.pick_up_time }}</span>
+                        {%- endif -%}
+                      {%- else -%}
+                        {{ 'products.pickup.unavailable_at_html' | t: location: availability.location.name }}
+                      {%- endif -%}
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+
+          {%- when 'complementary' -%}
+            <div class="product__complementary" {{ block.shopify_attributes }}>
+              <h2 class="product__label">{{ block.settings.heading }}</h2>
+              {%- comment -%}
+                Complementary products come from Shopify's recommendations with
+                intent "complementary", which is the Search & Discovery data —
+                not a hand-picked list, and not an app dependency.
+              {%- endcomment -%}
+              {% assign complementary_url = routes.product_recommendations_url
+                | append: '?section_id=' | append: section.id
+                | append: '&product_id=' | append: product.id
+                | append: '&limit=' | append: block.settings.limit
+                | append: '&intent=complementary'
+              %}
+              <div data-complementary data-url="{{ complementary_url }}"></div>
+            </div>
+
+          {%- when 'text' -%}
+            <div class="product__text rte" {{ block.shopify_attributes }}>
+              {{ block.settings.text }}
+            </div>
+
+          {%- when '@app' -%}
+            {% render block %}
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "t:general.product",
+  "blocks": [
+    { "type": "title", "name": "t:labels.title", "limit": 1 },
+    {
+      "type": "price",
+      "name": "t:general.price",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show_badge", "label": "t:labels.show_sale_badge", "default": true }
+      ]
+    },
+    { "type": "quantity", "name": "t:labels.quantity", "limit": 1 },
+    { "type": "variant_picker", "name": "t:general.variants", "limit": 1 },
+    { "type": "description", "name": "t:labels.description", "limit": 1 },
+    {
+      "type": "inventory",
+      "name": "t:general.inventory",
+      "limit": 1,
+      "settings": [
+        { "type": "range", "id": "inventory_threshold", "label": "t:labels.inventory_threshold", "info": "t:info.inventory_threshold", "min": 1, "max": 50, "step": 1, "default": 10 }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "t:general.buy_buttons",
+      "limit": 1,
+      "settings": [
+        { "type": "checkbox", "id": "show_dynamic_checkout", "label": "t:labels.show_dynamic_checkout", "info": "t:info.show_dynamic_checkout", "default": true }
+      ]
+    },
+    { "type": "pickup", "name": "t:general.pickup", "limit": 1 },
+    {
+      "type": "complementary",
+      "name": "t:general.complementary",
+      "limit": 1,
+      "settings": [
+        { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.pairs_well_with" },
+        { "type": "range", "id": "limit", "label": "t:labels.products_to_show", "min": 1, "max": 6, "step": 1, "default": 3 }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "t:general.text",
+      "settings": [
+        { "type": "richtext", "id": "text", "label": "t:labels.text" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "settings": [
+    { "type": "header", "content": "t:general.media" },
+    {
+      "type": "select",
+      "id": "gallery_layout",
+      "label": "t:labels.gallery_layout",
+      "default": "grid",
+      "options": [
+        { "value": "grid", "label": "t:options.gallery_layout.grid" },
+        { "value": "carousel", "label": "t:options.gallery_layout.carousel" }
+      ]
+    },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "t:labels.show_breadcrumbs", "default": true }
+  ],
+  "presets": [
+    {
+      "name": "t:general.product",
+      "blocks": [
+        { "type": "title" },
+        { "type": "price" },
+        { "type": "quantity" },
+        { "type": "variant_picker" },
+        { "type": "description" },
+        { "type": "inventory" },
+        { "type": "buy_buttons" },
+        { "type": "complementary" }
+      ]
+    }
+  ]
+}
+{% endschema %}

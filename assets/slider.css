@@ -21,7 +21,7 @@
   scroll-behavior: smooth;
   scrollbar-width: none;
   /* Room for the focus outline, which would otherwise be clipped by overflow. */
-  padding: var(--focus-ring-width, 2px);
+  /* padding: var(--focus-ring-width, 2px); */
   margin: calc(var(--focus-ring-width, 2px) * -1);
 }
 

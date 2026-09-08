@@ -1,0 +1,94 @@
+{% comment %}
+  Product recommendations — "You may also like".
+
+  Also serves the complementary block on the product page: that block fetches
+  this same section with `intent=complementary`, so both come from Shopify's
+  Search & Discovery data rather than a hand-picked list or an app.
+
+  https://shopify.dev/docs/storefronts/themes/product-merchandising/recommendations
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+  assign products = recommendations.products
+%}
+
+{{ 'card.css' | asset_url | stylesheet_tag }}
+{%- if settings.card_quick_add != 'none' -%}
+  <script src="{{ 'cart-add.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+{%- if recommendations.performed and products.size > 0 -%}
+  <div {% render 'layout-style', s: section.settings, class: 'recommendations full-width' %}>
+    <div class="layout__content">
+      <div class="recommendations__inner">
+        {%- if s.heading != blank -%}
+          <h2 class="recommendations__heading">{{ s.heading }}</h2>
+        {%- endif -%}
+
+        <ul class="layout__blocks list-unstyled" role="list">
+          {%- for product in products -%}
+            <li>{% render 'product-card', product: product, index: forloop.index0 %}</li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .recommendations__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-spacing);
+    width: 100%;
+    min-width: 0;
+  }
+
+  .recommendations__heading {
+    margin: 0;
+    text-align: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.recommendations",
+  "settings": [
+    { "type": "header", "content": "t:general.products" },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.you_may_also_like" },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
+      "options": [
+        { "value": "block", "label": "t:options.display.block" },
+        { "value": "flex", "label": "t:options.display.flex" },
+        { "value": "grid", "label": "t:options.display.grid" }
+      ] },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 4 },
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "2",
+      "options": [
+        { "value": "1", "label": "t:options.columns_mobile.one" },
+        { "value": "2", "label": "t:options.columns_mobile.two" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [{ "name": "t:general.recommendations" }]
+}
+{% endschema %}

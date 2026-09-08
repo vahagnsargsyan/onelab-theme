@@ -1,0 +1,56 @@
+{% doc %}
+  Price for one variant: current, compare-at, a percentage badge, and the unit
+  price when the variant carries a measurement.
+
+  Kept in a snippet because the product page, the quick view, and any future
+  featured-product section must show a price the same way.
+
+  @param {object} variant - Usually `product.selected_or_first_available_variant`.
+  @param {boolean} [show_badge] - Show the percentage-off badge.
+
+  @example
+  {% render 'product-price', variant: variant, show_badge: true %}
+{% enddoc %}
+
+{%- liquid
+  assign on_sale = false
+  if variant.compare_at_price > variant.price
+    assign on_sale = true
+    assign saved = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
+  endif
+-%}
+
+<div class="price{% if on_sale %} price--on-sale{% endif %}">
+  {%- if on_sale and show_badge -%}
+    <span class="price__badge">&minus;{{ saved }}%</span>
+  {%- endif -%}
+
+  {%- if on_sale -%}
+    <s class="price__compare">
+      <span class="visually-hidden">{{ 'products.price.regular' | t }}</span>
+      {{ variant.compare_at_price | money }}
+    </s>
+  {%- endif -%}
+
+  <span class="price__current">
+    <span class="visually-hidden">
+      {%- if on_sale -%}
+        {{ 'products.price.sale' | t }}
+      {%- else -%}
+        {{ 'products.price.regular' | t }}
+      {%- endif -%}
+    </span>
+    {{ variant.price | money }}
+  </span>
+
+  {%- if variant.unit_price_measurement -%}
+    <span class="price__unit">
+      {{ variant.unit_price | money }}
+      <span aria-hidden="true">/</span>
+      {%- if variant.unit_price_measurement.reference_value != 1 -%}
+        {{ variant.unit_price_measurement.reference_value }}
+      {%- endif -%}
+      {{ variant.unit_price_measurement.reference_unit }}
+    </span>
+  {%- endif -%}
+</div>

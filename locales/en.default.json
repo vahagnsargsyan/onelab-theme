@@ -122,7 +122,9 @@
       "pinterest": "Pinterest",
       "youtube": "YouTube",
       "linkedin": "LinkedIn"
-    }
+    },
+    "home": "Home",
+    "breadcrumbs": "Breadcrumbs"
   },
   "gift_card": {
     "add_to_apple_wallet": "Add to Apple Wallet",
@@ -153,6 +155,32 @@
       "sold_out_for": "{{ title }} is sold out",
       "added": "{{ title }} added to cart",
       "add_error": "Something went wrong. Please try again."
+    },
+    "quantity": "Quantity",
+    "increase": "Increase quantity",
+    "decrease": "Decrease quantity",
+    "add_to_cart": "Add to cart",
+    "sold_out": "Sold out",
+    "in_stock": "In stock, and ready to ship",
+    "unavailable": "Unavailable",
+    "price": {
+      "regular": "Regular price",
+      "sale": "Sale price"
+    },
+    "media": {
+      "zoom": "Open image in a larger view",
+      "close": "Close",
+      "show_item": "Show image {{ index }}"
+    },
+    "gift_card": {
+      "email": "Recipient email",
+      "name": "Recipient name",
+      "message": "Message",
+      "send_on": "Send on"
+    },
+    "pickup": {
+      "available_at_html": "Pickup available at {{ location }}",
+      "unavailable_at_html": "Pickup currently unavailable at {{ location }}"
     }
   },
   "search": {

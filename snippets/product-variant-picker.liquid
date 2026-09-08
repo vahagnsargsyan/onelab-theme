@@ -1,0 +1,110 @@
+{% doc %}
+  Variant picker.
+
+  One control per option, never a single dropdown of every variant — the
+  requirements call for separated options, and a combined list is unreadable
+  past two options. Swatch-backed values render as swatches, everything else as
+  a select.
+
+  Each control posts a real `option-values` parameter to a `<form method="get">`
+  wrapped by product.js, so choosing a variant works without JavaScript by
+  reloading the page at the right `?variant=` URL.
+
+  @param {object} product
+  @param {object} block - The block, for `shopify_attributes` and unique ids.
+  @param {string} section_id - `section.id`. A snippet has no `section` object
+    of its own, so it has to be handed in or the re-render never fires.
+
+  @example
+  {% render 'product-variant-picker', product: product, block: block, section_id: section.id %}
+{% enddoc %}
+
+{%- unless product.has_only_default_variant -%}
+  <variant-picker
+    class="variant-picker"
+    data-url="{{ product.url }}"
+    data-section="{{ section_id }}"
+  >
+    {%- for option in product.options_with_values -%}
+      {%- liquid
+        assign swatch_count = 0
+        for value in option.values
+          if value.swatch
+            assign swatch_count = swatch_count | plus: 1
+          endif
+        endfor
+      -%}
+
+      <fieldset class="variant-option">
+        <legend class="variant-option__label">{{ option.name }}</legend>
+
+        {%- if swatch_count > 0 -%}
+          <div class="variant-option__swatches">
+            {%- for value in option.values -%}
+              {%- liquid
+                assign input_id = 'opt-' | append: block.id | append: '-' | append: forloop.parentloop.index | append: '-' | append: forloop.index
+              -%}
+              <input
+                type="radio"
+                class="visually-hidden variant-option__input"
+                id="{{ input_id }}"
+                name="option-{{ option.position }}"
+                value="{{ value | escape }}"
+                data-option-position="{{ option.position }}"
+                {% if value.selected %}
+                  checked
+                {% endif %}
+                {% unless value.available %}
+                  disabled
+                {% endunless %}
+              >
+              <label
+                for="{{ input_id }}"
+                class="variant-option__swatch"
+                {% if value.swatch.image %}
+                  style="--swatch: url({{ value.swatch.image | image_url: width: 100 }});"
+                {% elsif value.swatch.color %}
+                  style="--swatch: {{ value.swatch.color }};"
+                {% endif %}
+              >
+                <span class="visually-hidden">{{ value }}</span>
+              </label>
+            {%- endfor -%}
+          </div>
+
+        {%- else -%}
+          <label for="select-{{ block.id }}-{{ option.position }}" class="visually-hidden">
+            {{- option.name -}}
+          </label>
+          <select
+            id="select-{{ block.id }}-{{ option.position }}"
+            class="variant-option__select"
+            name="option-{{ option.position }}"
+            data-option-position="{{ option.position }}"
+          >
+            {%- for value in option.values -%}
+              <option
+                value="{{ value | escape }}"
+                {% if value.selected %}
+                  selected
+                {% endif %}
+              >
+                {{ value }}
+                {%- unless value.available %} &mdash; {{ 'products.unavailable' | t }}{% endunless -%}
+              </option>
+            {%- endfor -%}
+          </select>
+        {%- endif -%}
+      </fieldset>
+    {%- endfor -%}
+
+    {%- comment -%}
+      The variant list the picker matches against. Rendered by Liquid rather
+      than assembled in JavaScript so option values, availability, and ids all
+      come from the same source as the markup above.
+    {%- endcomment -%}
+    <script type="application/json" data-variant-data>
+      {{ product.variants | json }}
+    </script>
+  </variant-picker>
+{%- endunless -%}

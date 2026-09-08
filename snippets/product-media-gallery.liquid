@@ -1,0 +1,199 @@
+{% doc %}
+  Product media, in one of two layouts.
+
+  - grid:     every image tiled; clicking one opens the lightbox at that item.
+  - carousel: one large image with thumbnails; a thumbnail changes the large
+              image, and clicking the large image opens the lightbox.
+
+  Both feed the same lightbox, and both mark each item with its media id so a
+  variant change can bring the right image forward.
+
+  Every media type goes through `media_tag`, so video, external video, and 3D
+  models render correctly rather than only images.
+
+  @param {object} product
+  @param {string} [layout] - 'grid' or 'carousel'.
+
+  @example
+  {% render 'product-media-gallery', product: product, layout: 'grid' %}
+{% enddoc %}
+
+{%- liquid
+  assign gallery_layout = layout | default: 'grid'
+  assign featured = product.selected_or_first_available_variant.featured_media | default: product.featured_media
+-%}
+
+<product-gallery
+  class="gallery gallery--{{ gallery_layout }}"
+  data-gallery-layout="{{ gallery_layout }}"
+>
+  {%- if product.media.size > 0 -%}
+    {%- if gallery_layout == 'carousel' -%}
+      <div class="gallery__stage">
+        {%- for media in product.media -%}
+          <div
+            class="gallery__item"
+            data-gallery-item
+            data-media-id="{{ media.id }}"
+            {% unless media.id == featured.id %}
+              hidden
+            {% endunless %}
+          >
+            {%- if media.media_type == 'image' -%}
+              <button
+                type="button"
+                class="gallery__zoom"
+                data-gallery-open="{{ forloop.index0 }}"
+                aria-label="{{ 'products.media.zoom' | t }}"
+              >
+                {{
+                  media
+                  | image_url: width: 1600
+                  | image_tag:
+                    class: 'gallery__image',
+                    widths: '400, 600, 800, 1200, 1600',
+                    sizes: '(min-width: 990px) 50vw, 100vw',
+                    alt: media.alt,
+                    loading: 'eager'
+                }}
+              </button>
+            {%- else -%}
+              {{ media | media_tag: class: 'gallery__media', image_size: '1600x' }}
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+
+      {%- if product.media.size > 1 -%}
+        <ul class="gallery__thumbs list-unstyled" role="list">
+          {%- for media in product.media -%}
+            <li>
+              <button
+                type="button"
+                class="gallery__thumb"
+                data-gallery-thumb="{{ media.id }}"
+                {% if media.id == featured.id %}
+                  aria-current="true"
+                {% endif %}
+              >
+                {{
+                  media.preview_image
+                  | image_url: width: 300
+                  | image_tag:
+                    widths: '80, 160, 300',
+                    sizes: '80px',
+                    alt: '',
+                    loading: 'lazy'
+                }}
+                <span class="visually-hidden">
+                  {{- 'products.media.show_item' | t: index: forloop.index -}}
+                </span>
+              </button>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+    {%- else -%}
+      <ul class="gallery__grid list-unstyled" role="list">
+        {%- for media in product.media -%}
+          <li
+            class="gallery__item"
+            data-gallery-item
+            data-media-id="{{ media.id }}"
+          >
+            {%- if media.media_type == 'image' -%}
+              {%- liquid
+                assign loading = 'lazy'
+                if forloop.first
+                  assign loading = 'eager'
+                endif
+              -%}
+              <button
+                type="button"
+                class="gallery__zoom"
+                data-gallery-open="{{ forloop.index0 }}"
+                aria-label="{{ 'products.media.zoom' | t }}"
+              >
+                {{
+                  media
+                  | image_url: width: 1400
+                  | image_tag:
+                    class: 'gallery__image',
+                    widths: '300, 500, 700, 1000, 1400',
+                    sizes: '(min-width: 990px) 30vw, 50vw',
+                    alt: media.alt,
+                    loading: loading
+                }}
+              </button>
+            {%- else -%}
+              {{ media | media_tag: class: 'gallery__media', image_size: '1400x' }}
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%}
+      Lightbox. One dialog for the whole gallery; showModal traps focus and
+      makes the page inert without any focus bookkeeping here.
+    {%- endcomment -%}
+    <dialog class="lightbox" data-gallery-dialog aria-label="{{ product.title | escape }}">
+      <button
+        type="button"
+        class="lightbox__close"
+        data-gallery-close
+        aria-label="{{ 'products.media.close' | t }}"
+      >
+        {{- 'icon-close.svg' | inline_asset_content -}}
+      </button>
+
+      <div class="lightbox__stage">
+        {%- for media in product.media -%}
+          {%- if media.media_type == 'image' -%}
+            <figure
+              class="lightbox__item"
+              data-lightbox-item="{{ forloop.index0 }}"
+              {% unless forloop.first %}
+                hidden
+              {% endunless %}
+            >
+              {{
+                media
+                | image_url: width: 2400
+                | image_tag:
+                  class: 'lightbox__image',
+                  widths: '800, 1200, 1600, 2000, 2400',
+                  sizes: '90vw',
+                  alt: media.alt,
+                  loading: 'lazy'
+              }}
+            </figure>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <div class="lightbox__controls">
+        <button
+          type="button"
+          class="lightbox__button"
+          data-gallery-prev
+          aria-label="{{ 'general.slider.previous' | t }}"
+        >
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </button>
+        <button
+          type="button"
+          class="lightbox__button lightbox__button--next"
+          data-gallery-next
+          aria-label="{{ 'general.slider.next' | t }}"
+        >
+          {{- 'icon-caret.svg' | inline_asset_content -}}
+        </button>
+      </div>
+    </dialog>
+
+  {%- else -%}
+    {{ 'product-1' | placeholder_svg_tag: 'gallery__image gallery__placeholder' }}
+  {%- endif -%}
+</product-gallery>
