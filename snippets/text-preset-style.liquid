@@ -1,0 +1,31 @@
+{% doc %}
+  Emits the typography custom properties for one of the global text presets,
+  plus an optional alignment.
+
+  Lets a section's own text pick up the same scale the `text` block uses,
+  without each section restating the token names. "Default" emits nothing, so
+  the element keeps whatever its tag already gets from critical.css.
+
+  @param {string} [preset] - 'default', 'paragraph', or 'h1'…'h6'.
+  @param {string} [alignment] - 'left', 'center', or 'right'.
+
+  @example
+  <h1 class="product__title" {% render 'text-preset-style', preset: block.settings.preset %}>
+{% enddoc %}
+
+{%- liquid
+  assign chosen = preset | default: 'default'
+-%}
+style="
+  {%- if chosen != 'default' %}
+  --text-family: var(--text-{{ chosen }}-family);
+  --text-weight: var(--text-{{ chosen }}-weight);
+  --text-size: var(--text-{{ chosen }}-size);
+  --text-leading: var(--text-{{ chosen }}-leading);
+  --text-tracking: var(--text-{{ chosen }}-tracking);
+  --text-case: var(--text-{{ chosen }}-case);
+  {%- endif %}
+  {%- if alignment != blank %}
+  text-align: {{ alignment }};
+  {%- endif %}
+"
