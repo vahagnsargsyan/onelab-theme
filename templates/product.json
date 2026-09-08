@@ -60,21 +60,27 @@
           "type": "tab",
           "settings": {
             "heading": "Description",
-            "content": "description"
+            "content": "description",
+            "text": "",
+            "page": ""
           }
         },
         "tab_shipping": {
           "type": "tab",
           "settings": {
             "heading": "Shipping",
-            "content": "page"
+            "content": "page",
+            "text": "",
+            "page": "ring-premier"
           }
         },
         "tab_return": {
           "type": "tab",
           "settings": {
             "heading": "Return",
-            "content": "page"
+            "content": "page",
+            "text": "",
+            "page": ""
           }
         }
       },
@@ -95,6 +101,9 @@
         "gallery_layout": "grid",
         "media_width": "half",
         "show_breadcrumbs": true,
+        "tabs_alignment": "center",
+        "tabs_preset": "default",
+        "show_divider": true,
         "gap": 48,
         "width": "page",
         "color_scheme": "",
@@ -116,7 +125,7 @@
       "type": "product-recommendations",
       "settings": {
         "heading": "You may also like",
-        "display": "grid",
+        "display": "flex",
         "columns": 4,
         "columns_mobile": "2",
         "gap": 16,
