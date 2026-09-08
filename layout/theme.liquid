@@ -65,5 +65,11 @@
     {{ content_for_layout }}
 
     {% sections 'footer-group' %}
+
+    {%- comment -%}
+      Rendered once for the whole site. The section itself returns nothing when
+      the cart type is Page.
+    {%- endcomment -%}
+    {% section 'cart-drawer' %}
   </body>
 </html>

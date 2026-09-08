@@ -1,33 +1,84 @@
 {% comment %}
-  This section is used in the cart template to render /cart page with an
-  overview of the items in customer's cart.
+  Cart page. Uses the same line-item and summary snippets as the drawer, so a
+  line behaves identically in both and there is one place to fix a bug.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/cart
 {% endcomment %}
 
-<h1>{{ 'cart.title' | t }}</h1>
+{{ 'cart.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
 
-<form action="{{ routes.cart_url }}" method="post">
-  <table>
-    {% for item in cart.items %}
-      <tr>
-        <td>
-          {% render 'image', image: item.image, url: item.url %}
-        </td>
-        <td>
-          <p>{{ item.product.title }}</p>
-          {{ 'cart.remove' | t | link_to: item.url_to_remove }}
-        </td>
-        <td>
-          <input type="text" name="updates[]" value="{{ item.quantity }}">
-          <input type="submit" value="{{ 'cart.update' | t }}">
-        </td>
-      </tr>
-    {% endfor %}
-  </table>
+<div class="cart-page">
+  <h1 class="cart-page__title">
+    {{ 'cart.title' | t }}
+    <span class="cart-page__count">{{ cart.item_count }}</span>
+  </h1>
 
-  <input type="submit" name="checkout" value="{{ 'cart.checkout' | t }}">
-</form>
+  {%- if cart.item_count == 0 -%}
+    <div class="cart-empty">
+      <p>{{ 'cart.empty' | t }}</p>
+      <a href="{{ routes.all_products_collection_url }}" class="button">
+        {{- 'cart.continue_shopping' | t -}}
+      </a>
+    </div>
+  {%- else -%}
+    {%- comment -%}
+      Wrapped in <cart-drawer> so the page reuses the same quantity, note, and
+      discount behavior. On this template it never opens as a dialog.
+    {%- endcomment -%}
+    <cart-drawer data-cart-type="page" data-item-count="{{ cart.item_count }}">
+      <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-page__form">
+        <div class="cart-page__items">
+          {% render 'cart-items', context: 'page' %}
+        </div>
+
+        <aside class="cart-page__summary">
+          {% render 'cart-summary', context: 'page' %}
+        </aside>
+      </form>
+    </cart-drawer>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+  .cart-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-spacing);
+    width: 100%;
+    padding-block: var(--section-spacing);
+  }
+
+  .cart-page__title {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin: 0;
+  }
+
+  .cart-page__count {
+    font-size: var(--text-h5-size);
+    opacity: 0.7;
+  }
+
+  .cart-page__form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    gap: var(--section-spacing);
+    align-items: start;
+  }
+
+  .cart-page__summary {
+    padding: 1.25rem;
+    border: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 989px) {
+    .cart-page__form {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {

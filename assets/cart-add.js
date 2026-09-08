@@ -34,10 +34,15 @@ class ProductAdd extends HTMLElement {
     this.setBusy(true);
 
     try {
+      const body = new FormData(this.form);
+      // Ask for the drawer's markup in the same round trip, so it can open
+      // already showing the line that was just added.
+      body.append('sections', 'cart-drawer');
+
       const response = await fetch(`${this.routeRoot}cart/add.js`, {
         method: 'POST',
         headers: { Accept: 'application/json' },
-        body: new FormData(this.form),
+        body,
       });
 
       const data = await response.json();
@@ -48,8 +53,17 @@ class ProductAdd extends HTMLElement {
         return;
       }
 
-      await this.refreshCartCount();
       this.announce(this.dataset.addedMessage || '');
+
+      const drawer = document.querySelector('cart-drawer');
+      if (drawer) {
+        // The drawer owns the count once it exists; refreshing it here too
+        // would set the same number twice.
+        document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
+        document.dispatchEvent(new CustomEvent('cart:open'));
+      } else {
+        await this.refreshCartCount();
+      }
     } catch (error) {
       // A network failure should not leave the customer with a silent button.
       this.announce(this.dataset.errorMessage || '');

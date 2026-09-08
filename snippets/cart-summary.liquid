@@ -1,0 +1,138 @@
+{% doc %}
+  Everything below the line items: free-shipping progress, order note, discount
+  field, order-level discounts, the taxes note, the subtotal, and the buttons.
+
+  Shared by the drawer and the cart page.
+
+  @param {string} [context] - 'drawer' or 'page'.
+
+  @example
+  {% render 'cart-summary', context: 'drawer' %}
+{% enddoc %}
+
+{%- liquid
+  assign ctx = context | default: 'page'
+
+  assign threshold = settings.cart_free_shipping_threshold | default: 0 | times: 100
+  assign show_bar = false
+  if settings.cart_free_shipping and threshold > 0
+    assign show_bar = true
+    assign remaining = threshold | minus: cart.total_price
+    assign progress = cart.total_price | times: 100.0 | divided_by: threshold
+    if progress > 100
+      assign progress = 100
+    endif
+  endif
+-%}
+
+{%- if show_bar -%}
+  <div class="cart-shipping-bar">
+    <p class="cart-shipping-bar__text">
+      {%- if remaining > 0 -%}
+        {%- assign amount = remaining | money -%}
+        {{ 'cart.free_shipping_remaining_html' | t: amount: amount }}
+      {%- else -%}
+        {{ 'cart.free_shipping_reached' | t }}
+      {%- endif -%}
+    </p>
+    {%- comment -%}
+      The bar is decorative; the sentence above already carries the meaning, so
+      it is hidden from assistive tech rather than given a redundant label.
+    {%- endcomment -%}
+    <div class="cart-shipping-bar__track" aria-hidden="true">
+      <div class="cart-shipping-bar__fill" style="width: {{ progress }}%;"></div>
+    </div>
+  </div>
+{%- endif -%}
+
+<div class="cart-summary">
+  {%- if settings.cart_show_note -%}
+    <details class="cart-disclosure">
+      <summary class="cart-disclosure__summary">
+        <span>{{ 'cart.note' | t }}</span>
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </summary>
+
+      <div class="cart-disclosure__body">
+        <label for="cart-note-{{ ctx }}" class="visually-hidden">{{ 'cart.note' | t }}</label>
+        <textarea
+          id="cart-note-{{ ctx }}"
+          name="note"
+          rows="3"
+          class="cart-note"
+          data-cart-note
+        >{{ cart.note }}</textarea>
+        <button type="button" class="button button--small" data-cart-note-save>
+          {{- 'cart.apply' | t -}}
+        </button>
+      </div>
+    </details>
+  {%- endif -%}
+
+  {%- if settings.cart_show_discount -%}
+    <details class="cart-disclosure">
+      <summary class="cart-disclosure__summary">
+        <span>{{ 'cart.discount' | t }}</span>
+        {{- 'icon-caret.svg' | inline_asset_content -}}
+      </summary>
+
+      <div class="cart-disclosure__body">
+        {%- comment -%}
+          A discount code cannot be applied to the cart through the Ajax API; it
+          belongs to the checkout. /discount/CODE is the supported way to attach
+          one and come back, which is why this is a navigation and not a fetch.
+        {%- endcomment -%}
+        <label for="cart-discount-{{ ctx }}" class="visually-hidden">{{ 'cart.discount_code' | t }}</label>
+        <input
+          id="cart-discount-{{ ctx }}"
+          type="text"
+          class="cart-discount__input"
+          autocomplete="off"
+          autocapitalize="characters"
+          data-discount-input
+        >
+        <button type="button" class="button button--small" data-discount-apply>
+          {{- 'cart.apply' | t -}}
+        </button>
+        <p class="cart-disclosure__note">{{ 'cart.discount_note' | t }}</p>
+      </div>
+    </details>
+  {%- endif -%}
+
+  {%- if cart.cart_level_discount_applications.size > 0 -%}
+    <ul class="cart-discounts list-unstyled" role="list">
+      {%- for discount in cart.cart_level_discount_applications -%}
+        <li class="cart-discounts__item">
+          {{ discount.title }}
+          <span>&minus;{{ discount.total_allocated_amount | money }}</span>
+        </li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+
+  <p class="cart-taxes">
+    {%- if cart.taxes_included -%}
+      {{ 'cart.taxes_included_shipping_at_checkout' | t }}
+    {%- else -%}
+      {{ 'cart.taxes_and_shipping_at_checkout' | t }}
+    {%- endif -%}
+  </p>
+
+  <div class="cart-total">
+    <span class="cart-total__label">{{ 'cart.subtotal' | t }}</span>
+    <span class="cart-total__value">{{ cart.total_price | money_with_currency }}</span>
+  </div>
+
+  <div class="cart-actions">
+    <a href="{{ routes.cart_url }}" class="button button--secondary">{{ 'cart.view_cart' | t }}</a>
+    <button type="submit" name="checkout" class="button">{{ 'cart.checkout' | t }}</button>
+  </div>
+
+  {%- comment -%}
+    Accelerated checkout buttons, on by default. Their branded colors must not
+    be restyled, so nothing here touches them.
+  {%- endcomment -%}
+  {%- if additional_checkout_buttons -%}
+    <div class="cart-accelerated">{{ content_for_additional_checkout_buttons }}</div>
+  {%- endif -%}
+</div>

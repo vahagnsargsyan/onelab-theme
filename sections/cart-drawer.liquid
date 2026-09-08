@@ -1,0 +1,72 @@
+{% comment %}
+  Cart drawer and the "added to cart" popover.
+
+  Rendered once from layout/theme.liquid so it exists on every page. After a
+  change, assets/cart.js re-fetches this whole section through the Section
+  Rendering API and swaps it in, so the markup is always Liquid-rendered and
+  there is no second templating layer to keep in sync.
+
+  Cart type "Page" renders nothing here — the customer goes to /cart.
+{% endcomment %}
+
+{% liquid
+  assign type = settings.cart_type | default: 'drawer'
+  assign is_empty = false
+  if cart.item_count == 0
+    assign is_empty = true
+  endif
+%}
+
+{%- if type != 'page' -%}
+  {{ 'cart.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
+
+  <cart-drawer data-cart-type="{{ type }}" data-item-count="{{ cart.item_count }}">
+    <dialog class="cart-dialog cart-dialog--{{ type }}" aria-label="{{ 'cart.title' | t }}">
+      <div class="cart-dialog__inner">
+        <header class="cart-dialog__head">
+          <h2 class="cart-dialog__title">
+            {%- if type == 'popover' -%}
+              {{ 'cart.added' | t }}
+            {%- else -%}
+              {{ 'cart.title' | t }}
+            {%- endif -%}
+          </h2>
+          <button type="button" class="cart-dialog__close" data-cart-close>
+            {{- 'icon-close.svg' | inline_asset_content -}}
+            <span class="visually-hidden">{{ 'cart.close' | t }}</span>
+          </button>
+        </header>
+
+        {%- if is_empty -%}
+          <div class="cart-empty">
+            <p>{{ 'cart.empty' | t }}</p>
+            <a href="{{ routes.all_products_collection_url }}" class="button">
+              {{- 'cart.continue_shopping' | t -}}
+            </a>
+          </div>
+        {%- else -%}
+          {%- comment -%}
+            A real cart form. Without JavaScript the quantity fields still post
+            and the checkout button still submits.
+          {%- endcomment -%}
+          <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-form">
+            <div class="cart-dialog__body">
+              {% render 'cart-items', context: 'drawer' %}
+            </div>
+
+            <div class="cart-dialog__foot">
+              {% render 'cart-summary', context: 'drawer' %}
+            </div>
+          </form>
+        {%- endif -%}
+      </div>
+    </dialog>
+  </cart-drawer>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "t:general.cart"
+}
+{% endschema %}

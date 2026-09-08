@@ -39,7 +39,26 @@
     "item_count": {
       "one": "{{ count }} item in cart",
       "other": "{{ count }} items in cart"
-    }
+    },
+    "added": "Added to cart",
+    "close": "Close cart",
+    "empty": "Your cart is empty.",
+    "continue_shopping": "Continue shopping",
+    "subtotal": "Subtotal",
+    "view_cart": "View cart",
+    "note": "Order note",
+    "discount": "Discount",
+    "discount_code": "Discount code",
+    "discount_note": "Applied at checkout.",
+    "apply": "Apply",
+    "quantity_for": "Quantity for {{ title }}",
+    "increase": "Increase quantity for {{ title }}",
+    "decrease": "Decrease quantity for {{ title }}",
+    "regular_total": "Regular total",
+    "taxes_included_shipping_at_checkout": "Taxes included. Shipping calculated at checkout.",
+    "taxes_and_shipping_at_checkout": "Taxes and shipping calculated at checkout.",
+    "free_shipping_remaining_html": "Spend {{ amount }} more and get free shipping",
+    "free_shipping_reached": "You have earned free shipping."
   },
   "collections": {
     "title": "Collections",

@@ -1019,6 +1019,58 @@
     ]
   },
   {
+    "name": "t:general.cart",
+    "settings": [
+      {
+        "type": "select",
+        "id": "cart_type",
+        "label": "t:labels.cart_type",
+        "info": "t:info.cart_type",
+        "default": "drawer",
+        "options": [
+          {
+            "value": "page",
+            "label": "t:options.cart_type.page"
+          },
+          {
+            "value": "drawer",
+            "label": "t:options.cart_type.drawer"
+          },
+          {
+            "value": "popover",
+            "label": "t:options.cart_type.popover"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_note",
+        "label": "t:labels.show_cart_note",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_show_discount",
+        "label": "t:labels.show_discount_field",
+        "info": "t:info.show_discount_field",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_free_shipping",
+        "label": "t:labels.show_free_shipping_bar",
+        "default": false
+      },
+      {
+        "type": "number",
+        "id": "cart_free_shipping_threshold",
+        "label": "t:labels.free_shipping_threshold",
+        "info": "t:info.free_shipping_threshold",
+        "default": 100
+      }
+    ]
+  },
+  {
     "name": "t:general.brand",
     "settings": [
       {
