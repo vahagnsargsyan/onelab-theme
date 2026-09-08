@@ -1,0 +1,246 @@
+/**
+ * Predictive search.
+ *
+ * One dialog, two presentations. `.search-dialog--center` is a panel below the
+ * header; `.search-dialog--drawer` is a full-height panel on the inline end.
+ * Only the dialog's own box changes — everything inside is shared.
+ */
+
+.search-dialog {
+  max-width: 100%;
+  max-height: 100svh;
+  padding: 0;
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+  border: 0;
+}
+
+.search-dialog::backdrop {
+  background-color: rgb(0 0 0 / 45%);
+}
+
+/* Centered: a wide panel that hangs below the header. */
+.search-dialog--center {
+  width: min(64rem, calc(100% - var(--page-margin) * 2));
+  margin: calc(var(--header-height, 5rem) + 1rem) auto auto;
+  max-height: calc(100svh - var(--header-height, 5rem) - 2rem);
+  overflow-y: auto;
+}
+
+/* Drawer: full height, pinned to the inline end. */
+.search-dialog--drawer {
+  width: min(28rem, 100%);
+  height: 100%;
+  margin: 0 0 0 auto;
+  overflow-y: auto;
+}
+
+.search-dialog__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 100%;
+  padding: 1.25rem var(--page-margin);
+}
+
+.search-dialog__head {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search-dialog__close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.search-dialog__close svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Field */
+
+.search__form {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.search__form svg {
+  flex: 0 0 auto;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+}
+
+.search__input:focus {
+  outline: none;
+}
+
+/* The field is the visible focus target, so the ring goes on the wrapper. */
+.search__form:focus-within {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.search__clear {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding-inline: 0.5rem;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Results */
+
+.search__groups {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Centered has room for products and articles side by side. */
+.search-dialog--center .search__groups {
+  grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
+}
+
+.search__group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block-end: 0.5rem;
+  border-block-end: 1px solid var(--color-border);
+}
+
+.search__group-title {
+  margin: 0;
+  font-family: var(--text-h6-family);
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+}
+
+.search__view-all,
+.search__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.search__view-all:hover,
+.search__link:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+.search__products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-block-start: 1rem;
+}
+
+.search__product {
+  display: grid;
+  gap: 0.4rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.search__product-media {
+  display: block;
+  background-color: var(--color-border);
+}
+
+.search__product-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.search__product-price {
+  opacity: 0.8;
+}
+
+.search__links {
+  display: grid;
+  gap: 0.5rem;
+  margin-block-start: 1rem;
+}
+
+.search__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+}
+
+.search__product:focus-visible,
+.search__link:focus-visible,
+.search__view-all:focus-visible,
+.search__clear:focus-visible,
+.search-dialog__close:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
+.search__empty {
+  margin: 0;
+}
+
+/* Pushed to the bottom of a drawer, inline in the centered panel. */
+.search__submit-all {
+  width: 100%;
+  margin-block-start: auto;
+}
+
+.search-dialog--center .search__submit-all {
+  margin-block-start: 1rem;
+}
+
+predictive-search {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+predictive-search.is-loading .search__results {
+  opacity: 0.6;
+}
+
+.search__results {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  flex: 1 1 auto;
+}
+
+@media (max-width: 749px) {
+  .search-dialog--center,
+  .search-dialog--drawer {
+    width: 100%;
+    height: 100%;
+    max-height: 100svh;
+    margin: 0;
+  }
+}

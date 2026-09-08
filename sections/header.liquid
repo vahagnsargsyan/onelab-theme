@@ -71,6 +71,11 @@
 {{ 'header.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'header.js' | asset_url }}" defer="defer"></script>
 
+{%- if s.show_search -%}
+  {{ 'search.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'search.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
 <site-header>
   <header
     class="
@@ -131,10 +136,15 @@
 
         <div class="header__actions">
           {%- if s.show_search -%}
-            <a href="{{ routes.search_url }}" class="header__action">
+            <button
+              type="button"
+              class="header__action"
+              data-search-open
+              aria-haspopup="dialog"
+            >
               {{- 'icon-search.svg' | inline_asset_content -}}
               <span class="visually-hidden">{{ 'search.title' | t }}</span>
-            </a>
+            </button>
           {%- endif -%}
 
           {%- if shop.customer_accounts_enabled -%}
@@ -204,6 +214,67 @@
     %}
   </dialog>
 </site-header>
+
+{%- if s.show_search -%}
+  <search-toggle>
+    <dialog
+      class="search-dialog search-dialog--{{ s.search_style | default: 'center' }}"
+      aria-label="{{ 'search.title' | t }}"
+    >
+      <div class="search-dialog__inner">
+        <div class="search-dialog__head">
+          <button type="button" class="search-dialog__close" data-search-close>
+            {{- 'icon-close.svg' | inline_asset_content -}}
+            <span class="visually-hidden">{{ 'search.close' | t }}</span>
+          </button>
+        </div>
+
+        <predictive-search data-limit="{{ s.search_results_count | default: 6 }}">
+          {%- comment -%}
+            A real search form. Enter submits it normally, so search works with
+            the script blocked; the panel below is the enhancement.
+          {%- endcomment -%}
+          <form action="{{ routes.search_url }}" method="get" role="search" class="search__form">
+            {{- 'icon-search.svg' | inline_asset_content -}}
+
+            <label for="header-search-input" class="visually-hidden">
+              {{- 'search.title' | t -}}
+            </label>
+            <input
+              id="header-search-input"
+              class="search__input"
+              type="search"
+              name="q"
+              placeholder="{{ 'search.placeholder' | t }}"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+              role="combobox"
+              aria-controls="header-search-results"
+              aria-expanded="false"
+              aria-autocomplete="list"
+              data-search-input
+            >
+            <input type="hidden" name="options[prefix]" value="last">
+
+            <button type="button" class="search__clear" data-search-clear hidden>
+              {{- 'search.clear' | t -}}
+            </button>
+          </form>
+
+          <div
+            id="header-search-results"
+            class="search__results"
+            data-search-results
+            hidden
+          ></div>
+
+          <p class="visually-hidden" role="status" aria-live="polite" data-search-status></p>
+        </predictive-search>
+      </div>
+    </dialog>
+  </search-toggle>
+{%- endif -%}
 
 {%- comment -%}
   Shared live region. Quick add speaks through this, so a customer using a
@@ -318,6 +389,27 @@
       "default": "scheme-1"
     },
     { "type": "checkbox", "id": "show_search", "label": "t:labels.show_search", "default": true },
+    {
+      "type": "select",
+      "id": "search_style",
+      "label": "t:labels.search_style",
+      "default": "center",
+      "visible_if": "{{ section.settings.show_search }}",
+      "options": [
+        { "value": "center", "label": "t:options.search_style.center" },
+        { "value": "drawer", "label": "t:options.search_style.drawer" }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "search_results_count",
+      "label": "t:labels.search_results_count",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 6,
+      "visible_if": "{{ section.settings.show_search }}"
+    },
     { "type": "checkbox", "id": "show_country", "label": "t:labels.show_country_selector", "default": true },
     { "type": "checkbox", "id": "show_language", "label": "t:labels.show_language_selector", "default": true }
   ]

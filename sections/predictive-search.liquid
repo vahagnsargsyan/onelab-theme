@@ -1,0 +1,131 @@
+{% comment %}
+  Predictive search results.
+
+  Never added to a page. It is fetched by assets/search.js through the Section
+  Rendering API — `/search/suggest?q=…&section_id=predictive-search` — so the
+  results are rendered by Liquid on the server rather than assembled from JSON
+  in the browser. That keeps money formatting, translations, and markets
+  behavior identical to the rest of the storefront.
+{% endcomment %}
+
+{% liquid
+  assign products = predictive_search.resources.products
+  assign articles = predictive_search.resources.articles
+  assign pages = predictive_search.resources.pages
+  assign total = products.size | plus: articles.size | plus: pages.size
+%}
+
+<div data-search-inner>
+  {%- if predictive_search.performed -%}
+    <p class="visually-hidden" data-search-announce>
+      {{- 'search.results_count' | t: count: total -}}
+    </p>
+
+    {%- if total == 0 -%}
+      <p class="search__empty">
+        {{- 'search.no_results_html' | t: terms: predictive_search.terms -}}
+      </p>
+    {%- else -%}
+      <div class="search__groups">
+        {%- if products.size > 0 -%}
+          <section class="search__group search__group--products">
+            <div class="search__group-head">
+              <h2 class="search__group-title">
+                {{- 'search.results_count' | t: count: products.size -}}
+              </h2>
+              <a href="{{ routes.search_url }}?q={{ predictive_search.terms | url_encode }}" class="search__view-all">
+                {{- 'search.view_all' | t -}}
+              </a>
+            </div>
+
+            <ul class="search__products list-unstyled" role="list">
+              {%- for product in products -%}
+                <li>
+                  <a href="{{ product.url }}" class="search__product" data-search-result>
+                    <span class="search__product-media">
+                      {%- if product.featured_media != blank -%}
+                        {{
+                          product.featured_media.preview_image
+                          | image_url: width: 400
+                          | image_tag:
+                            class: 'search__product-image',
+                            widths: '160, 240, 400',
+                            sizes: '160px',
+                            alt: '',
+                            loading: 'lazy'
+                        }}
+                      {%- else -%}
+                        {{ 'product-1' | placeholder_svg_tag: 'search__product-image' }}
+                      {%- endif -%}
+                    </span>
+                    <span class="search__product-title">{{ product.title }}</span>
+                    <span class="search__product-price">
+                      {%- if product.price_varies -%}
+                        {%- assign from = product.price_min | money -%}
+                        {{ 'products.card.from_price_html' | t: price: from }}
+                      {%- else -%}
+                        {{ product.price | money }}
+                      {%- endif -%}
+                    </span>
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </section>
+        {%- endif -%}
+
+        {%- if articles.size > 0 -%}
+          <section class="search__group search__group--articles">
+            <div class="search__group-head">
+              <h2 class="search__group-title">{{ 'search.articles' | t }}</h2>
+              <a href="{{ routes.search_url }}?q={{ predictive_search.terms | url_encode }}&type=article" class="search__view-all">
+                {{- 'search.view_all' | t -}}
+              </a>
+            </div>
+
+            <ul class="search__links list-unstyled" role="list">
+              {%- for article in articles -%}
+                <li>
+                  <a href="{{ article.url }}" class="search__link" data-search-result>
+                    {{- article.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </section>
+        {%- endif -%}
+
+        {%- if pages.size > 0 -%}
+          <section class="search__group search__group--pages">
+            <div class="search__group-head">
+              <h2 class="search__group-title">{{ 'search.pages' | t }}</h2>
+            </div>
+
+            <ul class="search__links list-unstyled" role="list">
+              {%- for page in pages -%}
+                <li>
+                  <a href="{{ page.url }}" class="search__link" data-search-result>
+                    {{- page.title -}}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </section>
+        {%- endif -%}
+      </div>
+
+      <a
+        href="{{ routes.search_url }}?q={{ predictive_search.terms | url_encode }}"
+        class="button search__submit-all"
+      >
+        {{- 'search.view_all_results' | t -}}
+      </a>
+    {%- endif -%}
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "t:general.search"
+}
+{% endschema %}

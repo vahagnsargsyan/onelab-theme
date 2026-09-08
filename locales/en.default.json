@@ -138,10 +138,20 @@
   },
   "search": {
     "title": "Search",
-    "placeholder": "Search articles, pages, or products",
+    "placeholder": "Search",
     "submit": "Search",
     "no_results_html": "No results found for {{ terms }}",
-    "results_for_html": "{{ count }} results found for {{ terms }}"
+    "results_for_html": "{{ count }} results found for {{ terms }}",
+    "clear": "Clear",
+    "close": "Close search",
+    "view_all": "View all",
+    "view_all_results": "View all results",
+    "articles": "Articles",
+    "pages": "Pages",
+    "results_count": {
+      "one": "{{ count }} result",
+      "other": "{{ count }} results"
+    }
   },
   "templates": {
     "contact": {

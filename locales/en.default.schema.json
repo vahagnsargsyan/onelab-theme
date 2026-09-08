@@ -166,6 +166,8 @@
     "products_to_show": "Products to show",
     "profile_url": "Profile link",
     "quick_add": "Quick add",
+    "search_results_count": "Results to show",
+    "search_style": "Search style",
     "secondary_button_text": "Secondary button text",
     "secondary_image": "Overlapping image",
     "secondary_image_width": "Overlapping image width",
@@ -387,6 +389,10 @@
     "quick_add": {
       "none": "None",
       "icon": "Icon button"
+    },
+    "search_style": {
+      "center": "Centered panel",
+      "drawer": "Side drawer"
     },
     "tag": {
       "p": "Paragraph",
