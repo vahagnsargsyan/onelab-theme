@@ -153,7 +153,12 @@
             </shopify-account>
           {%- endif -%}
 
-          <a href="{{ routes.cart_url }}" class="header__action">
+          {%- comment -%}
+            Stays a real link to /cart. cart.js intercepts a plain left click to
+            open the drawer, so middle-click, modified clicks, and a blocked
+            script all still reach the cart page.
+          {%- endcomment -%}
+          <a href="{{ routes.cart_url }}" class="header__action" data-cart-open>
             {{- 'icon-cart.svg' | inline_asset_content -}}
             <span class="visually-hidden">{{ 'cart.title' | t }}</span>
             {%- comment -%}

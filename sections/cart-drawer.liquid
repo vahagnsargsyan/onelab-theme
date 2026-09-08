@@ -21,16 +21,23 @@
   {{ 'cart.css' | asset_url | stylesheet_tag }}
   <script src="{{ 'cart.js' | asset_url }}" defer="defer"></script>
 
-  <cart-drawer data-cart-type="{{ type }}" data-item-count="{{ cart.item_count }}">
+  <cart-drawer data-section-id="cart-drawer" data-cart-type="{{ type }}" data-item-count="{{ cart.item_count }}">
     <dialog class="cart-dialog cart-dialog--{{ type }}" aria-label="{{ 'cart.title' | t }}">
       <div class="cart-dialog__inner">
         <header class="cart-dialog__head">
-          <h2 class="cart-dialog__title">
-            {%- if type == 'popover' -%}
-              {{ 'cart.added' | t }}
-            {%- else -%}
-              {{ 'cart.title' | t }}
-            {%- endif -%}
+          {%- comment -%}
+            The heading depends on how the dialog was opened, not on the cart
+            type. Opened from the cart icon it says Cart; opened by adding
+            something it says Added to cart. A popover permanently titled
+            "Added to cart" would lie whenever the icon opened it.
+          {%- endcomment -%}
+          <h2
+            class="cart-dialog__title"
+            data-cart-title
+            data-title-cart="{{ 'cart.title' | t | escape }}"
+            data-title-added="{{ 'cart.added' | t | escape }}"
+          >
+            {{- 'cart.title' | t -}}
           </h2>
           <button type="button" class="cart-dialog__close" data-cart-close>
             {{- 'icon-close.svg' | inline_asset_content -}}

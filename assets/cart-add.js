@@ -60,7 +60,9 @@ class ProductAdd extends HTMLElement {
         // The drawer owns the count once it exists; refreshing it here too
         // would set the same number twice.
         document.dispatchEvent(new CustomEvent('cart:updated', { detail: data }));
-        document.dispatchEvent(new CustomEvent('cart:open'));
+        document.dispatchEvent(
+          new CustomEvent('cart:open', { detail: { added: true } })
+        );
       } else {
         await this.refreshCartCount();
       }

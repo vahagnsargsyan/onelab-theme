@@ -10,15 +10,51 @@
  * Rendering API rather than patched in the DOM. Totals, discounts, the free
  * shipping bar, and per-line prices all move together, so they cannot disagree.
  */
-const SECTION_ID = 'cart-drawer';
+const CART_SECTION_ID = 'cart-drawer';
 
 class CartDrawer extends HTMLElement {
   connectedCallback() {
     this.dialog = this.querySelector('dialog');
     this.bind();
 
-    document.addEventListener('cart:updated', (event) => this.refresh(event.detail));
-    document.addEventListener('cart:open', () => this.open());
+    // The cart page renders its own <cart-drawer> for the line controls while
+    // the global one still exists in the layout. Only the instance that owns a
+    // dialog listens for global events or takes over the cart link; otherwise
+    // the page instance would swallow the click and have nothing to open.
+    if (this.dialog) {
+      document.addEventListener('cart:updated', (event) => this.refresh(event.detail));
+      document.addEventListener('cart:open', (event) => this.open(event.detail));
+      this.bindOpeners();
+    }
+  }
+
+  /** Which section to re-render after a change: the drawer, or the cart page. */
+  get sectionId() {
+    return this.dataset.sectionId || CART_SECTION_ID;
+  }
+
+  /**
+   * The cart icon stays a link to /cart. Only a plain left click is taken over;
+   * middle-click, ctrl/cmd-click, and shift-click keep their normal meaning, so
+   * "open cart in a new tab" is not quietly broken.
+   */
+  bindOpeners() {
+    document.querySelectorAll('[data-cart-open]').forEach((trigger) => {
+      trigger.addEventListener('click', (event) => {
+        if (
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+        this.open();
+      });
+    });
   }
 
   get routeRoot() {
@@ -77,7 +113,7 @@ class CartDrawer extends HTMLElement {
       const response = await fetch(`${this.routeRoot}cart/change.js`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ line: Number(line), quantity, sections: [SECTION_ID] }),
+        body: JSON.stringify({ line: Number(line), quantity, sections: [this.sectionId] }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -123,7 +159,7 @@ class CartDrawer extends HTMLElement {
 
   /** Swaps in freshly rendered markup and reopens if it was open. */
   refresh(data) {
-    const markup = data?.sections?.[SECTION_ID];
+    const markup = data?.sections?.[this.sectionId];
     if (!markup) return;
 
     const wasOpen = this.dialog?.open;
@@ -163,8 +199,22 @@ class CartDrawer extends HTMLElement {
     });
   }
 
-  open() {
-    if (!this.dialog || this.dialog.open) return;
+  /**
+   * @param {{added?: boolean}} [options] - `added: true` when something was
+   *   just added, which changes the heading from "Cart" to "Added to cart".
+   */
+  open(options) {
+    if (!this.dialog) return;
+
+    const title = this.querySelector('[data-cart-title]');
+    if (title) {
+      title.textContent = options?.added
+        ? title.dataset.titleAdded
+        : title.dataset.titleCart;
+    }
+
+    if (this.dialog.open) return;
+
     if (typeof this.dialog.showModal === 'function') {
       this.dialog.showModal();
     } else {

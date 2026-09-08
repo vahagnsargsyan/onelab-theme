@@ -26,7 +26,7 @@
       Wrapped in <cart-drawer> so the page reuses the same quantity, note, and
       discount behavior. On this template it never opens as a dialog.
     {%- endcomment -%}
-    <cart-drawer data-cart-type="page" data-item-count="{{ cart.item_count }}">
+    <cart-drawer data-section-id="{{ section.id }}" data-cart-type="page" data-item-count="{{ cart.item_count }}">
       <form action="{{ routes.cart_url }}" method="post" novalidate class="cart-page__form">
         <div class="cart-page__items">
           {% render 'cart-items', context: 'page' %}
