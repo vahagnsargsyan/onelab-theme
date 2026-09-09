@@ -12,9 +12,257 @@
     "main": {
       "type": "page",
       "settings": {}
+    },
+    "image_with_text_VVpk3Q": {
+      "type": "image-with-text",
+      "name": "t:general.image_with_text",
+      "settings": {
+        "heading": "",
+        "text": "<h4>A Subtle Presence<br/></h4><p>At Soléa, we believe jewelry should do more than complete an outfit it should tell a story. Inspired by timeless beauty and modern sophistication, we create pieces that are designed to be worn, loved, and treasured for years to come.<br/><br/>Our collections combine elegant craftsmanship with contemporary design, offering jewelry that feels effortless, refined, and versatile. Whether you're celebrating a special moment or elevating your everyday style, Soléa is here to help you shine with confidence.<br/><br/></p>",
+        "show_divider": false,
+        "button_label": "Shop collection",
+        "button_link": "",
+        "button_style": "primary",
+        "image": "shopify://shop_images/image_23.png",
+        "image_ratio": "portrait",
+        "media_style": "simple",
+        "panel_color": "#1F3A34",
+        "panel_offset": 8,
+        "secondary_image_width": 30,
+        "content_position": "left",
+        "media_width": "half",
+        "content_alignment": "left",
+        "content_spacing": "grouped",
+        "heading_position": "inline",
+        "gap": 64,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 48,
+        "padding_bottom": 48,
+        "padding_left": 0,
+        "padding_right": 0
+      }
+    },
+    "image_with_text_4zNyEC": {
+      "type": "image-with-text",
+      "name": "t:general.image_with_text",
+      "settings": {
+        "heading": "",
+        "text": "<h4>Our Mission</h4><p>To create timeless jewelry that inspires confidence, celebrates individuality, and brings beauty to everyday moments.</p><h4><br/>Our Vision</h4><p><br/>To become a destination for modern luxury, offering elegant designs that empower people to express their unique style.</p><h4><br/>What Makes Soléa Different?<br/></h4><ul><li>Timeless & Elegant Designs</li><li> Premium Craftsmanship</li><li> Quality Materials</li><li> Everyday Luxury</li><li> Thoughtfully Curated Collections</li><li> Exceptional Customer Experience</li></ul>",
+        "show_divider": false,
+        "button_label": "Shop collection",
+        "button_link": "",
+        "button_style": "primary",
+        "image": "shopify://shop_images/image_24.png",
+        "image_ratio": "portrait",
+        "media_style": "simple",
+        "panel_color": "#1F3A34",
+        "panel_offset": 8,
+        "secondary_image_width": 30,
+        "content_position": "right",
+        "media_width": "half",
+        "content_alignment": "left",
+        "content_spacing": "grouped",
+        "heading_position": "inline",
+        "gap": 64,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 48,
+        "padding_bottom": 48,
+        "padding_left": 0,
+        "padding_right": 0
+      }
+    },
+    "custom_section_3383hg": {
+      "type": "custom-section",
+      "blocks": {
+        "group_DixLAE": {
+          "type": "group",
+          "name": "t:general.column",
+          "settings": {
+            "display": "block",
+            "use_slider": false,
+            "slider_loop": false,
+            "direction": "horizontal",
+            "columns": 1,
+            "columns_mobile": "1",
+            "alignment": "left",
+            "position": "top",
+            "gap": 12,
+            "width": "fill",
+            "height": "fit",
+            "background_media": "none",
+            "background_color": "",
+            "background_overlay": false,
+            "overlay_color": "#000000",
+            "overlay_opacity": 40,
+            "border_style": "none",
+            "border_width": 1,
+            "border_radius": 0,
+            "padding_top": 0,
+            "padding_bottom": 0,
+            "padding_left": 0,
+            "padding_right": 0
+          },
+          "blocks": {
+            "image_HXN8pU": {
+              "type": "image",
+              "name": "t:general.image",
+              "settings": {
+                "image": "shopify://shop_images/image_25.png",
+                "link": "",
+                "width": "full",
+                "custom_width": 400,
+                "alignment": "left",
+                "ratio": "adapt",
+                "fit": "cover",
+                "corner_radius": 0,
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "image_HXN8pU"
+          ]
+        },
+        "group_3J9zWF": {
+          "type": "group",
+          "name": "t:general.column",
+          "settings": {
+            "display": "flex",
+            "use_slider": false,
+            "slider_loop": false,
+            "direction": "vertical",
+            "columns": 2,
+            "columns_mobile": "1",
+            "alignment": "left",
+            "position": "top",
+            "gap": 6,
+            "width": "fill",
+            "height": "medium",
+            "background_media": "none",
+            "background_color": "",
+            "background_overlay": false,
+            "overlay_color": "#000000",
+            "overlay_opacity": 40,
+            "border_style": "none",
+            "border_width": 1,
+            "border_radius": 0,
+            "padding_top": 0,
+            "padding_bottom": 0,
+            "padding_left": 0,
+            "padding_right": 0
+          },
+          "blocks": {
+            "image_UYjWEk": {
+              "type": "image",
+              "name": "t:general.image",
+              "settings": {
+                "image": "shopify://shop_images/image_26.png",
+                "link": "",
+                "width": "full",
+                "custom_width": 500,
+                "alignment": "left",
+                "ratio": "adapt",
+                "fit": "cover",
+                "corner_radius": 0,
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_eaM9df": {
+              "type": "text",
+              "name": "t:general.text",
+              "settings": {
+                "text": "At Solea, we believe true elegance is timeless, and every piece is designed to help you wear it beautifully. ✨",
+                "preset": "paragraph",
+                "tag": "p",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "image_UYjWEk",
+            "text_eaM9df"
+          ]
+        }
+      },
+      "block_order": [
+        "group_DixLAE",
+        "group_3J9zWF"
+      ],
+      "name": "t:general.custom_section",
+      "settings": {
+        "display": "flex",
+        "use_slider": false,
+        "slider_loop": false,
+        "show_dots": false,
+        "direction": "horizontal",
+        "columns": 2,
+        "columns_mobile": "1",
+        "alignment": "center",
+        "position": "top",
+        "gap": 10,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "image_with_text_VVpk3Q",
+    "image_with_text_4zNyEC",
+    "custom_section_3383hg"
   ]
 }
