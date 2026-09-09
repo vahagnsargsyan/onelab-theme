@@ -1,23 +1,209 @@
 {% comment %}
-  This section is used in the 404 template to render page shown when customers
-  enter an invalid store URL.
+  404. Shown when a customer lands on a URL that does not exist.
+
+  A dead end is the one page where the way out matters more than the message,
+  so it offers both: a search box and a link back into the catalog. The large
+  numeral is decorative and hidden from assistive technology — "Page not found"
+  is the heading that gets read.
+
+  Deviation from the canonical layout settings, per the rule in
+  snippets/layout-style.liquid: Display, Use slider, Direction, and the Columns
+  settings are omitted. There is one stack of content here and nothing to lay
+  out beside it. Alignment and Position stay, and are what center it in the
+  space, so their `visible_if` conditions drop the clauses that referenced the
+  omitted settings.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/404
 {% endcomment %}
 
-<h1>{{ '404.title' | t }}</h1>
+{% liquid
+  assign s = section.settings
+  assign text_align = s.alignment | default: 'center'
+%}
 
-<p>
-  {{ '404.not_found' | t }}
-</p>
+<div {% render 'layout-style', s: section.settings, class: 'not-found full-width' %}>
+  {% render 'layout-background', s: section.settings %}
 
-<a href="{{ routes.all_products_collection_url }}">
-  {{ '404.back_to_shopping' | t }}
-</a>
+  <div class="layout__content">
+    <div class="layout__blocks not-found__inner" style="--not-found-align: {{ text_align }};">
+      {%- if s.show_code -%}
+        <p class="not-found__code" aria-hidden="true">{{ '404.code' | t }}</p>
+      {%- endif -%}
+      <img
+        src="{{ '404.svg' | asset_url }}"
+        alt=""
+        aria-hidden="true"
+        class="not-found__image">
+
+      <h1 class="not-found__title" {% render 'text-preset-style', preset: s.title_preset %}>
+        {{- '404.title' | t -}}
+      </h1>
+
+      <p class="not-found__text">{{ '404.not_found' | t }}</p>
+
+      {%- if s.show_search -%}
+        {%- comment -%}
+          A search box is the shorter route back for someone who arrived from a
+          stale link and knows what they were after.
+        {%- endcomment -%}
+        <form action="{{ routes.search_url }}" method="get" role="search" class="not-found__search">
+          <label class="visually-hidden" for="not-found-search-{{ section.id }}">
+            {{- 'search.title' | t -}}
+          </label>
+          <input
+            type="search"
+            id="not-found-search-{{ section.id }}"
+            name="q"
+            class="not-found__input"
+            placeholder="{{ 'search.placeholder' | t | escape }}"
+          >
+          <button type="submit" class="button">{{ 'search.submit' | t }}</button>
+        </form>
+      {%- endif -%}
+
+      <a href="{{ routes.all_products_collection_url }}" class="button button--secondary">
+        {{- '404.back_to_shopping' | t -}}
+      </a>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .not-found__inner {
+    text-align: var(--not-found-align, center);
+  }
+
+  /* Only full bleed loses the content grid's margins, so only it needs these. */
+  .layout--width-full > .layout__content > .not-found__inner {
+    padding-inline: var(--page-margin);
+  }
+
+  .not-found__code {
+    font-family: var(--text-h1-family);
+    font-size: var(--text-h1-size);
+    line-height: 1;
+    opacity: 0.15;
+  }
+
+  .not-found__title {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  .not-found__text {
+    max-width: 45ch;
+  }
+
+  .not-found__search {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    width: min(100%, 28rem);
+  }
+
+  .not-found__input {
+    flex: 1 1 12rem;
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    color: inherit;
+    background-color: transparent;
+    border: var(--input-border-width) solid var(--color-border);
+  }
+
+  .not-found__input:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.404",
-  "settings": []
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "checkbox", "id": "show_code", "label": "t:labels.show_error_code", "default": true },
+    { "type": "select", "id": "title_preset", "label": "t:labels.preset", "default": "h2",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "checkbox", "id": "show_search", "label": "t:labels.show_search", "default": true },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "center",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "full",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "medium",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ]
 }
 {% endschema %}

@@ -9,8 +9,9 @@
  */
 {
   "404": {
-    "title": "404",
-    "not_found": "Page not found.",
+    "title": "Page not found",
+    "code": "404",
+    "not_found": "The page you were looking for does not exist, or has moved.",
     "back_to_shopping": "Back to shopping"
   },
   "blogs": {
@@ -25,6 +26,7 @@
     },
     "comment_form": {
       "title": "Add a comment",
+      "post_success": "Thanks for your comment. It will appear once it has been approved.",
       "name": "Name",
       "email": "Email",
       "body": "Comment",

@@ -1,68 +1,427 @@
 {% comment %}
-  This section is used in the article template to render the article page, which
-  displays the full content of the blog post and can optionally include a
-  comments section for customers (not shown in this example).
+  Article. The featured image runs across the top and the article body sits on a
+  panel that overlaps its lower edge, so the two read as one composition rather
+  than a picture with text under it.
+
+  The overlap is a setting and can be set to zero, which is what a merchant with
+  a tall or busy photograph will want. Below the fold it is an ordinary article:
+  meta, heading, rich-text content, then comments.
+
+  `article.published_at` is used, never `created_at` — a post edited months
+  after publication would otherwise appear to have been written today.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/article
 {% endcomment %}
 
-{% if article.image %}
-  {{ article.image | image_url: width: 1000 | image_tag }}
-{% endif %}
+{% liquid
+  assign s = section.settings
+  assign image = article.image
 
-<h1>{{ article.title }}</h1>
+  assign has_image = false
+  if s.show_image and image != blank
+    assign has_image = true
+  endif
 
-{% assign date = article.published_at | time_tag: format: 'date' %}
-<p>{{ 'blogs.article.metadata_html' | t: date: date, author: article.author }}</p>
+  comment
+    The panel only lifts over the image when there is an image to lift over.
+  endcomment
+  assign overlap = 0
+  if has_image
+    assign overlap = s.image_overlap | default: 0
+  endif
 
-{{ article.content }}
+  assign has_meta = false
+  if s.show_author and article.author != blank
+    assign has_meta = true
+  endif
+  if s.show_date
+    assign has_meta = true
+  endif
+%}
 
-{% if blog.comments_enabled? %}
-  <h2>{{ 'blogs.article.comments' | t }}</h2>
+<div {% render 'layout-style', s: section.settings, class: 'article full-width' %}>
+  {% render 'layout-background', s: section.settings %}
 
-  <div id="comments">
-    {% paginate article.comments by 10 %}
-      {% for comment in article.comments %}
-        <div>
-          <p>{{ comment.author }}</p>
-          <p>
-            {{- comment.created_at | time_tag: format: 'date' -}}
-          </p>
-          <p>{{ comment.content }}</p>
+  <div class="layout__content">
+    <div class="article__inner">
+      {%- if s.show_breadcrumbs or s.show_blog_title -%}
+        <header class="article__top">
+          {%- if s.show_breadcrumbs -%}
+            {% render 'breadcrumbs' %}
+          {%- endif -%}
+
+          {%- if s.show_blog_title -%}
+            {%- comment -%}
+              A link, not a heading: the article's own title is the page's one
+              top-level heading, and this is a way back to the blog.
+            {%- endcomment -%}
+            <a class="article__blog" href="{{ blog.url }}" {% render 'text-preset-style', preset: s.blog_title_preset %}>
+              {{- blog.title -}}
+            </a>
+          {%- endif -%}
+        </header>
+      {%- endif -%}
+
+      {%- if has_image -%}
+        {%- liquid
+          assign focal = image.presentation.focal_point | default: 'center center'
+          assign focal_style = 'object-position: ' | append: focal | append: ';'
+          assign alt = image.alt | default: article.title | escape
+        -%}
+        <div class="article__media" style="--article-image-ratio: {{ s.image_ratio }};">
+          {{
+            image
+            | image_url: width: 2000
+            | image_tag:
+              class: 'article__image',
+              widths: '375, 550, 750, 1100, 1500, 2000',
+              sizes: '100vw',
+              alt: alt,
+              loading: 'eager',
+              fetchpriority: 'high',
+              style: focal_style
+          }}
         </div>
-      {% endfor %}
+      {%- endif -%}
 
-      {{ paginate | default_pagination: anchor: 'comments' }}
-    {% endpaginate %}
+      <article class="article__body" style="--article-overlap: {{ overlap }}px;">
+        <header class="article__header">
+          {%- if has_meta -%}
+            <p class="article__meta">
+              {%- if s.show_author and article.author != blank -%}
+                {{ article.author }}
+                {%- if s.show_date -%}
+                  <span class="article__separator" aria-hidden="true">&bull;</span>
+                {%- endif -%}
+              {%- endif -%}
+
+              {%- if s.show_date -%}
+                {{ article.published_at | time_tag: format: 'month_day_year' }}
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+
+          <h1 class="article__title" {% render 'text-preset-style', preset: s.title_preset %}>
+            {{- article.title -}}
+          </h1>
+        </header>
+
+        <div class="article__content rte">{{ article.content }}</div>
+
+        {%- if s.show_tags and article.tags.size > 0 -%}
+          <ul class="article__tags list-unstyled" role="list">
+            {%- for tag in article.tags -%}
+              <li>
+                <a class="button button--secondary button--small" href="{{ blog.url }}/tagged/{{ tag | handle }}">
+                  {{- tag -}}
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </article>
+
+      {%- if blog.comments_enabled? -%}
+        <section class="article__comments" id="comments">
+          <h2 class="article__comments-heading">{{ 'blogs.article.comments' | t }}</h2>
+
+          {%- paginate article.comments by 10 -%}
+            {%- if article.comments_count > 0 -%}
+              <ul class="comments list-unstyled" role="list">
+                {%- for comment in article.comments -%}
+                  <li class="comment">
+                    <p class="comment__meta">
+                      <span class="comment__author">{{ comment.author }}</span>
+                      <span class="article__separator" aria-hidden="true">&bull;</span>
+                      {{ comment.created_at | time_tag: format: 'month_day_year' }}
+                    </p>
+                    <div class="comment__body rte">{{ comment.content }}</div>
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {% render 'pagination', paginate: paginate %}
+            {%- endif -%}
+          {%- endpaginate -%}
+
+          {%- form 'new_comment', article -%}
+            <h3 class="article__comments-heading">{{ 'blogs.comment_form.title' | t }}</h3>
+
+            {%- if form.posted_successfully? -%}
+              <p class="comment-form__success" role="status" tabindex="-1">
+                {{ 'blogs.comment_form.post_success' | t }}
+              </p>
+            {%- endif -%}
+
+            {%- comment -%}
+              Comments post whether or not the blog moderates them, so the
+              customer is told which of the two just happened.
+            {%- endcomment -%}
+            {{ form.errors | default_errors }}
+
+            <div class="comment-form">
+              <div class="comment-form__row">
+                <div class="comment-form__field">
+                  <label for="comment-author">{{ 'blogs.comment_form.name' | t }}</label>
+                  <input type="text" id="comment-author" name="comment[author]" value="{{ form.author }}" autocomplete="name" required>
+                </div>
+
+                <div class="comment-form__field">
+                  <label for="comment-email">{{ 'blogs.comment_form.email' | t }}</label>
+                  <input type="email" id="comment-email" name="comment[email]" value="{{ form.email }}" autocomplete="email" autocapitalize="off" spellcheck="false" required>
+                </div>
+              </div>
+
+              <div class="comment-form__field">
+                <label for="comment-body">{{ 'blogs.comment_form.body' | t }}</label>
+                <textarea id="comment-body" name="comment[body]" rows="5" required>{{ form.body }}</textarea>
+              </div>
+
+              <button type="submit" class="button">{{ 'blogs.comment_form.submit' | t }}</button>
+            </div>
+          {%- endform -%}
+        </section>
+      {%- endif -%}
+    </div>
   </div>
+</div>
 
-  {% form 'new_comment', article %}
-    <h2>{{ 'blogs.comment_form.title' | t }}</h2>
+{% stylesheet %}
+  .article__inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
 
-    {{ form.errors | default_errors }}
+  .article__top {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-block-end: 1.5rem;
+  }
 
-    <div>
-      <label for="author">{{ 'blogs.comment_form.name' | t }}</label>
-      <input type="text" name="comment[author]" id="author" value="{{ form.author }}" required>
-    </div>
+  .article__blog {
+    color: inherit;
+    text-decoration: none;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
 
-    <div>
-      <label for="email">{{ 'blogs.comment_form.email' | t }}</label>
-      <input type="email" name="comment[email]" id="email" value="{{ form.email }}" required>
-    </div>
+  .article__image {
+    width: 100%;
+    aspect-ratio: var(--article-image-ratio, 16 / 9);
+    object-fit: cover;
+  }
 
-    <div>
-      <label for="body">{{ 'blogs.comment_form.body' | t }}</label>
-      <textarea name="comment[body]" id="body" required>{{ form.body }}</textarea>
-    </div>
+  /*
+   * The panel that lifts over the image. It carries the section's own
+   * background so the photograph stops cleanly behind it, and is inset from
+   * both edges so the image still shows down either side.
+   */
+  .article__body {
+    position: relative;
+    z-index: 1;
+    align-self: center;
+    width: min(100%, 46rem);
+    margin-block-start: calc(var(--article-overlap, 0px) * -1);
+    padding-block-start: var(--article-overlap, 0px);
+    /* Follows a Background color override, not just the color scheme. */
+    background-color: var(--layout-background, var(--color-background));
+  }
 
-    <input type="submit" value="{{ 'blogs.comment_form.submit' | t }}">
-  {% endform %}
-{% endif %}
+  .article__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-block-end: 1.5rem;
+  }
+
+  .article__meta,
+  .comment__meta {
+    margin: 0;
+    font-size: var(--text-h6-size);
+    opacity: 0.75;
+  }
+
+  .article__separator {
+    margin-inline: 0.4rem;
+  }
+
+  .article__title {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  .article__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block-start: 2rem;
+  }
+
+  /* Comments */
+
+  .article__comments {
+    align-self: center;
+    width: min(100%, 46rem);
+    margin-block-start: 3rem;
+  }
+
+  .article__comments-heading {
+    margin-block-end: 1rem;
+    font-family: var(--text-h5-family);
+    font-size: var(--text-h5-size);
+  }
+
+  .comments {
+    display: grid;
+    gap: 1.5rem;
+    margin-block-end: 2.5rem;
+  }
+
+  .comment {
+    padding-block-end: 1.5rem;
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .comment__author {
+    font-family: var(--text-h6-family);
+  }
+
+  .comment-form {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 1.25rem;
+  }
+
+  .comment-form__row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    width: 100%;
+  }
+
+  .comment-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .comment-form__field label {
+    font-size: var(--text-h6-size);
+  }
+
+  .comment-form__field input,
+  .comment-form__field textarea {
+    min-height: 44px;
+    padding: 0.5rem 0.75rem;
+    font: inherit;
+    color: inherit;
+    background-color: transparent;
+    border: var(--input-border-width) solid var(--color-border);
+    border-radius: var(--input-radius);
+  }
+
+  .comment-form__field textarea {
+    resize: vertical;
+  }
+
+  .comment-form__success {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-border);
+  }
+
+  @media (max-width: 749px) {
+    /*
+     * An overlap that works on a wide photograph eats a phone-width one, and
+     * the panel is full width here anyway, so it sits below instead.
+     */
+    .article__body {
+      margin-block-start: 0;
+      padding-block-start: 1.5rem;
+    }
+
+    .comment-form__row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.article",
-  "settings": []
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "t:labels.show_breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_blog_title", "label": "t:labels.show_blog_title", "default": true },
+    { "type": "select", "id": "blog_title_preset", "label": "t:labels.blog_title_preset", "default": "h4",
+      "visible_if": "{{ section.settings.show_blog_title }}",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "title_preset", "label": "t:labels.preset", "default": "h2",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "checkbox", "id": "show_author", "label": "t:labels.show_author", "default": true },
+    { "type": "checkbox", "id": "show_date", "label": "t:labels.show_date", "default": true },
+    { "type": "checkbox", "id": "show_tags", "label": "t:labels.show_tags", "default": false },
+
+    { "type": "header", "content": "t:general.media" },
+    { "type": "checkbox", "id": "show_image", "label": "t:labels.show_featured_image", "default": true },
+    { "type": "select", "id": "image_ratio", "label": "t:labels.image_ratio", "default": "3 / 2",
+      "visible_if": "{{ section.settings.show_image }}",
+      "options": [
+        { "value": "1 / 1", "label": "t:options.image_ratio.square" },
+        { "value": "4 / 5", "label": "t:options.image_ratio.portrait" },
+        { "value": "3 / 2", "label": "t:options.image_ratio.landscape" },
+        { "value": "16 / 9", "label": "t:options.image_ratio.wide" }
+      ] },
+    { "type": "range", "id": "image_overlap", "label": "t:labels.image_overlap", "info": "t:info.image_overlap", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80,
+      "visible_if": "{{ section.settings.show_image }}" },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ]
 }
 {% endschema %}

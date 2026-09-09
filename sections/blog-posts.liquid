@@ -12,22 +12,47 @@
 
 {% liquid
   assign s = section.settings
-  assign blog = s.blog
   assign limit = s.posts_to_show | default: 3
 
-  assign dot_count = blog.articles.size
+  comment
+    With no blog chosen, fall back to the one in context. On an article or blog
+    template that is the blog being read, which is what a "Read more" row wants;
+    everywhere else there is none and the section says so.
+  endcomment
+  assign posts_blog = s.blog
+  if posts_blog == blank
+    assign posts_blog = blog
+  endif
+
+  comment
+    Never offer the post already being read. One extra article is fetched so
+    dropping it still fills the row, and `shown` — not the loop index — decides
+    when to stop.
+  endcomment
+  assign current_id = article.id
+  assign fetch_limit = limit
+  if current_id
+    assign fetch_limit = limit | plus: 1
+  endif
+
+  assign available = posts_blog.articles.size
+  if current_id and available > 0
+    assign available = available | minus: 1
+  endif
+
+  assign dot_count = available
   if dot_count > limit
     assign dot_count = limit
   endif
 
   assign has_posts = false
-  if blog.articles.size > 0
+  if available > 0
     assign has_posts = true
   endif
 
   assign slider_label = s.heading | strip_html | strip
   if slider_label == blank
-    assign slider_label = blog.title
+    assign slider_label = posts_blog.title
   endif
   if slider_label == blank
     assign slider_label = 'general.slider.label' | t
@@ -66,17 +91,22 @@
               role="region"
               aria-label="{{ slider_label | escape }}"
             >
-              {%- for article in blog.articles limit: limit -%}
+              {%- assign shown = 0 -%}
+              {%- for post in posts_blog.articles limit: fetch_limit -%}
+                {%- if post.id == current_id or shown >= limit -%}
+                  {%- continue -%}
+                {%- endif -%}
                 <li>
                   {% render 'article-card',
-                    article: article,
-                    index: forloop.index0,
+                    article: post,
+                    index: shown,
                     show_author: s.show_author,
                     show_date: s.show_date,
                     show_excerpt: s.show_excerpt,
                     show_read_more: s.show_read_more
                   %}
                 </li>
+                {%- assign shown = shown | plus: 1 -%}
               {%- endfor -%}
             </ul>
 
@@ -87,24 +117,29 @@
       </slider-carousel>
         {%- else -%}
           <ul class="layout__blocks blog-posts__grid list-unstyled">
-            {%- for article in blog.articles limit: limit -%}
+            {%- assign shown = 0 -%}
+            {%- for post in posts_blog.articles limit: fetch_limit -%}
+              {%- if post.id == current_id or shown >= limit -%}
+                {%- continue -%}
+              {%- endif -%}
               <li>
                 {% render 'article-card',
-                  article: article,
-                  index: forloop.index0,
+                  article: post,
+                  index: shown,
                   show_author: s.show_author,
                   show_date: s.show_date,
                   show_excerpt: s.show_excerpt,
                   show_read_more: s.show_read_more
                 %}
               </li>
+              {%- assign shown = shown | plus: 1 -%}
             {%- endfor -%}
           </ul>
         {%- endif -%}
 
       {%- elsif request.design_mode -%}
         <p class="blog-posts__hint">
-          {%- if blog == blank -%}
+          {%- if posts_blog == blank -%}
             {{ 'blogs.section.no_blog' | t }}
           {%- else -%}
             {{ 'blogs.section.empty_blog' | t }}

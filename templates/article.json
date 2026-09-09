@@ -12,9 +12,29 @@
     "main": {
       "type": "article",
       "settings": {}
+    },
+    "read_more": {
+      "type": "blog-posts",
+      "settings": {
+        "heading": "Read more",
+        "heading_alignment": "center",
+        "posts_to_show": 3,
+        "show_author": true,
+        "show_date": true,
+        "show_excerpt": false,
+        "show_read_more": true,
+        "display": "grid",
+        "columns": 3,
+        "columns_mobile": "1",
+        "gap": 24,
+        "width": "page",
+        "padding_top": 48,
+        "padding_bottom": 64
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "read_more"
   ]
 }

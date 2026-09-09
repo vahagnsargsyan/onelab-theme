@@ -332,6 +332,53 @@ h6 {
   opacity: 0.5;
 }
 
+/*
+ * Rich text.
+ *
+ * Every merchant-authored body — article content, page content, product
+ * descriptions, FAQ answers — carries `.rte`, and the reset has already
+ * stripped every margin, so this is where that text gets its rhythm back.
+ * Styling it once here is what keeps a description on the product page reading
+ * the same as the same words on a page.
+ */
+.rte > * + * {
+  margin-block-start: 1rem;
+}
+
+/* Only headings with something above them; the first child stays flush. */
+.rte > * + :is(h1, h2, h3, h4, h5, h6) {
+  margin-block-start: 2rem;
+}
+
+.rte :is(ul, ol) {
+  padding-inline-start: 1.25rem;
+}
+
+.rte li + li {
+  margin-block-start: 0.35rem;
+}
+
+.rte blockquote {
+  padding-inline-start: 1rem;
+  border-inline-start: 2px solid var(--color-border);
+}
+
+.rte a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
+.rte table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rte :is(th, td) {
+  padding: 0.5rem;
+  text-align: start;
+  border: 1px solid var(--color-border);
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
