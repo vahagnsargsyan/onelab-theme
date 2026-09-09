@@ -1,0 +1,290 @@
+{% comment %}
+  FAQ. A stack of questions that open to reveal their answers.
+
+  Built on <details>/<summary>, so it opens and closes from the keyboard, is
+  announced correctly by screen readers, prints expanded, and is findable by the
+  browser's own find-in-page — none of which a scripted accordion gets for free.
+  There is no JavaScript in this section at all.
+
+  "Open one item at a time" uses the `name` attribute, which makes a group of
+  <details> mutually exclusive natively. A browser that does not know the
+  attribute yet simply lets more than one stay open, which is a fair fallback.
+
+  Blocks are local rather than theme blocks: a question belongs to an accordion
+  and nowhere else, and the exclusive group needs `section.id`, which a theme
+  block cannot see. `@app` is accepted alongside them.
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+%}
+
+<div {% render 'layout-style', s: section.settings, class: 'faq full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    <div class="faq__inner">
+      {%- if s.heading != blank -%}
+        <header class="faq__header faq__header--{{ s.heading_alignment }}">
+          <h2 class="faq__heading" {% render 'text-preset-style', preset: s.heading_preset %}>
+            {{- s.heading -}}
+          </h2>
+        </header>
+      {%- endif -%}
+
+      <div class="layout__blocks faq__list">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'question' -%}
+              <details
+                class="faq__item"
+                {% if s.exclusive %}name="faq-{{ section.id }}"{% endif %}
+                {% if block.settings.open %}open{% endif %}
+                {{ block.shopify_attributes }}
+              >
+                <summary class="faq__question">
+                  <span class="faq__label">{{ block.settings.question }}</span>
+                  {%- comment -%}
+                    One icon for both states: the stem is hidden when the item
+                    is open, which turns the plus into a minus.
+                  {%- endcomment -%}
+                  <span class="faq__icon">{{ 'icon-plus.svg' | inline_asset_content }}</span>
+                </summary>
+
+                <div class="faq__answer rte">{{ block.settings.answer }}</div>
+              </details>
+
+            {%- when '@app' -%}
+              {% render block %}
+          {%- endcase -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .faq__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .faq__header--left {
+    text-align: left;
+  }
+  .faq__header--center {
+    text-align: center;
+  }
+  .faq__header--right {
+    text-align: right;
+  }
+
+  .faq__heading {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  /*
+   * The rule sits on the top of every row, so the set reads as one ruled list
+   * and there is no stray line hanging under the last answer.
+   */
+  .faq__item {
+    border-block-start: 1px solid var(--color-border);
+  }
+
+  .faq__question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    min-height: 44px;
+    padding-block: 1.1rem;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  /* Safari paints its own triangle without this. */
+  .faq__question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq__question:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .faq__label {
+    font-family: var(--text-h5-family);
+    font-size: var(--text-h5-size);
+  }
+
+  .faq__icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 24px;
+    height: 24px;
+  }
+
+  .faq__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .faq__item[open] .icon-plus__stem {
+    opacity: 0;
+  }
+
+  .faq__answer {
+    padding-block-end: 1.5rem;
+    /* Long answers stay readable rather than running the full page width. */
+    max-width: 70ch;
+  }
+
+  .faq__answer > * + * {
+    margin-block-start: 1rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.faq",
+  "blocks": [
+    {
+      "type": "question",
+      "name": "t:general.question",
+      "settings": [
+        { "type": "text", "id": "question", "label": "t:labels.question", "default": "t:defaults.faq_question" },
+        { "type": "richtext", "id": "answer", "label": "t:labels.answer", "default": "t:defaults.faq_answer" },
+        { "type": "checkbox", "id": "open", "label": "t:labels.open_by_default", "default": false }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.faq_heading" },
+    { "type": "select", "id": "heading_preset", "label": "t:labels.preset", "default": "h4",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "heading_alignment", "label": "t:labels.heading_alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "checkbox", "id": "exclusive", "label": "t:labels.exclusive", "info": "t:info.exclusive", "default": true },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "display", "label": "t:labels.display", "default": "block",
+      "options": [
+        { "value": "block", "label": "t:options.display.block" },
+        { "value": "flex", "label": "t:options.display.flex" },
+        { "value": "grid", "label": "t:options.display.grid" }
+      ] },
+    { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
+      "visible_if": "{{ section.settings.display == 'flex' }}",
+      "options": [
+        { "value": "vertical", "label": "t:options.direction.vertical" },
+        { "value": "horizontal", "label": "t:options.direction.horizontal" }
+      ] },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 1 },
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
+      "options": [
+        { "value": "1", "label": "t:options.columns_mobile.one" },
+        { "value": "2", "label": "t:options.columns_mobile.two" }
+      ] },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "left",
+      "visible_if": "{{ section.settings.display != 'block' }}",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "top",
+      "visible_if": "{{ section.settings.display != 'block' }}",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "default": "fit",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.faq",
+      "blocks": [
+        { "type": "question", "settings": { "open": true } },
+        { "type": "question", "settings": { "question": "t:defaults.faq_question_shipping", "answer": "t:defaults.faq_answer_shipping" } },
+        { "type": "question", "settings": { "question": "t:defaults.faq_question_returns", "answer": "t:defaults.faq_answer_returns" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
