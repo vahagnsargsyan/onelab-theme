@@ -23,18 +23,29 @@
       assign ratio = 'auto'
   endcase
 
+  comment
+    Width resolves to a CSS length and a `sizes` hint together, so the browser
+    is told the same thing the layout will do. A custom width is a fixed number
+    of pixels, which caps at the container on small screens through max-width.
+  endcomment
   case s.width
+    when 'custom'
+      assign custom_width = s.custom_width | default: 400
+      assign image_width = custom_width | append: 'px'
+      assign sizes = '(min-width: ' | append: custom_width | append: 'px) ' | append: custom_width | append: 'px, 100vw'
     when 'large'
-      assign width_pct = 75
+      assign image_width = '75%'
+      assign sizes = '(min-width: 1400px) 75vw, 100vw'
     when 'medium'
-      assign width_pct = 50
+      assign image_width = '50%'
+      assign sizes = '(min-width: 1400px) 50vw, 100vw'
     when 'small'
-      assign width_pct = 25
+      assign image_width = '25%'
+      assign sizes = '(min-width: 1400px) 25vw, 100vw'
     else
-      assign width_pct = 100
+      assign image_width = '100%'
+      assign sizes = '100vw'
   endcase
-
-  assign sizes = '(min-width: 1400px) ' | append: width_pct | append: 'vw, 100vw'
   assign focal = image.presentation.focal_point | default: 'center center'
   assign focal_style = 'object-position: ' | append: focal | append: ';'
   assign alt = image.alt | default: ''
@@ -44,7 +55,7 @@
   class="image image--align-{{ s.alignment | default: 'left' }}"
   style="
     --image-ratio: {{ ratio }};
-    --image-width: {{ width_pct }}%;
+    --image-width: {{ image_width }};
     --image-fit: {{ s.fit | default: 'cover' }};
     --image-radius: {{ s.corner_radius | default: 0 }}px;
     --image-padding-top: {{ s.padding_top | default: 0 }}px;
@@ -99,6 +110,7 @@
   .image__link {
     display: block;
     width: var(--image-width);
+    max-width: 100%;
   }
   .image__link:focus-visible {
     outline: var(--focus-ring-width) solid currentColor;
@@ -108,6 +120,7 @@
   .image__media {
     display: block;
     width: var(--image-width);
+    max-width: 100%;
     aspect-ratio: var(--image-ratio);
     object-fit: var(--image-fit);
     border-radius: var(--image-radius);
@@ -147,8 +160,21 @@
         { "value": "full", "label": "t:options.image_width.full" },
         { "value": "large", "label": "t:options.image_width.large" },
         { "value": "medium", "label": "t:options.image_width.medium" },
-        { "value": "small", "label": "t:options.image_width.small" }
+        { "value": "small", "label": "t:options.image_width.small" },
+        { "value": "custom", "label": "t:options.image_width.custom" }
       ]
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "t:labels.custom_width",
+      "min": 20,
+      "max": 500,
+      "step": 5,
+      "unit": "px",
+      "default": 400,
+      "info": "t:info.custom_width",
+      "visible_if": "{{ block.settings.width == 'custom' }}"
     },
     {
       "type": "select",

@@ -40,7 +40,7 @@
 %}
 
 <{{ wrapper }}
-  class="image {{ class }}"
+  class="media-frame {{ class }}"
   {% if url %}
     href="{{ url }}"
   {% endif %}
@@ -49,7 +49,12 @@
 </{{ wrapper }}>
 
 {% stylesheet %}
-  .image {
+  /*
+   * `.media-frame`, not `.image`: blocks/image.liquid owns `.image`, and a
+   * `.image > img` rule here outranked its `.image__media` on specificity —
+   * which quietly forced every Width option in that block to full width.
+   */
+  .media-frame {
     display: block;
     position: relative;
     overflow: hidden;
@@ -57,7 +62,7 @@
     height: auto;
   }
 
-  .image > img {
+  .media-frame > img {
     width: 100%;
     height: auto;
   }

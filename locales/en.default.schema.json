@@ -128,6 +128,7 @@
     "content_spacing": "Content spacing",
     "corner_radius": "Corner radius",
     "custom_liquid": "Liquid code",
+    "custom_width": "Custom width",
     "customer_account_menu": "Customer account menu",
     "description": "Description",
     "direction": "Direction",
@@ -251,6 +252,7 @@
     "content_position": "Where the text sits in relation to the image.",
     "content_spacing": "Spread pins the heading to the top and the rest to the bottom, when the section is tall enough.",
     "custom_liquid": "Add app snippets or other Liquid code to create advanced customizations.",
+    "custom_width": "Never wider than the space the block sits in, so it stays inside its column on small screens.",
     "favicon": "Scaled down to 32 x 32px.",
     "focus_accessibility": "The focus outline shows keyboard customers where they are on the page. Keep it visible so the storefront stays usable without a mouse.",
     "font_performance": "Roles that share a font family load once. Using fewer families keeps the storefront fast.",
@@ -402,7 +404,8 @@
       "full": "Full",
       "large": "Three quarters",
       "medium": "Half",
-      "small": "Quarter"
+      "small": "Quarter",
+      "custom": "Custom"
     },
     "letter_spacing": {
       "tight": "Tight",
