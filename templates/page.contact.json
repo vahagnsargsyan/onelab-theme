@@ -11,15 +11,353 @@
   "sections": {
     "banner": {
       "type": "page",
-      "settings": {}
+      "settings": {
+        "show_breadcrumbs": true,
+        "title_preset": "h2",
+        "alignment": "left",
+        "position": "center",
+        "gap": 24,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 25,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 32,
+        "padding_bottom": 32,
+        "padding_left": 0,
+        "padding_right": 0
+      }
+    },
+    "custom_section_RMWLCE": {
+      "type": "custom-section",
+      "blocks": {
+        "group_x4imYX": {
+          "type": "group",
+          "name": "t:general.column",
+          "settings": {
+            "display": "block",
+            "use_slider": false,
+            "slider_loop": false,
+            "direction": "vertical",
+            "columns": 1,
+            "columns_mobile": "1",
+            "alignment": "left",
+            "position": "top",
+            "gap": 12,
+            "width": "fill",
+            "height": "fit",
+            "background_media": "none",
+            "background_color": "",
+            "background_overlay": false,
+            "overlay_color": "#000000",
+            "overlay_opacity": 40,
+            "border_style": "none",
+            "border_width": 1,
+            "border_radius": 0,
+            "padding_top": 0,
+            "padding_bottom": 0,
+            "padding_left": 0,
+            "padding_right": 0
+          },
+          "blocks": {
+            "image_R3RaUn": {
+              "type": "image",
+              "name": "t:general.image",
+              "settings": {
+                "image": "shopify://shop_images/Rectangle_63.png",
+                "link": "",
+                "width": "full",
+                "custom_width": 500,
+                "alignment": "left",
+                "ratio": "adapt",
+                "fit": "cover",
+                "corner_radius": 0,
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "image_R3RaUn"
+          ]
+        },
+        "group_VGnwaz": {
+          "type": "group",
+          "name": "t:general.column",
+          "settings": {
+            "display": "block",
+            "use_slider": false,
+            "slider_loop": false,
+            "direction": "vertical",
+            "columns": 3,
+            "columns_mobile": "1",
+            "alignment": "left",
+            "position": "top",
+            "gap": 12,
+            "width": "fill",
+            "height": "fit",
+            "background_media": "none",
+            "background_color": "",
+            "background_overlay": false,
+            "overlay_color": "#000000",
+            "overlay_opacity": 40,
+            "border_style": "none",
+            "border_width": 1,
+            "border_radius": 0,
+            "padding_top": 0,
+            "padding_bottom": 0,
+            "padding_left": 72,
+            "padding_right": 0
+          },
+          "blocks": {
+            "text_YWYmkk": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Get in Touch",
+                "preset": "h2",
+                "tag": "h2",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_FXektY": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Address",
+                "preset": "h6",
+                "tag": "h3",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_xfLVje": {
+              "type": "text",
+              "name": "t:general.text",
+              "settings": {
+                "text": "2715 Ash Dr. San Jose, South Dakota 83475",
+                "preset": "paragraph",
+                "tag": "p",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_G7czXT": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Email",
+                "preset": "h6",
+                "tag": "h3",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_j4K37n": {
+              "type": "text",
+              "name": "t:general.text",
+              "settings": {
+                "text": "youremail@domain.com",
+                "preset": "paragraph",
+                "tag": "p",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_FE69LY": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Phone",
+                "preset": "h6",
+                "tag": "h3",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_6BrwAp": {
+              "type": "text",
+              "name": "t:general.text",
+              "settings": {
+                "text": "+123 456 789",
+                "preset": "paragraph",
+                "tag": "p",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "text_YWYmkk",
+            "text_FXektY",
+            "text_xfLVje",
+            "text_G7czXT",
+            "text_j4K37n",
+            "text_FE69LY",
+            "text_6BrwAp"
+          ]
+        }
+      },
+      "block_order": [
+        "group_x4imYX",
+        "group_VGnwaz"
+      ],
+      "name": "t:general.custom_section",
+      "settings": {
+        "display": "flex",
+        "use_slider": false,
+        "slider_loop": false,
+        "show_dots": false,
+        "direction": "horizontal",
+        "columns": 2,
+        "columns_mobile": "1",
+        "alignment": "left",
+        "position": "center",
+        "gap": 12,
+        "width": "full",
+        "height": "fit",
+        "color_scheme": "scheme-4",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 0,
+        "padding_bottom": 0,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     },
     "main": {
       "type": "page-contact",
-      "settings": {}
+      "settings": {
+        "heading": "Write to us",
+        "heading_preset": "h3",
+        "show_phone": true,
+        "require_phone": true,
+        "show_subject": true,
+        "image": "shopify://shop_images/Rectangle_64.png",
+        "image_position": "right",
+        "media_width": "half",
+        "image_ratio": "landscape",
+        "gap": 48,
+        "width": "page",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 64,
+        "padding_bottom": 64,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
     "banner",
+    "custom_section_RMWLCE",
     "main"
   ]
 }

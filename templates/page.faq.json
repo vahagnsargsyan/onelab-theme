@@ -1,0 +1,170 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "page",
+      "settings": {
+        "show_breadcrumbs": true,
+        "title_preset": "h2",
+        "alignment": "center",
+        "position": "center",
+        "gap": 24,
+        "width": "full",
+        "height": "small",
+        "color_scheme": "scheme-4",
+        "background_media": "image",
+        "background_image": "shopify://shop_images/cornelia-ng-2zHQhfEpisc-unsplash_1_1.png",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 25,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 32,
+        "padding_bottom": 32,
+        "padding_left": 0,
+        "padding_right": 0
+      }
+    },
+    "faq_AbN4Bc": {
+      "type": "faq",
+      "blocks": {
+        "question_CNa4qV": {
+          "type": "question",
+          "settings": {
+            "question": "Do you ship internationally?",
+            "answer": "<p>We ship worldwide. Duties and taxes are calculated at checkout, so there is nothing to pay on delivery.</p>",
+            "open": true
+          }
+        },
+        "question_hqwC6d": {
+          "type": "question",
+          "settings": {
+            "question": "How long does shipping take?",
+            "answer": "<p>Orders are packed within one business day and arrive in three to five business days.</p>",
+            "open": false
+          }
+        },
+        "question_UkjfX6": {
+          "type": "question",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "<p>Unworn pieces can be returned within 30 days of delivery, in their original packaging.</p>",
+            "open": false
+          }
+        }
+      },
+      "block_order": [
+        "question_CNa4qV",
+        "question_hqwC6d",
+        "question_UkjfX6"
+      ],
+      "name": "t:general.faq",
+      "settings": {
+        "heading": "Shipping and returns",
+        "heading_preset": "h4",
+        "heading_alignment": "center",
+        "exclusive": true,
+        "display": "block",
+        "direction": "vertical",
+        "columns": 1,
+        "columns_mobile": "1",
+        "alignment": "left",
+        "position": "top",
+        "gap": 0,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 48,
+        "padding_bottom": 48,
+        "padding_left": 52,
+        "padding_right": 52
+      }
+    },
+    "faq_EiGeP6": {
+      "type": "faq",
+      "blocks": {
+        "question_hiFfmq": {
+          "type": "question",
+          "settings": {
+            "question": "Do you ship internationally?",
+            "answer": "<p>We ship worldwide. Duties and taxes are calculated at checkout, so there is nothing to pay on delivery.</p>",
+            "open": true
+          }
+        },
+        "question_t8nhMA": {
+          "type": "question",
+          "settings": {
+            "question": "How long does shipping take?",
+            "answer": "<p>Orders are packed within one business day and arrive in three to five business days.</p>",
+            "open": false
+          }
+        },
+        "question_F4E9BG": {
+          "type": "question",
+          "settings": {
+            "question": "What is your return policy?",
+            "answer": "<p>Unworn pieces can be returned within 30 days of delivery, in their original packaging.</p>",
+            "open": false
+          }
+        }
+      },
+      "block_order": [
+        "question_hiFfmq",
+        "question_t8nhMA",
+        "question_F4E9BG"
+      ],
+      "name": "t:general.faq",
+      "settings": {
+        "heading": "Orders",
+        "heading_preset": "h4",
+        "heading_alignment": "center",
+        "exclusive": true,
+        "display": "block",
+        "direction": "vertical",
+        "columns": 1,
+        "columns_mobile": "1",
+        "alignment": "left",
+        "position": "top",
+        "gap": 0,
+        "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 48,
+        "padding_bottom": 48,
+        "padding_left": 52,
+        "padding_right": 52
+      }
+    }
+  },
+  "order": [
+    "main",
+    "faq_AbN4Bc",
+    "faq_EiGeP6"
+  ]
+}
