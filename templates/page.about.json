@@ -173,7 +173,7 @@
           "type": "group",
           "name": "t:general.column",
           "settings": {
-            "display": "flex",
+            "display": "block",
             "use_slider": false,
             "slider_loop": false,
             "direction": "vertical",
