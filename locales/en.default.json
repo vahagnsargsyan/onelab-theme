@@ -225,11 +225,12 @@
   "templates": {
     "contact": {
       "form": {
-        "name": "Name",
-        "email": "Email",
+        "name": "Full name",
+        "email": "Email address",
         "phone": "Phone number",
-        "comment": "Comment",
-        "send": "Send",
+        "subject": "Subject",
+        "comment": "Message",
+        "send": "Send message",
         "post_success": "Thanks for contacting us. We'll get back to you as soon as we can.",
         "error_heading": "Please adjust the following:"
       }

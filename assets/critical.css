@@ -274,9 +274,8 @@ h6 {
  * in one section's stylesheet.
  */
 .breadcrumbs__list {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  justify-content: inherit;
   gap: 0.5rem;
   font-size: var(--text-h6-size);
 }

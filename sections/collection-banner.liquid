@@ -60,13 +60,13 @@
 </div>
 
 {% stylesheet %}
-  /*
-   * The banner runs full bleed, so its content needs the page margin that the
-   * content grid would otherwise have given it.
-   */
   .collection-banner__inner {
-    padding-inline: var(--page-margin);
     text-align: var(--banner-align, center);
+  }
+
+  /* Only full bleed loses the content grid's margins, so only it needs these. */
+  .layout--width-full > .layout__content > .collection-banner__inner {
+    padding-inline: var(--page-margin);
   }
 
   .collection-banner__title {

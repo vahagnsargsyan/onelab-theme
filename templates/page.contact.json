@@ -9,12 +9,17 @@
  */
 {
   "sections": {
+    "banner": {
+      "type": "page",
+      "settings": {}
+    },
     "main": {
       "type": "page-contact",
       "settings": {}
     }
   },
   "order": [
+    "banner",
     "main"
   ]
 }

@@ -1,17 +1,175 @@
 {% comment %}
-  This section is used in the page template to render store pages like About us
-  or Contact us.
+  Page. Breadcrumbs and the page title, optionally over a background image, then
+  the page content.
+
+  The banner is not a separate mechanism: setting Background media to Image is
+  what puts a photo behind the header, and the shared Height, Alignment, and
+  Overlay settings shape it. Left with no background media it is a plain title
+  and breadcrumbs on the section's color scheme.
+
+  Because that background backs the whole section, a page that wants a photo
+  behind only its header leaves the page content empty and builds the body from
+  sections below — which is how a page like FAQ is usually put together.
+
+  Deviation from the canonical layout settings, per the rule in
+  snippets/layout-style.liquid: Display, Use slider, Direction, and the Columns
+  settings are omitted. A page header is a stack of two things. Alignment and
+  Position stay, and are what place the title against the image, so their
+  `visible_if` conditions drop the clauses that referenced the omitted settings.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/page
 {% endcomment %}
 
-<h1>{{ page.title }}</h1>
+{% liquid
+  assign s = section.settings
 
-{{ page.content }}
+  comment
+    Alignment places the boxes; this makes the text inside the header follow.
+    The page content is deliberately not aligned with it — centered body copy is
+    hard to read, and a merchant centering a title is not asking for that.
+  endcomment
+  assign text_align = s.alignment | default: 'left'
+%}
+
+<div {% render 'layout-style', s: section.settings, class: 'page full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    <div class="layout__blocks page__inner" style="--page-align: {{ text_align }};">
+      <header class="page__header">
+        {%- if s.show_breadcrumbs -%}
+          {% render 'breadcrumbs' %}
+        {%- endif -%}
+
+        <h1 class="page__title" {% render 'text-preset-style', preset: s.title_preset %}>
+          {{- page.title -}}
+        </h1>
+      </header>
+
+      {%- if page.content != blank -%}
+        <div class="page__content rte">{{ page.content }}</div>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  /* Only full bleed loses the content grid's margins, so only it needs these. */
+  .layout--width-full > .layout__content > .page__inner {
+    padding-inline: var(--page-margin);
+  }
+
+  .page__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: var(--page-align, left);
+  }
+
+  .page__title {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  /* Body copy stays where it reads best, whatever the header is doing. */
+  .page__content {
+    width: 100%;
+    max-width: 70ch;
+    text-align: start;
+  }
+
+  .page__content > * + * {
+    margin-block-start: 1rem;
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.page",
-  "settings": []
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "t:labels.show_breadcrumbs", "default": true },
+    { "type": "select", "id": "title_preset", "label": "t:labels.preset", "default": "h2",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "left",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "center",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 24 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "full",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "select", "id": "height", "label": "t:labels.height", "info": "t:info.page_height", "default": "fit",
+      "options": [
+        { "value": "fit", "label": "t:options.height.fit" },
+        { "value": "small", "label": "t:options.height.small" },
+        { "value": "medium", "label": "t:options.height.medium" },
+        { "value": "large", "label": "t:options.height.large" },
+        { "value": "full", "label": "t:options.height.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "info": "t:info.page_background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 25,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ]
 }
 {% endschema %}
