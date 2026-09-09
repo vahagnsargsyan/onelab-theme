@@ -142,11 +142,126 @@
               },
               "blocks": {}
             },
+            "text_FXektY": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Address",
+                "preset": "h6",
+                "tag": "h3",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
             "text_xfLVje": {
               "type": "text",
               "name": "t:general.text",
               "settings": {
-                "text": "Address 2715 Ash Dr. San Jose, South Dakota 83475Emailyouremail@domain.comPhone+123 456 789",
+                "text": "2715 Ash Dr. San Jose, South Dakota 83475",
+                "preset": "paragraph",
+                "tag": "p",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_G7czXT": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Email",
+                "preset": "h6",
+                "tag": "h3",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_j4K37n": {
+              "type": "text",
+              "name": "t:general.text",
+              "settings": {
+                "text": "youremail@domain.com",
+                "preset": "paragraph",
+                "tag": "p",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_FE69LY": {
+              "type": "text",
+              "name": "t:general.heading",
+              "settings": {
+                "text": "Phone",
+                "preset": "h6",
+                "tag": "h3",
+                "custom_font": "heading",
+                "custom_size": 32,
+                "custom_line_height": "normal",
+                "custom_letter_spacing": "normal",
+                "custom_case": "default",
+                "text_alignment": "left",
+                "width": "fit",
+                "max_width": "normal",
+                "text_color": "",
+                "padding_top": 0,
+                "padding_bottom": 0,
+                "padding_left": 0,
+                "padding_right": 0
+              },
+              "blocks": {}
+            },
+            "text_6BrwAp": {
+              "type": "text",
+              "name": "t:general.text",
+              "settings": {
+                "text": "+123 456 789",
                 "preset": "paragraph",
                 "tag": "p",
                 "custom_font": "heading",
@@ -168,7 +283,12 @@
           },
           "block_order": [
             "text_YWYmkk",
-            "text_xfLVje"
+            "text_FXektY",
+            "text_xfLVje",
+            "text_G7czXT",
+            "text_j4K37n",
+            "text_FE69LY",
+            "text_6BrwAp"
           ]
         }
       },
