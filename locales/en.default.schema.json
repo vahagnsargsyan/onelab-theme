@@ -135,6 +135,7 @@
     "content_source": "Content source",
     "content_spacing": "Content spacing",
     "corner_radius": "Corner radius",
+    "custom_font": "Custom font",
     "custom_liquid": "Liquid code",
     "custom_width": "Custom width",
     "customer_account_menu": "Customer account menu",
@@ -280,6 +281,7 @@
     "contact_image_position": "Where the image sits in relation to the form.",
     "content_position": "Where the text sits in relation to the image.",
     "content_spacing": "Spread pins the heading to the top and the rest to the bottom, when the section is tall enough.",
+    "custom_font": "Replaces the font above with one bundled with the theme. Chosen for brand fonts that Shopify's library does not carry.",
     "custom_liquid": "Add app snippets or other Liquid code to create advanced customizations.",
     "custom_width": "Never wider than the space the block sits in, so it stays inside its column on small screens.",
     "exclusive": "Opening one question closes whichever was open. Older browsers let more than one stay open.",
@@ -399,6 +401,10 @@
     "columns_mobile": {
       "one": "One",
       "two": "Two"
+    },
+    "custom_font": {
+      "none": "None",
+      "forum": "Forum"
     },
     "content_spacing": {
       "grouped": "Grouped",

@@ -98,10 +98,32 @@
         "default": "work_sans_n4"
       },
       {
+        "type": "select",
+        "id": "font_body_custom",
+        "label": "t:labels.custom_font",
+        "info": "t:info.custom_font",
+        "default": "none",
+        "options": [
+          { "value": "none", "label": "t:options.custom_font.none" },
+          { "value": "forum", "label": "t:options.custom_font.forum" }
+        ]
+      },
+      {
         "type": "font_picker",
         "id": "font_subheading",
         "label": "t:labels.subheading",
         "default": "work_sans_n4"
+      },
+      {
+        "type": "select",
+        "id": "font_subheading_custom",
+        "label": "t:labels.custom_font",
+        "info": "t:info.custom_font",
+        "default": "none",
+        "options": [
+          { "value": "none", "label": "t:options.custom_font.none" },
+          { "value": "forum", "label": "t:options.custom_font.forum" }
+        ]
       },
       {
         "type": "font_picker",
@@ -110,10 +132,32 @@
         "default": "work_sans_n4"
       },
       {
+        "type": "select",
+        "id": "font_heading_custom",
+        "label": "t:labels.custom_font",
+        "info": "t:info.custom_font",
+        "default": "none",
+        "options": [
+          { "value": "none", "label": "t:options.custom_font.none" },
+          { "value": "forum", "label": "t:options.custom_font.forum" }
+        ]
+      },
+      {
         "type": "font_picker",
         "id": "font_accent",
         "label": "t:labels.accent",
         "default": "work_sans_n4"
+      },
+      {
+        "type": "select",
+        "id": "font_accent_custom",
+        "label": "t:labels.custom_font",
+        "info": "t:info.custom_font",
+        "default": "none",
+        "options": [
+          { "value": "none", "label": "t:options.custom_font.none" },
+          { "value": "forum", "label": "t:options.custom_font.forum" }
+        ]
       },
       {
         "type": "header",

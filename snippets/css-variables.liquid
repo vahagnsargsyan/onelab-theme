@@ -13,13 +13,42 @@
 {% liquid
   assign font_roles = 'body,subheading,heading,accent' | split: ','
   assign emitted_families = ''
+
+  comment
+    Self-hosted families in use. A role set to one of these ignores its picker
+    font entirely, so the picker face is not downloaded for it either.
+    See snippets/custom-fonts.liquid — this whole mechanism is temporary.
+  endcomment
+  assign custom_fonts_used = ''
+  for role in font_roles
+    assign custom_key = 'font_' | append: role | append: '_custom'
+    assign custom = settings[custom_key]
+    if custom != blank and custom != 'none'
+      assign custom_fonts_used = custom_fonts_used | append: custom | append: '|'
+    endif
+  endfor
 %}
 
+{%- capture custom_font_faces -%}
+  {% render 'custom-fonts', used: custom_fonts_used %}
+{%- endcapture -%}
+
 {% style %}
+  {{ custom_font_faces }}
+
   {%- liquid
     for role in font_roles
       assign font_key = 'font_' | append: role
       assign font = settings[font_key]
+
+      comment
+        Nothing to load from Shopify for a role that uses a self-hosted family.
+      endcomment
+      assign custom_key = font_key | append: '_custom'
+      assign custom = settings[custom_key]
+      if custom != blank and custom != 'none'
+        continue
+      endif
 
       assign fingerprint = font.family | append: '~' | append: font.weight | append: '~' | append: font.style | append: '|'
 
@@ -52,9 +81,17 @@
     {%- for role in font_roles %}
       {%- assign font_key = 'font_' | append: role %}
       {%- assign font = settings[font_key] %}
+      {%- assign custom_key = font_key | append: '_custom' %}
+      {%- case settings[custom_key] %}
+        {%- when 'forum' %}
+    --font-{{ role }}--family: 'Forum', {{ font.fallback_families }};
+    --font-{{ role }}--style: normal;
+    --font-{{ role }}--weight: 400;
+        {%- else %}
     --font-{{ role }}--family: {{ font.family }}, {{ font.fallback_families }};
     --font-{{ role }}--style: {{ font.style }};
     --font-{{ role }}--weight: {{ font.weight }};
+      {%- endcase %}
     {%- endfor %}
 
     {%- comment -%}

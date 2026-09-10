@@ -1,0 +1,42 @@
+{% doc %}
+  Self-hosted font faces.
+
+  THEME STORE BLOCKER. The requirements say fonts must come from the
+  `font_picker` setting, whose library is Shopify's and cannot be extended by a
+  theme; a bundled font file fails review. This exists because Forum is not in
+  that library and the brand calls for it.
+
+  Removing it before submission is a clean delete, by design:
+    1. this file
+    2. the `{% render 'custom-fonts' %}` capture in snippets/css-variables.liquid
+       and the `case custom` branches around it
+    3. the four `font_*_custom` settings in config/settings_schema.json
+    4. the font files in assets/
+  The named fallback to switch to is in DEVELOPMENT-PLAN.md, Phase 11.
+
+  Forum ships one weight and no italic, so bold and italic are synthesized by
+  the browser. That is a second reason this cannot go to review as it stands.
+
+  `assets/forum-regular.woff2` is the latin subset from Google Fonts, 24 KB.
+
+  Forum: Copyright (c) 2011 Denis Masharov, Reserved Font Name "Forum",
+  licensed under the SIL Open Font License 1.1. Bundling is permitted as long
+  as the license travels with the font — the full text is in `licenses/` at the
+  repository root, since Shopify's assets directory does not accept .txt.
+
+  @param {string} used - Pipe-separated list of custom font keys in use, so a
+    face is only downloaded when a role actually asks for it.
+
+  @example
+  {% capture faces %}{% render 'custom-fonts', used: custom_fonts_used %}{% endcapture %}
+{% enddoc %}
+
+{%- if used contains 'forum' -%}
+@font-face {
+  font-family: 'Forum';
+  src: url({{ 'forum-regular.woff2' | asset_url }}) format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+{%- endif -%}

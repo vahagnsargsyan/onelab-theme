@@ -18,12 +18,12 @@
       assign heading_font = settings.font_heading
 
       assign preload_body = false
-      unless body_font.system?
+      unless body_font.system? or settings.font_body_custom != blank
         assign preload_body = true
       endunless
 
       assign preload_heading = false
-      unless heading_font.system?
+      unless heading_font.system? or settings.font_heading_custom != blank
         if heading_font.family != body_font.family
           assign preload_heading = true
         endif
