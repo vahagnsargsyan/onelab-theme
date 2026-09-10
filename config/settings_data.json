@@ -87,8 +87,8 @@
         "settings": {
           "background": "rgba(0,0,0,0)",
           "background_gradient": "",
-          "text": "#171717",
-          "button": "#171717",
+          "text": "#FFFFFF",
+          "button": "#FFFFFF",
           "button_label": "#ffffff",
           "secondary_button_label": "#171717",
           "borders": "#767676",
