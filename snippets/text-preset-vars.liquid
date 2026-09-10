@@ -1,0 +1,29 @@
+{% doc %}
+  Emits one global text preset's tokens under a custom prefix.
+
+  The companion to `text-preset-style`, for regions rather than single elements.
+  A footer column has one heading but a dozen links; giving each link its own
+  inline style would repeat the same six declarations a dozen times. This types
+  the whole region once on its wrapper, and the CSS reads the prefixed
+  properties with a fallback to what the region used before — so "Default"
+  leaves the design exactly as it was.
+
+  Emits nothing for a blank or "default" preset, which is what makes that
+  fallback work.
+
+  @param {string} [preset] - 'default', 'paragraph', or 'h1'…'h6'.
+  @param {string} prefix - Name to emit the properties under, without dashes.
+
+  @example
+  <div style="{% render 'text-preset-vars', preset: s.link_preset, prefix: 'footer-link' %}">
+  .footer__link { font-size: var(--footer-link-size, var(--text-paragraph-size)); }
+{% enddoc %}
+
+{%- if preset != blank and preset != 'default' -%}
+  --{{ prefix }}-family: var(--text-{{ preset }}-family);
+  --{{ prefix }}-weight: var(--text-{{ preset }}-weight);
+  --{{ prefix }}-size: var(--text-{{ preset }}-size);
+  --{{ prefix }}-leading: var(--text-{{ preset }}-leading);
+  --{{ prefix }}-tracking: var(--text-{{ preset }}-tracking);
+  --{{ prefix }}-case: var(--text-{{ preset }}-case);
+{%- endif -%}

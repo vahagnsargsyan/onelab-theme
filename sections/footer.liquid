@@ -18,7 +18,20 @@
   {% render 'layout-background', s: section.settings %}
 
   <div class="layout__content">
-    <div class="footer__inner">
+    {%- comment -%}
+      Typed once for the whole footer rather than element by element: a column
+      has one heading but a dozen links. Each preset falls back in CSS to what
+      the region already used, so "Default" changes nothing.
+    {%- endcomment -%}
+    <div
+      class="footer__inner"
+      style="
+        {% render 'text-preset-vars', preset: s.heading_preset, prefix: 'footer-heading' %}
+        {% render 'text-preset-vars', preset: s.link_preset, prefix: 'footer-link' %}
+        {% render 'text-preset-vars', preset: s.text_preset, prefix: 'footer-text' %}
+        {% render 'text-preset-vars', preset: s.bottom_preset, prefix: 'footer-bottom' %}
+      "
+    >
       {%- if section.blocks.size > 0 -%}
         <div class="layout__blocks footer__columns">
           {%- for block in section.blocks -%}
@@ -174,14 +187,22 @@
 
   .footer__heading {
     margin: 0;
-    font-family: var(--text-h5-family);
-    font-size: var(--text-h5-size);
-    letter-spacing: var(--text-h5-tracking);
-    text-transform: var(--text-h5-case);
+    font-family: var(--footer-heading-family, var(--text-h5-family));
+    font-weight: var(--footer-heading-weight, inherit);
+    font-size: var(--footer-heading-size, var(--text-h5-size));
+    line-height: var(--footer-heading-leading, inherit);
+    letter-spacing: var(--footer-heading-tracking, var(--text-h5-tracking));
+    text-transform: var(--footer-heading-case, var(--text-h5-case));
   }
 
   .footer__text {
     margin: 0;
+    font-family: var(--footer-text-family, inherit);
+    font-weight: var(--footer-text-weight, inherit);
+    font-size: var(--footer-text-size, inherit);
+    line-height: var(--footer-text-leading, inherit);
+    letter-spacing: var(--footer-text-tracking, inherit);
+    text-transform: var(--footer-text-case, none);
   }
 
   .footer__links {
@@ -197,6 +218,12 @@
     min-height: 32px;
     color: inherit;
     text-decoration: none;
+    font-family: var(--footer-link-family, inherit);
+    font-weight: var(--footer-link-weight, inherit);
+    font-size: var(--footer-link-size, inherit);
+    line-height: var(--footer-link-leading, inherit);
+    letter-spacing: var(--footer-link-tracking, inherit);
+    text-transform: var(--footer-link-case, none);
   }
 
   .footer__link:hover,
@@ -274,7 +301,12 @@
 
   .footer__bottom-text {
     margin: 0;
-    font-size: var(--text-h6-size);
+    font-family: var(--footer-bottom-family, inherit);
+    font-weight: var(--footer-bottom-weight, inherit);
+    font-size: var(--footer-bottom-size, var(--text-h6-size));
+    line-height: var(--footer-bottom-leading, inherit);
+    letter-spacing: var(--footer-bottom-tracking, inherit);
+    text-transform: var(--footer-bottom-case, none);
   }
 
   .footer__bottom-row {
@@ -285,9 +317,18 @@
     gap: 1rem;
   }
 
+  .footer__copyright,
+  .footer__bottom-links {
+    font-family: var(--footer-bottom-family, inherit);
+    font-weight: var(--footer-bottom-weight, inherit);
+    font-size: var(--footer-bottom-size, var(--text-h6-size));
+    line-height: var(--footer-bottom-leading, inherit);
+    letter-spacing: var(--footer-bottom-tracking, inherit);
+    text-transform: var(--footer-bottom-case, none);
+  }
+
   .footer__copyright {
     margin: 0;
-    font-size: var(--text-h6-size);
   }
 
   .footer__copyright a {
@@ -359,6 +400,52 @@
     { "type": "link_list", "id": "bottom_menu", "label": "t:labels.bottom_menu" },
     { "type": "checkbox", "id": "show_payment_icons", "label": "t:labels.show_payment_icons", "default": true },
 
+    { "type": "header", "content": "t:general.typography" },
+    { "type": "select", "id": "heading_preset", "label": "t:labels.heading_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "link_preset", "label": "t:labels.menu_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "text_preset", "label": "t:labels.text_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "bottom_preset", "label": "t:labels.bottom_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
       "options": [
@@ -398,6 +485,16 @@
     { "type": "header", "content": "t:general.appearance" },
     { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
     { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.padding" },
     { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 60 },

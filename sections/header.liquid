@@ -126,6 +126,33 @@
     "
     style="
       --header-min-height: {{ s.header_height | default: 80 }}px;
+      --header-padding-top: {{ s.padding_top | default: 0 }}px;
+      --header-padding-bottom: {{ s.padding_bottom | default: 0 }}px;
+      {%- comment -%}
+        Zero means "leave the page margin alone", which is why these two are
+        emitted only when set rather than always.
+      {%- endcomment -%}
+      {%- if s.padding_left > 0 %}
+      --header-padding-left: {{ s.padding_left }}px;
+      {%- endif %}
+      {%- if s.padding_right > 0 %}
+      --header-padding-right: {{ s.padding_right }}px;
+      {%- endif %}
+      {%- if s.width == 'full' %}
+      --header-max-width: 100%;
+      {%- endif %}
+      {%- if s.border_style == 'solid' %}
+      --header-border-width: {{ s.border_width | default: 1 }}px;
+      {%- endif %}
+      {%- comment -%}
+        Not while transparent: an inline background would beat the stylesheet
+        rule that makes the header see-through over the hero.
+      {%- endcomment -%}
+      {%- if s.background_color != blank and is_transparent == false %}
+      background-color: {{ s.background_color }};
+      {%- endif %}
+      {% render 'text-preset-vars', preset: s.menu_preset, prefix: 'header-menu' %}
+      {% render 'text-preset-vars', preset: s.utilities_preset, prefix: 'header-utilities' %}
       {%- if transparent_colors %}
       --header-transparent-text: {{ s.transparent_color_scheme.settings.text }};
       --header-transparent-border: {{ s.transparent_color_scheme.settings.borders }};
@@ -440,6 +467,45 @@
       "default": 80
     },
 
+    {
+      "type": "select",
+      "id": "width",
+      "label": "t:labels.width",
+      "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ]
+    },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 60, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 60, "step": 2, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "info": "t:info.header_padding_inline", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.typography" },
+    { "type": "select", "id": "menu_preset", "label": "t:labels.menu_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "utilities_preset", "label": "t:labels.utilities_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+
     { "type": "header", "content": "t:general.position" },
     {
       "type": "select",
@@ -505,6 +571,14 @@
       "label": "t:labels.color_scheme",
       "default": "scheme-1"
     },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "select", "id": "border_style", "label": "t:labels.border_bottom", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
     { "type": "checkbox", "id": "show_search", "label": "t:labels.show_search", "default": true },
     {
       "type": "select",
