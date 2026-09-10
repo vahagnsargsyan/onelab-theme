@@ -143,6 +143,27 @@ product-add.is-busy .card__add {
   margin-block-start: 0.5rem;
 }
 
+/*
+ * A ruled word rather than a filled button. The card already carries the
+ * image and the title as links; a solid button here would compete with the
+ * page's real calls to action.
+ */
+.card__read-more {
+  display: inline-block;
+  padding-block-end: 0.2rem;
+  color: inherit;
+  font-size: var(--text-h6-size);
+  letter-spacing: var(--text-h6-tracking);
+  text-transform: var(--text-h6-case);
+  text-decoration: none;
+  border-block-end: 1px solid currentColor;
+}
+
+.card__read-more:focus-visible {
+  outline: var(--focus-ring-width) solid currentColor;
+  outline-offset: var(--focus-ring-offset);
+}
+
 .card__separator {
   margin-inline: 0.4em;
 }

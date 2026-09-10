@@ -1,35 +1,359 @@
 {% comment %}
-  This section is used in the blog template to render the blog page listing all
-  articles within a blog.
+  Blog. Breadcrumbs and the blog title, an optional featured post shown large,
+  then the rest of the posts as a grid, then pagination.
+
+  The featured post is the newest one and appears on the first page only —
+  repeating it above page two would be a promise that the list underneath was
+  new. The grid then starts one post later so nothing shows twice.
+
+  Its text sits over a photograph, so it takes its own color scheme, the way a
+  transparent header does: pick a scheme with light text and the button and the
+  meta line follow it. `article.excerpt_or_content` is used on the cards, never
+  `article.content`.
 
   https://shopify.dev/docs/storefronts/themes/architecture/templates/blog
 {% endcomment %}
 
-<h1>{{ blog.title }}</h1>
+{% liquid
+  assign s = section.settings
+  assign per_page = s.posts_per_page | default: 6
 
-{% paginate blog.articles by 5 %}
-  {% for article in blog.articles %}
-    <div>
-      {% if article.image %}
-        {{ article.image | image_url: width: 1000 | image_tag }}
-      {% endif %}
-      <h2>
-        {{ article.title | link_to: article.url }}
-      </h2>
-      {% assign date = article.published_at | time_tag: format: 'date' %}
-      <p>{{ 'blogs.article.metadata_html' | t: date: date, author: article.author }}</p>
-      <p>{{ article.excerpt }}</p>
+  assign featured = blog.articles.first
+
+  comment
+    First page only, and only when there is something left for the grid to show
+    after it is taken out.
+  endcomment
+  assign has_featured = false
+  if s.show_featured and featured != blank
+    assign has_featured = true
+  endif
+
+  assign scheme = s.featured_color_scheme
+%}
+
+{{ 'card.css' | asset_url | stylesheet_tag }}
+
+<div {% render 'layout-style', s: section.settings, class: 'blog full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    <div class="blog__inner">
+      {%- if s.show_breadcrumbs or s.show_title -%}
+        <header class="blog__header">
+          {%- if s.show_breadcrumbs -%}
+            {% render 'breadcrumbs' %}
+          {%- endif -%}
+
+          {%- if s.show_title -%}
+            <h1 class="blog__title" {% render 'text-preset-style', preset: s.title_preset %}>
+              {{- blog.title -}}
+            </h1>
+          {%- endif -%}
+        </header>
+      {%- endif -%}
+
+      {%- paginate blog.articles by per_page -%}
+        {%- if blog.articles.size > 0 -%}
+          {%- liquid
+            assign offset = 0
+            assign show_featured_here = false
+            if has_featured and paginate.current_page == 1
+              assign show_featured_here = true
+              assign offset = 1
+            endif
+          -%}
+
+          {%- if show_featured_here -%}
+            {%- liquid
+              assign image = featured.image
+              assign focal = image.presentation.focal_point | default: 'center center'
+              assign focal_style = 'object-position: ' | append: focal | append: ';'
+              assign alt = image.alt | default: featured.title | escape
+            -%}
+            <a
+              class="blog__featured{% if scheme != blank %} color-{{ scheme }}{% endif %}"
+              href="{{ featured.url }}"
+              style="
+                --featured-ratio: {{ s.featured_ratio }};
+                --featured-overlay: {{ s.featured_overlay_color | default: '#000000' }};
+                --featured-overlay-opacity: {{ s.featured_overlay_opacity | default: 45 | divided_by: 100.0 }};
+              "
+            >
+              {%- if image != blank -%}
+                {{
+                  image
+                  | image_url: width: 2000
+                  | image_tag:
+                    class: 'blog__featured-image',
+                    widths: '375, 550, 750, 1100, 1500, 2000',
+                    sizes: '100vw',
+                    alt: alt,
+                    loading: 'eager',
+                    fetchpriority: 'high',
+                    style: focal_style
+                }}
+              {%- else -%}
+                {{ 'image' | placeholder_svg_tag: 'blog__featured-image blog__featured-placeholder' }}
+              {%- endif -%}
+
+              <div class="blog__featured-content">
+                {%- if s.show_author or s.show_date -%}
+                  <p class="blog__featured-meta">
+                    {%- if s.show_author and featured.author != blank -%}
+                      {{ featured.author }}
+                      {%- if s.show_date -%}
+                        <span class="card__separator" aria-hidden="true">&bull;</span>
+                      {%- endif -%}
+                    {%- endif -%}
+
+                    {%- if s.show_date -%}
+                      {{ featured.published_at | time_tag: format: 'month_day_year' }}
+                    {%- endif -%}
+                  </p>
+                {%- endif -%}
+
+                <h2 class="blog__featured-title">{{ featured.title }}</h2>
+
+                {%- comment -%}
+                  A span, not a link: the whole card is already the link, and a
+                  link inside a link is not valid and traps a keyboard twice.
+                {%- endcomment -%}
+                <span class="button button--secondary">{{ 'blogs.article.read_more' | t }}</span>
+              </div>
+            </a>
+          {%- endif -%}
+
+          <ul class="layout__blocks blog__grid list-unstyled">
+            {%- for article in blog.articles offset: offset -%}
+              <li>
+                {% render 'article-card',
+                  article: article,
+                  index: forloop.index0,
+                  show_author: s.show_author,
+                  show_date: s.show_date,
+                  show_excerpt: s.show_excerpt,
+                  show_read_more: s.show_read_more
+                %}
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          {% render 'pagination', paginate: paginate %}
+        {%- else -%}
+          <p class="blog__empty">{{ 'blogs.section.empty_blog' | t }}</p>
+        {%- endif -%}
+      {%- endpaginate -%}
     </div>
-  {% endfor %}
+  </div>
+</div>
 
-  {%- if paginate.pages > 1 -%}
-    {{- paginate | default_pagination -}}
-  {%- endif -%}
-{% endpaginate %}
+{% stylesheet %}
+  .blog__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .blog__header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .blog__title {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  /*
+   * The featured post. The color scheme sits on the link itself: its background
+   * is entirely covered by the photograph, so only the text and button tokens
+   * it carries are doing any work.
+   */
+  .blog__featured {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .blog__featured-image {
+    width: 100%;
+    aspect-ratio: var(--featured-ratio, 21 / 9);
+    object-fit: cover;
+  }
+
+  .blog__featured-placeholder {
+    background-color: var(--color-border);
+    fill: var(--color-background);
+  }
+
+  /* Weighted to the bottom, so the top of the photograph stays clear. */
+  .blog__featured::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to top, var(--featured-overlay, #000) 0%, transparent 70%);
+    opacity: var(--featured-overlay-opacity, 0.45);
+  }
+
+  .blog__featured-content {
+    position: absolute;
+    z-index: 1;
+    inset-block-end: 0;
+    inset-inline-start: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.75rem;
+    max-width: min(100%, 42rem);
+    padding: 2rem;
+  }
+
+  .blog__featured-meta {
+    margin: 0;
+    font-size: var(--text-h6-size);
+  }
+
+  .blog__featured-title {
+    margin: 0;
+    font-family: var(--text-h3-family);
+    font-size: var(--text-h3-size);
+  }
+
+  .blog__featured:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @media (max-width: 749px) {
+    .blog__featured-content {
+      padding: 1.25rem;
+    }
+  }
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "t:general.blog",
-  "settings": []
+  "settings": [
+    { "type": "header", "content": "t:general.content" },
+    { "type": "checkbox", "id": "show_breadcrumbs", "label": "t:labels.show_breadcrumbs", "default": true },
+    { "type": "checkbox", "id": "show_title", "label": "t:labels.show_blog_title", "default": true },
+    { "type": "select", "id": "title_preset", "label": "t:labels.preset", "default": "h4",
+      "visible_if": "{{ section.settings.show_title }}",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "range", "id": "posts_per_page", "label": "t:labels.posts_per_page", "min": 3, "max": 24, "step": 3, "default": 6 },
+    { "type": "checkbox", "id": "show_author", "label": "t:labels.show_author", "default": true },
+    { "type": "checkbox", "id": "show_date", "label": "t:labels.show_date", "default": true },
+    { "type": "checkbox", "id": "show_excerpt", "label": "t:labels.show_excerpt", "default": false },
+    { "type": "checkbox", "id": "show_read_more", "label": "t:labels.show_read_more", "info": "t:info.show_read_more", "default": true },
+
+    { "type": "header", "content": "t:general.featured_post" },
+    { "type": "checkbox", "id": "show_featured", "label": "t:labels.show_featured_post", "info": "t:info.show_featured_post", "default": true },
+    { "type": "select", "id": "featured_ratio", "label": "t:labels.image_ratio", "default": "21 / 9",
+      "visible_if": "{{ section.settings.show_featured }}",
+      "options": [
+        { "value": "3 / 2", "label": "t:options.image_ratio.landscape" },
+        { "value": "16 / 9", "label": "t:options.image_ratio.wide" },
+        { "value": "21 / 9", "label": "t:options.image_ratio.panoramic" }
+      ] },
+    { "type": "color_scheme", "id": "featured_color_scheme", "label": "t:labels.color_scheme", "info": "t:info.featured_color_scheme", "default": "scheme-1",
+      "visible_if": "{{ section.settings.show_featured }}" },
+    { "type": "color", "id": "featured_overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.show_featured }}" },
+    { "type": "range", "id": "featured_overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 45,
+      "visible_if": "{{ section.settings.show_featured }}" },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
+      "options": [
+        { "value": "block", "label": "t:options.display.block" },
+        { "value": "flex", "label": "t:options.display.flex" },
+        { "value": "grid", "label": "t:options.display.grid" }
+      ] },
+    { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
+      "visible_if": "{{ section.settings.display == 'flex' }}",
+      "options": [
+        { "value": "vertical", "label": "t:options.direction.vertical" },
+        { "value": "horizontal", "label": "t:options.direction.horizontal" }
+      ] },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 3 },
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "1",
+      "options": [
+        { "value": "1", "label": "t:options.columns_mobile.one" },
+        { "value": "2", "label": "t:options.columns_mobile.two" }
+      ] },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "left",
+      "visible_if": "{{ section.settings.display != 'block' }}",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "top",
+      "visible_if": "{{ section.settings.display != 'block' }}",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 24 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 24 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ]
 }
 {% endschema %}

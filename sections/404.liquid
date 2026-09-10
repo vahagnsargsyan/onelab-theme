@@ -33,6 +33,8 @@
         src="{{ '404.svg' | asset_url }}"
         alt=""
         aria-hidden="true"
+        width="438"
+        height="331"
         class="not-found__image">
 
       <h1 class="not-found__title" {% render 'text-preset-style', preset: s.title_preset %}>
@@ -76,6 +78,11 @@
   /* Only full bleed loses the content grid's margins, so only it needs these. */
   .layout--width-full > .layout__content > .not-found__inner {
     padding-inline: var(--page-margin);
+  }
+
+  .not-found__image {
+    width: min(100%, 27rem);
+    height: auto;
   }
 
   .not-found__code {
