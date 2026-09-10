@@ -21,7 +21,7 @@
         "header_height": 80,
         "header_position": "fixed_all",
         "transparent_on_home": true,
-        "transparent_color_scheme": "",
+        "transparent_color_scheme": "scheme-2",
         "transparent_scrim": true,
         "color_scheme": "scheme-04aa7079-9788-4d1c-80a2-e7ba6d2942f7",
         "show_search": true,
