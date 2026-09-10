@@ -30,6 +30,45 @@
   object-fit: var(--card-image-fit, cover);
 }
 
+/*
+ * Second image on hover.
+ *
+ * Stacked over the first and faded in, rather than swapping the `src`: the
+ * browser has already decoded both, so there is no flash of empty space on the
+ * first hover. It sits under the badge and the quick-add button, which are
+ * positioned later in the same stacking context.
+ *
+ * Gated on a fine pointer. A touchscreen has no hover, and a device that
+ * emulates one leaves the second image stuck on after a tap.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .card__image--hover {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .card:hover .card__image--hover,
+  .card:focus-within .card__image--hover {
+    opacity: 1;
+  }
+}
+
+/* Hidden outright where hover cannot happen, so it is never a stray overlay. */
+@media not all and (hover: hover) and (pointer: fine) {
+  .card__image--hover {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card__image--hover {
+    transition: none;
+  }
+}
+
 .card__placeholder {
   background-color: var(--color-border);
   fill: var(--color-background);

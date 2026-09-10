@@ -1002,6 +1002,13 @@
       },
       {
         "type": "checkbox",
+        "id": "card_hover_image",
+        "label": "t:labels.card_hover_image",
+        "info": "t:info.card_hover_image",
+        "default": true
+      },
+      {
+        "type": "checkbox",
         "id": "card_show_vendor",
         "label": "t:labels.show_vendor",
         "default": false

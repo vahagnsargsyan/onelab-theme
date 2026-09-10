@@ -8,6 +8,10 @@
   @param {object} product - The product to render.
   @param {number} [index] - Position in the list. The first four load eagerly.
 
+  With "Show the second image on hover" on, a product with more than one media
+  item cross-fades to its second one. Pointer devices only — there is no hover
+  on a touchscreen, and the card must read correctly without it.
+
   @example
   {% render 'product-card', product: product, index: forloop.index0 %}
 {% enddoc %}
@@ -15,6 +19,16 @@
 {%- liquid
   assign variant = product.selected_or_first_available_variant
   assign image = product.featured_media.preview_image
+
+  comment
+    The second media item, shown on hover. It is a duplicate view of something
+    already on the card, so it is decorative: empty alt, and never the first
+    thing loaded.
+  endcomment
+  assign hover_image = ''
+  if settings.card_hover_image
+    assign hover_image = product.media[1].preview_image
+  endif
 
   assign on_sale = false
   if product.compare_at_price_max > product.price_min
@@ -68,6 +82,19 @@
       }}
     {%- else -%}
       {{ 'product-1' | placeholder_svg_tag: 'card__image card__placeholder' }}
+    {%- endif -%}
+
+    {%- if hover_image != blank and image != blank -%}
+      {{
+        hover_image
+        | image_url: width: 1200
+        | image_tag:
+          class: 'card__image card__image--hover',
+          widths: '165, 275, 360, 533, 720, 940, 1200',
+          sizes: '(min-width: 750px) 25vw, 50vw',
+          alt: '',
+          loading: 'lazy'
+      }}
     {%- endif -%}
 
     {%- unless product.available -%}
