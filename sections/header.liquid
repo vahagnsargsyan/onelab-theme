@@ -7,6 +7,12 @@
   "logo center, menu left" put the utilities on the right without a fourth
   setting to keep in sync.
 
+  The logo can be two marks. When the header is set to go transparent and a
+  transparent logo is supplied, both are rendered and CSS shows whichever suits
+  the current background — the transparent one over the hero, the ordinary one
+  once the page scrolls and the header turns solid. Both ship in the markup, so
+  the swap is instant rather than a request halfway down the page.
+
   This section does not use the shared layout snippet. It cannot: a fixed or
   sticky header needs its own positioning and its own full-bleed grid, and
   `.layout` is built for in-flow content. It reads the same global tokens
@@ -92,29 +98,71 @@
     <div class="header__inner">
       {%- comment -%} Logo {%- endcomment -%}
       {%- capture logo_markup -%}
-        {%- if settings.logo != blank -%}
-          {%- liquid
-            assign logo_sizes = settings.logo_width | append: 'px'
-            assign logo_width_2x = settings.logo_width | times: 2
-          -%}
-          <a href="{{ routes.root_url }}" class="header__logo-link">
+        {%- liquid
+          assign logo_sizes = settings.logo_width | append: 'px'
+          assign logo_width_2x = settings.logo_width | times: 2
+
+          comment
+            A second mark exists only when the header can actually go
+            transparent and the merchant supplied one. Without both there is
+            nothing to swap, and the CSS must not hide the only logo there is.
+          endcomment
+          assign has_dual_logo = false
+          if is_transparent and s.transparent_logo != blank
+            assign has_dual_logo = true
+          endif
+
+          comment
+            Whichever mark is on screen first is the one worth fetching first.
+            The other is in the markup from the start so the swap on scroll is
+            instant rather than a request.
+          endcomment
+          assign solid_priority = 'high'
+          assign transparent_priority = 'auto'
+          if has_dual_logo
+            assign solid_priority = 'auto'
+            assign transparent_priority = 'high'
+          endif
+        -%}
+        <a
+          href="{{ routes.root_url }}"
+          class="header__logo-link{% if has_dual_logo %} header__logo-link--dual{% endif %}"
+        >
+          {%- if settings.logo != blank -%}
             {{
               settings.logo
               | image_url: width: logo_width_2x
               | image_tag:
-                class: 'header__logo',
+                class: 'header__logo header__logo--solid',
                 widths: '150, 300, 450, 600',
                 sizes: logo_sizes,
                 alt: shop.name,
                 loading: 'eager',
-                fetchpriority: 'high'
+                fetchpriority: solid_priority
             }}
-          </a>
-        {%- else -%}
-          <a href="{{ routes.root_url }}" class="header__logo-link">
-            <span class="header__shop-name">{{ shop.name }}</span>
-          </a>
-        {%- endif -%}
+          {%- else -%}
+            <span class="header__shop-name header__logo--solid">{{ shop.name }}</span>
+          {%- endif -%}
+
+          {%- if has_dual_logo -%}
+            {%- comment -%}
+              Same alt on both. Only one is ever displayed, and `display: none`
+              keeps the other out of the accessibility tree, so the shop name is
+              announced once.
+            {%- endcomment -%}
+            {{
+              s.transparent_logo
+              | image_url: width: logo_width_2x
+              | image_tag:
+                class: 'header__logo header__logo--transparent',
+                widths: '150, 300, 450, 600',
+                sizes: logo_sizes,
+                alt: shop.name,
+                loading: 'eager',
+                fetchpriority: transparent_priority
+            }}
+          {%- endif -%}
+        </a>
       {%- endcapture -%}
 
       {%- comment -%} Navigation {%- endcomment -%}
@@ -375,6 +423,13 @@
       "label": "t:labels.transparent_color_scheme",
       "info": "t:info.transparent_color_scheme",
       "default": "scheme-2",
+      "visible_if": "{{ section.settings.transparent_on_home }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "transparent_logo",
+      "label": "t:labels.transparent_logo",
+      "info": "t:info.transparent_logo",
       "visible_if": "{{ section.settings.transparent_on_home }}"
     },
     {

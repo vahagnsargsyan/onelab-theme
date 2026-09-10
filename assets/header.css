@@ -108,6 +108,35 @@ site-header.is-scrolled .header--scrim::before {
   height: auto;
 }
 
+/*
+ * Two logos, one visible.
+ *
+ * `display: none` rather than opacity, so the hidden one is out of the
+ * accessibility tree and the shop name is announced once. The rules are scoped
+ * to `--dual`: with only one mark supplied there is nothing to swap to, and
+ * hiding it would leave the header blank.
+ */
+.header__logo--transparent {
+  display: none;
+}
+
+.header--transparent .header__logo-link--dual .header__logo--transparent {
+  display: block;
+}
+
+.header--transparent .header__logo-link--dual .header__logo--solid {
+  display: none;
+}
+
+/* Scrolled: the header is solid again, and so is the mark on it. */
+site-header.is-scrolled .header--transparent .header__logo-link--dual .header__logo--transparent {
+  display: none;
+}
+
+site-header.is-scrolled .header--transparent .header__logo-link--dual .header__logo--solid {
+  display: block;
+}
+
 .header__shop-name {
   margin: 0;
   font-family: var(--text-h4-family);
