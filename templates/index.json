@@ -235,7 +235,7 @@
         "border_style": "none",
         "border_width": 1,
         "border_radius": 0,
-        "animation": "fade_up",
+        "animation": "fade_down",
         "animation_stagger": true,
         "padding_top": 48,
         "padding_bottom": 96,
