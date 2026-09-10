@@ -11,7 +11,7 @@
   "current": {
     "card_hover_image": true,
     "card_show_vendor": false,
-    "logo": "shopify://shop_images/Solea.svg",
+    "logo": "shopify://shop_images/Solea_2d839f7a-9568-4a3d-988d-33e714fea058.svg",
     "social_instagram": "#",
     "social_facebook": "#",
     "social_x": "#",
@@ -37,7 +37,7 @@
       },
       "scheme-2": {
         "settings": {
-          "background": "#FFFFFF",
+          "background": "#ffffff",
           "background_gradient": "",
           "text": "#f5f5f5",
           "button": "#f5f5f5",
