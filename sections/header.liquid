@@ -7,6 +7,17 @@
   "logo center, menu left" put the utilities on the right without a fourth
   setting to keep in sync.
 
+  Transparent mode applies only while the page is at the top. Once it scrolls,
+  the header is the same header as on every other page — same color scheme, same
+  background, same logo. The transparent color scheme is therefore not swapped
+  in server-side; its text and border colors are emitted as custom properties
+  and applied by CSS to the unscrolled state alone.
+
+  The header can change color once the page scrolls. That is what stops a
+  transparent header keeping its light-on-dark text after it turns solid, and it
+  also lets a plain sticky header change as it leaves the top of the page. Both
+  colors are optional: left empty, the color scheme applies throughout.
+
   The logo can be two marks. When the header is set to go transparent and a
   transparent logo is supplied, both are rendered and CSS shows whichever suits
   the current background — the transparent one over the hero, the ordinary one
@@ -65,12 +76,30 @@
     assign is_transparent = true
   endif
 
+  comment
+    A static header scrolls away with the page, so it never has a scrolled
+    state to color. Only one that stays put does.
+  endcomment
+  assign scrolls = false
+  if is_fixed or is_sticky
+    assign scrolls = true
+  endif
+
   assign nav_label = 'general.navigation.primary' | t
   assign slots = 'start,center,end' | split: ','
 
+  comment
+    The header always carries its ordinary color scheme, so a scrolled home page
+    header is the same header as on every other page. The transparent scheme is
+    emitted separately and applied by CSS only while the page is at the top —
+    swapping the whole scheme server-side would have kept the light-on-photo
+    text long after the header turned solid.
+  endcomment
   assign scheme = s.color_scheme
+
+  assign transparent_colors = false
   if is_transparent and s.transparent_color_scheme != blank
-    assign scheme = s.transparent_color_scheme
+    assign transparent_colors = true
   endif
 %}
 
@@ -90,9 +119,24 @@
       {% if is_fixed %}header--fixed{% endif %}
       {% if is_sticky %}header--sticky{% endif %}
       {% if is_transparent %}header--transparent{% endif %}
+      {% if transparent_colors %}header--transparent-colors{% endif %}
       {% if is_transparent and s.transparent_scrim %}header--scrim{% endif %}
+      {% if scrolls and s.scrolled_background != blank %}header--scroll-bg{% endif %}
+      {% if scrolls and s.scrolled_text != blank %}header--scroll-text{% endif %}
     "
-    style="--header-min-height: {{ s.header_height | default: 80 }}px;"
+    style="
+      --header-min-height: {{ s.header_height | default: 80 }}px;
+      {%- if transparent_colors %}
+      --header-transparent-text: {{ s.transparent_color_scheme.settings.text }};
+      --header-transparent-border: {{ s.transparent_color_scheme.settings.borders }};
+      {%- endif %}
+      {%- if scrolls and s.scrolled_background != blank %}
+      --header-scrolled-background: {{ s.scrolled_background }};
+      {%- endif %}
+      {%- if scrolls and s.scrolled_text != blank %}
+      --header-scrolled-text: {{ s.scrolled_text }};
+      {%- endif %}
+    "
     data-header
   >
     <div class="header__inner">
@@ -431,6 +475,19 @@
       "label": "t:labels.transparent_logo",
       "info": "t:info.transparent_logo",
       "visible_if": "{{ section.settings.transparent_on_home }}"
+    },
+    {
+      "type": "color",
+      "id": "scrolled_background",
+      "label": "t:labels.scrolled_background",
+      "info": "t:info.scrolled_colors",
+      "visible_if": "{{ section.settings.header_position != 'static' }}"
+    },
+    {
+      "type": "color",
+      "id": "scrolled_text",
+      "label": "t:labels.scrolled_text",
+      "visible_if": "{{ section.settings.header_position != 'static' }}"
     },
     {
       "type": "checkbox",

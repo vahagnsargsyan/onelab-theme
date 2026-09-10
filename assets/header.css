@@ -66,8 +66,17 @@
 }
 
 /*
- * Transparent mode. Turns solid once the page scrolls, which is what keeps the
- * text legible after it leaves the hero it was designed against.
+ * Transparent mode, which is the unscrolled state only.
+ *
+ * The header keeps its ordinary color scheme throughout, so once the page
+ * scrolls it is the same header as on every other page. Only while it is at the
+ * top does it go transparent and borrow the transparent scheme's text and
+ * border colors — those are picked to read against the hero image, and are
+ * wrong the moment the header becomes a solid bar.
+ *
+ * No fallback inside these `var()` calls on purpose: a custom property cannot
+ * fall back to itself, and the section only emits them alongside the class that
+ * reads them.
  */
 .header--transparent {
   background-color: transparent;
@@ -75,6 +84,40 @@
 
 site-header.is-scrolled .header--transparent {
   background-color: var(--color-background);
+}
+
+site-header:not(.is-scrolled) .header--transparent-colors {
+  --color-foreground: var(--header-transparent-text);
+  --color-border: var(--header-transparent-border);
+  color: var(--header-transparent-text);
+}
+
+/*
+ * Scrolled colors.
+ *
+ * The two are separate classes so either can be set alone, and each redefines
+ * the token as well as the property: everything inside the header — nav links,
+ * icons, the dropdown panels — reads `--color-background` and
+ * `--color-foreground`, so overriding those carries the change through instead
+ * of leaving the panels on the old palette.
+ *
+ * This is also what stops a transparent header keeping its light text after it
+ * turns solid, which the transparent color scheme alone cannot fix: that scheme
+ * is chosen to read against the hero image, not against the solid bar.
+ */
+.header--scroll-bg,
+.header--scroll-text {
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+site-header.is-scrolled .header--scroll-bg {
+  --color-background: var(--header-scrolled-background);
+  background-color: var(--header-scrolled-background);
+}
+
+site-header.is-scrolled .header--scroll-text {
+  --color-foreground: var(--header-scrolled-text);
+  color: var(--header-scrolled-text);
 }
 
 /*
