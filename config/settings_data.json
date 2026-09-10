@@ -9,6 +9,10 @@
  */
 {
   "current": {
+    "font_body": "inter_n4",
+    "font_subheading_custom": "forum",
+    "font_heading_custom": "forum",
+    "font_accent": "inter_n4",
     "card_hover_image": true,
     "card_show_vendor": false,
     "logo": "shopify://shop_images/Solea_2d839f7a-9568-4a3d-988d-33e714fea058.svg",
@@ -87,8 +91,8 @@
         "settings": {
           "background": "rgba(0,0,0,0)",
           "background_gradient": "",
-          "text": "#FFFFFF",
-          "button": "#FFFFFF",
+          "text": "#ffffff",
+          "button": "#ffffff",
           "button_label": "#ffffff",
           "secondary_button_label": "#171717",
           "borders": "#767676",
