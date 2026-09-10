@@ -22,6 +22,7 @@
         "header_position": "fixed_all",
         "transparent_on_home": true,
         "transparent_color_scheme": "scheme-2",
+        "transparent_logo": "shopify://shop_images/Solea.svg",
         "transparent_scrim": true,
         "color_scheme": "scheme-04aa7079-9788-4d1c-80a2-e7ba6d2942f7",
         "show_search": true,
