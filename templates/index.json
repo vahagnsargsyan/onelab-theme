@@ -713,6 +713,60 @@
         "padding_left": 0,
         "padding_right": 0
       }
+    },
+    "marquee_V6CeR9": {
+      "type": "marquee",
+      "blocks": {
+        "text_tdaiMw": {
+          "type": "text",
+          "settings": {
+            "text": "Sustainably designed",
+            "preset": "default"
+          }
+        },
+        "image_E7rx8p": {
+          "type": "image",
+          "settings": {
+            "height": 40
+          }
+        },
+        "text_THCmwc": {
+          "type": "text",
+          "settings": {
+            "text": "Certified recycled metals",
+            "preset": "default"
+          }
+        },
+        "image_HBmr8g": {
+          "type": "image",
+          "settings": {
+            "height": 40
+          }
+        }
+      },
+      "block_order": [
+        "text_tdaiMw",
+        "image_E7rx8p",
+        "text_THCmwc",
+        "image_HBmr8g"
+      ],
+      "name": "t:general.scrolling_banner",
+      "settings": {
+        "direction": "left",
+        "speed": 8,
+        "pause_on_hover": false,
+        "gap": 32,
+        "width": "page",
+        "color_scheme": "",
+        "background_color": "",
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 24,
+        "padding_bottom": 24,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
@@ -723,6 +777,7 @@
     "blog_posts_kpKz4n",
     "instagram_gallery_ik3zCD",
     "custom_section_G8iFRP",
-    "custom_section_8nnK3j"
+    "custom_section_8nnK3j",
+    "marquee_V6CeR9"
   ]
 }
