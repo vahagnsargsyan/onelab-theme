@@ -9,10 +9,18 @@
  */
 {
   "current": {
+    "card_hover_image": true,
+    "card_show_vendor": false,
     "logo": "shopify://shop_images/Solea.svg",
     "social_instagram": "#",
     "social_facebook": "#",
     "social_x": "#",
+    "sections": {
+      "cart-drawer": {
+        "type": "cart-drawer",
+        "settings": {}
+      }
+    },
     "content_for_index": [],
     "color_schemes": {
       "scheme-1": {
@@ -20,7 +28,7 @@
           "background": "#ffffff",
           "background_gradient": "",
           "text": "#171717",
-          "button": "#19392D",
+          "button": "#19392d",
           "button_label": "#ffffff",
           "secondary_button_label": "#171717",
           "borders": "#767676",
