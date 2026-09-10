@@ -10,6 +10,8 @@
 {
   "general": {
     "404": "Not found",
+    "animation": "Animation",
+    "animations": "Animations",
     "appearance": "Appearance",
     "article": "Article",
     "block": "Block",
@@ -101,6 +103,11 @@
   "labels": {
     "accent": "Accent",
     "alignment": "Alignment",
+    "animation": "Animation",
+    "animation_duration": "Duration",
+    "animation_stagger": "Reveal items one by one",
+    "animation_stagger_delay": "Delay between items",
+    "animations_reveal": "Reveal sections on scroll",
     "answer": "Answer",
     "background": "Background",
     "background_color": "Background color",
@@ -276,6 +283,10 @@
     "width": "Width"
   },
   "info": {
+    "animation": "Needs Reveal sections on scroll turned on in theme settings.",
+    "animation_stagger": "Each item in the section arrives after the one before it, rather than the whole section at once.",
+    "animation_stagger_delay": "How long each item waits behind the one before it.",
+    "animations_reveal": "Sections fade in as they come into view. Ignored for anyone whose system asks for reduced motion.",
     "background_color": "Leave empty to use the color scheme background.",
     "block_background_color": "Leave empty to let the section background show through.",
     "bottom_text": "Shown above the copyright line, across the full width.",
@@ -371,6 +382,13 @@
     "you_may_also_like": "You may also like"
   },
   "options": {
+    "animation": {
+      "none": "None",
+      "fade": "Fade in",
+      "fade_up": "Rise up",
+      "fade_down": "Drop down",
+      "zoom": "Scale up"
+    },
     "alignment": {
       "left": "Left",
       "center": "Center",

@@ -511,6 +511,18 @@
       "visible_if": "{{ section.settings.border_style == 'solid' }}" },
     { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
 
+    { "type": "header", "content": "t:general.animation" },
+    { "type": "select", "id": "animation", "label": "t:labels.animation", "info": "t:info.animation", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.animation.none" },
+        { "value": "fade", "label": "t:options.animation.fade" },
+        { "value": "fade_up", "label": "t:options.animation.fade_up" },
+        { "value": "fade_down", "label": "t:options.animation.fade_down" },
+        { "value": "zoom", "label": "t:options.animation.zoom" }
+      ] },
+    { "type": "checkbox", "id": "animation_stagger", "label": "t:labels.animation_stagger", "info": "t:info.animation_stagger", "default": false,
+      "visible_if": "{{ section.settings.animation != 'none' }}" },
+
     { "type": "header", "content": "t:general.padding" },
     { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 24 },
     { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },

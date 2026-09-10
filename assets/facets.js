@@ -183,6 +183,9 @@ class FacetFilters extends HTMLElement {
 
       this.unlockPriceFields();
 
+      // Anything watching for new content — reveal-on-scroll, at present.
+      document.dispatchEvent(new CustomEvent('theme:contentchange'));
+
       if (push) window.history.pushState({}, '', url);
     } catch (error) {
       window.location.href = url;

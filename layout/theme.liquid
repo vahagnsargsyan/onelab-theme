@@ -45,6 +45,19 @@
     {% # Load and preload the critical CSS %}
     {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
 
+    {%- comment -%}
+      Reveal on scroll. The class goes on <html> from an inline script rather
+      than from the deferred one, so the hidden state is in place before the
+      first paint — added after paint it would show the content and then snatch
+      it back. With scripting off the class is never added and nothing hides,
+      which is the whole reason the rules hang off it.
+    {%- endcomment -%}
+    {%- if settings.animations_reveal_on_scroll -%}
+      {{ 'animations.css' | asset_url | stylesheet_tag }}
+      <script>document.documentElement.classList.add('animations-on');</script>
+      <script src="{{ 'animations.js' | asset_url }}" defer="defer"></script>
+    {%- endif -%}
+
     {%- if settings.favicon != blank -%}
       <link
         rel="icon"

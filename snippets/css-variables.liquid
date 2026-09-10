@@ -162,6 +162,9 @@
       minmax(0, var(--page-width))
       minmax(var(--page-margin), 1fr);
 
+    --animation-duration: {{ settings.animation_duration | default: 600 }}ms;
+    --animation-stagger: {{ settings.animation_stagger_delay | default: 80 }}ms;
+
     --button-radius: {{ settings.button_corner_radius }}px;
     --button-border-width: {{ settings.button_border_width }}px;
     --input-radius: {{ settings.input_corner_radius }}px;

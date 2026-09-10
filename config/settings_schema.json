@@ -1122,6 +1122,41 @@
     ]
   },
   {
+    "name": "t:general.animations",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "animations_reveal_on_scroll",
+        "label": "t:labels.animations_reveal",
+        "info": "t:info.animations_reveal",
+        "default": false
+      },
+      {
+        "type": "range",
+        "id": "animation_duration",
+        "label": "t:labels.animation_duration",
+        "min": 200,
+        "max": 1200,
+        "step": 50,
+        "unit": "ms",
+        "default": 600,
+        "visible_if": "{{ settings.animations_reveal_on_scroll }}"
+      },
+      {
+        "type": "range",
+        "id": "animation_stagger_delay",
+        "label": "t:labels.animation_stagger_delay",
+        "info": "t:info.animation_stagger_delay",
+        "min": 20,
+        "max": 200,
+        "step": 10,
+        "unit": "ms",
+        "default": 80,
+        "visible_if": "{{ settings.animations_reveal_on_scroll }}"
+      }
+    ]
+  },
+  {
     "name": "t:general.brand",
     "settings": [
       {
