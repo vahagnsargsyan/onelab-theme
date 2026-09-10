@@ -1,44 +1,88 @@
 /**
  * Reveal on scroll.
  *
- * Loaded only when the theme setting is on, and every rule hangs off
- * `html.animations-on`, which an inline script in theme.liquid adds before the
- * first paint. With scripting off that class never appears, so nothing is ever
- * hidden — the page is simply the page. That is the whole reason the hidden
- * state lives behind a class rather than in the section's own styles.
+ * Every rule hangs off `html.animations-on`, which an inline script in
+ * theme.liquid adds before the first paint. With scripting off that class never
+ * appears, so nothing is ever hidden — the page is simply the page. That is the
+ * whole reason the hidden state lives behind a class rather than in a section's
+ * own styles.
  *
- * A section reveals as one piece, or item by item when "Reveal items one by
- * one" is on. `--animation-from` carries the offset the section chose, so this
- * needs one pair of rules rather than one pair per animation option.
+ * One class does the revealing, and it goes on the section root: `is-revealed`.
+ * The script therefore never has to touch the individual items, which matters —
+ * anything the script has to mark is still visible during the first paint and
+ * would flash into hiding a moment later. Everything below is in place from the
+ * first frame.
+ *
+ * `--animation-from` carries the offset the section chose, so this is one pair
+ * of rules rather than one pair per animation option.
  */
 
 @media (prefers-reduced-motion: no-preference) {
   html.animations-on .layout--animate:not(.layout--stagger) > .layout__content,
-  html.animations-on .layout--stagger [data-animate-item] {
+  html.animations-on .layout--animate.layout--stagger .layout__blocks > * {
     opacity: 0;
     transform: var(--animation-from, none);
     transition:
       opacity var(--animation-duration, 600ms) ease,
       transform var(--animation-duration, 600ms) ease;
-    /* Zero for a whole-section reveal, which has no index. */
-    transition-delay: calc(var(--animation-index, 0) * var(--animation-stagger, 80ms));
   }
 
-  html.animations-on .layout--animate:not(.layout--stagger) > .layout__content.is-revealed,
-  html.animations-on .layout--stagger [data-animate-item].is-revealed {
+  html.animations-on .layout--animate.is-revealed:not(.layout--stagger) > .layout__content,
+  html.animations-on .layout--animate.layout--stagger.is-revealed .layout__blocks > * {
     opacity: 1;
     transform: none;
+  }
+
+  /*
+   * The stagger, as plain nth-child delays.
+   *
+   * Written out rather than counted in script for the reason above: a delay the
+   * script sets is a delay that is not there on the first frame. Twelve covers
+   * a grid deep enough to see; past that everything arrives with the twelfth,
+   * which is a better failure than a row that waits two seconds.
+   */
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(2) {
+    transition-delay: calc(1 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(3) {
+    transition-delay: calc(2 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(4) {
+    transition-delay: calc(3 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(5) {
+    transition-delay: calc(4 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(6) {
+    transition-delay: calc(5 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(7) {
+    transition-delay: calc(6 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(8) {
+    transition-delay: calc(7 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(9) {
+    transition-delay: calc(8 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(10) {
+    transition-delay: calc(9 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(11) {
+    transition-delay: calc(10 * var(--animation-stagger, 80ms));
+  }
+  html.animations-on .layout--stagger .layout__blocks > *:nth-child(n + 12) {
+    transition-delay: calc(11 * var(--animation-stagger, 80ms));
   }
 }
 
 /*
  * Reduced motion is honored in CSS and outside the setting, so the media query
- * wins whatever the merchant chose. Nothing is hidden and nothing moves; the
- * script still marks elements, which costs nothing.
+ * wins whatever the merchant chose. Nothing is hidden and nothing moves.
  */
 @media (prefers-reduced-motion: reduce) {
   html.animations-on .layout__content,
-  html.animations-on [data-animate-item] {
+  html.animations-on .layout__blocks > * {
     opacity: 1;
     transform: none;
     transition: none;

@@ -283,10 +283,11 @@
     "width": "Width"
   },
   "info": {
-    "animation": "Needs Reveal sections on scroll turned on in theme settings.",
+    "animation": "Applies as the section comes into view. Needs Reveal sections on scroll, in the Animations group of theme settings.",
+    "animation_duration": "How long a section takes to arrive. Applies when Reveal sections on scroll is on.",
     "animation_stagger": "Each item in the section arrives after the one before it, rather than the whole section at once.",
     "animation_stagger_delay": "How long each item waits behind the one before it.",
-    "animations_reveal": "Sections fade in as they come into view. Ignored for anyone whose system asks for reduced motion.",
+    "animations_reveal": "Lets sections animate as they come into view. Each section chooses its own animation, and none is set by default. Turning this off removes the code from every page. Ignored for anyone whose system asks for reduced motion.",
     "background_color": "Leave empty to use the color scheme background.",
     "block_background_color": "Leave empty to let the section background show through.",
     "bottom_text": "Shown above the copyright line, across the full width.",

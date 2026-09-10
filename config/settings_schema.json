@@ -1129,7 +1129,7 @@
         "id": "animations_reveal_on_scroll",
         "label": "t:labels.animations_reveal",
         "info": "t:info.animations_reveal",
-        "default": false
+        "default": true
       },
       {
         "type": "range",
@@ -1140,7 +1140,7 @@
         "step": 50,
         "unit": "ms",
         "default": 600,
-        "visible_if": "{{ settings.animations_reveal_on_scroll }}"
+        "info": "t:info.animation_duration"
       },
       {
         "type": "range",
@@ -1151,8 +1151,7 @@
         "max": 200,
         "step": 10,
         "unit": "ms",
-        "default": 80,
-        "visible_if": "{{ settings.animations_reveal_on_scroll }}"
+        "default": 80
       }
     ]
   },
