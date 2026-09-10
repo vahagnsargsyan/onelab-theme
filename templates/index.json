@@ -117,7 +117,7 @@
         "show_view_all": true,
         "display": "grid",
         "use_slider": true,
-        "slider_loop": false,
+        "slider_loop": true,
         "show_dots": false,
         "direction": "vertical",
         "columns": 4,
