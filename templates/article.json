@@ -11,25 +11,62 @@
   "sections": {
     "main": {
       "type": "article",
-      "settings": {}
+      "settings": {
+        "show_breadcrumbs": true,
+        "show_blog_title": true,
+        "blog_title_preset": "h4",
+        "title_preset": "h2",
+        "show_author": true,
+        "show_date": true,
+        "show_tags": false,
+        "show_image": true,
+        "image_ratio": "16 / 9",
+        "image_overlap": 64,
+        "width": "full",
+        "color_scheme": "",
+        "background_color": "",
+        "padding_top": 24,
+        "padding_bottom": 64,
+        "padding_left": 44,
+        "padding_right": 40
+      }
     },
     "read_more": {
       "type": "blog-posts",
       "settings": {
+        "blog": "",
+        "posts_to_show": 3,
         "heading": "Read more",
         "heading_alignment": "center",
-        "posts_to_show": 3,
         "show_author": true,
         "show_date": true,
         "show_excerpt": false,
         "show_read_more": true,
         "display": "grid",
+        "use_slider": false,
+        "slider_loop": false,
+        "show_dots": false,
+        "direction": "vertical",
         "columns": 3,
         "columns_mobile": "1",
+        "alignment": "left",
+        "position": "top",
         "gap": 24,
         "width": "page",
+        "height": "fit",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
         "padding_top": 48,
-        "padding_bottom": 64
+        "padding_bottom": 64,
+        "padding_left": 0,
+        "padding_right": 0
       }
     }
   },
