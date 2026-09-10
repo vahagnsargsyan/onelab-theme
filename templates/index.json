@@ -73,6 +73,94 @@
         "padding_right": 0
       }
     },
+    "marquee_V6CeR9": {
+      "type": "marquee",
+      "blocks": {
+        "text_tdaiMw": {
+          "type": "text",
+          "settings": {
+            "text": "Sustainably designed",
+            "preset": "default"
+          }
+        },
+        "image_E7rx8p": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/image_48.png",
+            "height": 40
+          }
+        },
+        "text_THCmwc": {
+          "type": "text",
+          "settings": {
+            "text": "Certified recycled metals",
+            "preset": "default"
+          }
+        },
+        "image_HBmr8g": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/image_46_c3556807-9266-45e5-b17d-c3fe5f7d99f5.png",
+            "height": 40
+          }
+        },
+        "text_LfcjhW": {
+          "type": "text",
+          "settings": {
+            "text": "Sustainably designed",
+            "preset": "default"
+          }
+        },
+        "image_ftRYjx": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/image_47.png",
+            "height": 40
+          }
+        },
+        "text_dFp4Bx": {
+          "type": "text",
+          "settings": {
+            "text": "Certified recycled metals",
+            "preset": "default"
+          }
+        },
+        "image_KRDDbg": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/image_49.png",
+            "height": 40
+          }
+        }
+      },
+      "block_order": [
+        "text_tdaiMw",
+        "image_E7rx8p",
+        "text_THCmwc",
+        "image_HBmr8g",
+        "text_LfcjhW",
+        "image_ftRYjx",
+        "text_dFp4Bx",
+        "image_KRDDbg"
+      ],
+      "name": "t:general.scrolling_banner",
+      "settings": {
+        "direction": "left",
+        "speed": 5,
+        "pause_on_hover": true,
+        "gap": 32,
+        "width": "full",
+        "color_scheme": "",
+        "background_color": "",
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "padding_top": 24,
+        "padding_bottom": 24,
+        "padding_left": 0,
+        "padding_right": 0
+      }
+    },
     "collections_A8Kaxc": {
       "type": "collections",
       "name": "t:general.collections_grid",
@@ -713,71 +801,17 @@
         "padding_left": 0,
         "padding_right": 0
       }
-    },
-    "marquee_V6CeR9": {
-      "type": "marquee",
-      "blocks": {
-        "text_tdaiMw": {
-          "type": "text",
-          "settings": {
-            "text": "Sustainably designed",
-            "preset": "default"
-          }
-        },
-        "image_E7rx8p": {
-          "type": "image",
-          "settings": {
-            "height": 40
-          }
-        },
-        "text_THCmwc": {
-          "type": "text",
-          "settings": {
-            "text": "Certified recycled metals",
-            "preset": "default"
-          }
-        },
-        "image_HBmr8g": {
-          "type": "image",
-          "settings": {
-            "height": 40
-          }
-        }
-      },
-      "block_order": [
-        "text_tdaiMw",
-        "image_E7rx8p",
-        "text_THCmwc",
-        "image_HBmr8g"
-      ],
-      "name": "t:general.scrolling_banner",
-      "settings": {
-        "direction": "left",
-        "speed": 8,
-        "pause_on_hover": false,
-        "gap": 32,
-        "width": "page",
-        "color_scheme": "",
-        "background_color": "",
-        "border_style": "none",
-        "border_width": 1,
-        "border_radius": 0,
-        "padding_top": 24,
-        "padding_bottom": 24,
-        "padding_left": 0,
-        "padding_right": 0
-      }
     }
   },
   "order": [
     "slideshow_F68c7G",
+    "marquee_V6CeR9",
     "collections_A8Kaxc",
     "featured_products_MczVn9",
     "image_with_text_wUQUn8",
     "blog_posts_kpKz4n",
     "instagram_gallery_ik3zCD",
     "custom_section_G8iFRP",
-    "custom_section_8nnK3j",
-    "marquee_V6CeR9"
+    "custom_section_8nnK3j"
   ]
 }
