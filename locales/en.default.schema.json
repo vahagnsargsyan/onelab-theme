@@ -273,6 +273,7 @@
     "card_hover_image": "Products with more than one image fade to the second one. Nothing changes on touchscreens, which have no hover.",
     "card_image_fit": "Applies when the image ratio is not set to adapt.",
     "cart_type": "Page opens the cart page. Drawer slides in from the side. Popover confirms the add without covering the page.",
+    "collection_heading": "Optional. The collection title is already shown by the banner section above.",
     "columns": "Items shown in each row. Applies when Display is Grid, or Flex set to Horizontal, and sets items per view for a slider.",
     "contact_image_position": "Where the image sits in relation to the form.",
     "content_position": "Where the text sits in relation to the image.",
@@ -322,6 +323,7 @@
   },
   "defaults": {
     "blog_heading": "Our blog",
+    "collections_heading": "Collections",
     "contact_text": "Questions about an order or a piece? We usually reply within one business day.",
     "contact_us": "Contact us",
     "faq_answer": "We ship worldwide. Duties and taxes are calculated at checkout, so there is nothing to pay on delivery.",

@@ -85,6 +85,19 @@
       data-section-id="{{ section.id }}"
       style="--columns-roomy: repeat({{ roomy }}, minmax(0, 1fr));"
     >
+      {%- comment -%}
+        Optional, and empty by default: the collection title is an <h1> in the
+        banner section above, so anything here is a second-level heading a
+        merchant has chosen to add.
+      {%- endcomment -%}
+      {%- if s.heading != blank -%}
+        <header class="collection__header collection__header--{{ s.heading_alignment }}">
+          <h2 class="collection__heading" {% render 'text-preset-style', preset: s.heading_preset %}>
+            {{- s.heading -}}
+          </h2>
+        </header>
+      {%- endif -%}
+
       {%- if show_toolbar -%}
         <div class="collection__toolbar">
           {%- if s.show_view_toggle -%}
@@ -240,6 +253,26 @@
   "name": "t:general.collection_products",
   "settings": [
     { "type": "header", "content": "t:general.products" },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "info": "t:info.collection_heading" },
+    { "type": "select", "id": "heading_preset", "label": "t:labels.preset", "default": "h3",
+      "visible_if": "{{ section.settings.heading != blank }}",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "heading_alignment", "label": "t:labels.heading_alignment", "default": "left",
+      "visible_if": "{{ section.settings.heading != blank }}",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
     { "type": "range", "id": "products_per_page", "label": "t:labels.products_per_page", "min": 4, "max": 48, "step": 4, "default": 12 },
     { "type": "checkbox", "id": "show_filters", "label": "t:labels.show_filters", "info": "t:info.show_filters", "default": true },
     { "type": "checkbox", "id": "show_sorting", "label": "t:labels.show_sorting", "default": true },

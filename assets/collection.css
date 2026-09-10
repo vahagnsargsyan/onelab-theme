@@ -27,6 +27,26 @@
   gap: 1rem;
 }
 
+.collection__header--left {
+  text-align: left;
+}
+.collection__header--center {
+  text-align: center;
+}
+.collection__header--right {
+  text-align: right;
+}
+
+.collection__heading {
+  margin: 0;
+  font-family: var(--text-family, inherit);
+  font-weight: var(--text-weight, inherit);
+  font-size: var(--text-size, inherit);
+  line-height: var(--text-leading, inherit);
+  letter-spacing: var(--text-tracking, inherit);
+  text-transform: var(--text-case, none);
+}
+
 /* Toolbar */
 
 .collection__toolbar {

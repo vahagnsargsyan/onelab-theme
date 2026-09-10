@@ -59,9 +59,11 @@
   <div class="layout__content">
     <div class="featured-products__inner">
       {%- if show_header -%}
-        <header class="featured-products__header">
+        <header class="featured-products__header featured-products__header--{{ s.heading_alignment }}">
           {%- if s.heading != blank -%}
-            <h2 class="featured-products__heading">{{ s.heading }}</h2>
+            <h2 class="featured-products__heading" {% render 'text-preset-style', preset: s.heading_preset %}>
+              {{- s.heading -}}
+            </h2>
           {%- endif -%}
 
           {%- if show_view_all -%}
@@ -139,12 +141,31 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
+  }
+
+  /*
+   * Left keeps the view-all button against the far edge, which is what a wide
+   * header wants. The other two gather the pair together.
+   */
+  .featured-products__header--left {
+    justify-content: space-between;
+  }
+  .featured-products__header--center {
+    justify-content: center;
+  }
+  .featured-products__header--right {
+    justify-content: flex-end;
   }
 
   .featured-products__heading {
     margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
   }
 
   .featured-products__hint {
@@ -163,6 +184,23 @@
     { "type": "collection", "id": "collection", "label": "t:labels.collection" },
     { "type": "range", "id": "products_to_show", "label": "t:labels.products_to_show", "min": 2, "max": 24, "step": 1, "default": 8 },
     { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.featured_products" },
+    { "type": "select", "id": "heading_preset", "label": "t:labels.preset", "default": "h3",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "heading_alignment", "label": "t:labels.heading_alignment", "default": "left",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
     { "type": "checkbox", "id": "show_view_all", "label": "t:labels.show_view_all", "default": true },
 
     { "type": "header", "content": "t:general.layout" },
