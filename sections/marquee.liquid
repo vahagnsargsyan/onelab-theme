@@ -90,10 +90,18 @@
 </div>
 
 {% stylesheet %}
+  /*
+   * A flex row, because the script appends further copies of the list as
+   * siblings. As a block container they would stack underneath each other
+   * instead of continuing the row.
+   */
   .marquee__viewport {
-    display: block;
+    display: flex;
+    align-items: center;
     width: 100%;
+    min-width: 0;
     overflow-x: auto;
+    overflow-y: hidden;
     /* Dragging is the point; a scrollbar under it would be noise. */
     scrollbar-width: none;
     cursor: grab;
@@ -115,6 +123,8 @@
     /* Trailing gap so the seam between copies matches every other join. */
     gap: var(--layout-gap, 2rem);
     margin-inline-end: var(--layout-gap, 2rem);
+    /* Never squeezed to fit: the row is meant to be longer than the screen. */
+    flex: 0 0 auto;
     width: max-content;
   }
 

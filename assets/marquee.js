@@ -70,9 +70,16 @@ class MarqueeBanner extends HTMLElement {
       this.run();
     }
 
-    // A font swap or a resize changes how long one copy is.
+    /*
+     * A font swap or a resize changes how long one copy is. Guarded on the
+     * width actually changing: build() appends elements, and an unguarded
+     * observer would answer its own notifications forever.
+     */
     if ('ResizeObserver' in window) {
-      this.resizer = new ResizeObserver(() => this.build());
+      this.resizer = new ResizeObserver(() => {
+        if (this.clientWidth === this.builtAt) return;
+        this.build();
+      });
       this.resizer.observe(this);
     }
   }
@@ -89,6 +96,8 @@ class MarqueeBanner extends HTMLElement {
 
     const one = this.list.getBoundingClientRect().width;
     if (one === 0) return;
+
+    this.builtAt = this.clientWidth;
 
     /*
      * Enough copies that the wrap point always has a full copy on either side
@@ -133,13 +142,13 @@ class MarqueeBanner extends HTMLElement {
     this.last = now;
 
     const moving = !this.dragging && !this.hovered && !this.reduced.matches;
-    if (moving) this.scrollTo(this.scrollLeft + this.direction * this.speed * elapsed);
+    if (moving) this.moveTo(this.scrollLeft + this.direction * this.speed * elapsed);
 
     this.frame = requestAnimationFrame(this.step);
   }
 
   /** Keeps the position inside one copy's worth of the middle of the track. */
-  scrollTo(value) {
+  moveTo(value) {
     let next = value;
     if (next < 0) next += this.period;
     else if (next >= this.period * 2) next -= this.period;
@@ -167,13 +176,19 @@ class MarqueeBanner extends HTMLElement {
     // worse. The flag is still set, so the animation yields to the finger.
     if (event.pointerType === 'touch') return;
 
+    /*
+     * Stops the browser starting a text selection or picking an image up as a
+     * draggable file the moment the customer takes hold of the row.
+     */
+    event.preventDefault();
+
     this.classList.add('is-dragging');
     this.setPointerCapture(event.pointerId);
   }
 
   onPointerMove(event) {
     if (!this.dragging || this.pointerType === 'touch') return;
-    this.scrollTo(this.startScroll - (event.clientX - this.startX));
+    this.moveTo(this.startScroll - (event.clientX - this.startX));
   }
 
   onPointerUp(event) {
