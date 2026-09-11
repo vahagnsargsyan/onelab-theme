@@ -23,7 +23,12 @@
     <div class="layout__content">
       <div class="recommendations__inner">
         {%- if s.heading != blank -%}
-          <h2 class="recommendations__heading">{{ s.heading }}</h2>
+          <h2
+            class="recommendations__heading"
+            {% render 'text-preset-style', preset: s.heading_preset, alignment: s.heading_alignment, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}
+          >
+            {{- s.heading -}}
+          </h2>
         {%- endif -%}
 
         <ul class="layout__blocks list-unstyled" role="list">
@@ -47,7 +52,12 @@
 
   .recommendations__heading {
     margin: 0;
-    text-align: center;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
   }
 {% endstylesheet %}
 
@@ -57,6 +67,26 @@
   "settings": [
     { "type": "header", "content": "t:general.products" },
     { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.you_may_also_like" },
+
+    { "type": "select", "id": "heading_preset", "label": "t:labels.heading_preset", "default": "h3",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "heading_alignment", "label": "t:labels.heading_alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",

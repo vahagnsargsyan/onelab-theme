@@ -72,7 +72,12 @@
     <div class="blog-posts__inner">
       {%- if s.heading != blank -%}
         <header class="blog-posts__header blog-posts__header--{{ s.heading_alignment }}">
-          <h2 class="blog-posts__heading">{{ s.heading }}</h2>
+          <h2
+            class="blog-posts__heading"
+            {% render 'text-preset-style', preset: s.heading_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}
+          >
+            {{- s.heading -}}
+          </h2>
         </header>
       {%- endif -%}
 
@@ -171,6 +176,12 @@
 
   .blog-posts__heading {
     margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
   }
 
   .blog-posts__hint {
@@ -201,6 +212,20 @@
     { "type": "checkbox", "id": "show_date", "label": "t:labels.show_date", "default": true },
     { "type": "checkbox", "id": "show_excerpt", "label": "t:labels.show_excerpt", "default": false },
     { "type": "checkbox", "id": "show_read_more", "label": "t:labels.show_read_more", "info": "t:info.show_read_more", "default": true },
+
+    { "type": "select", "id": "heading_preset", "label": "t:labels.heading_preset", "default": "h3",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",

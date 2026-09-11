@@ -26,7 +26,7 @@
     <div class="faq__inner">
       {%- if s.heading != blank -%}
         <header class="faq__header faq__header--{{ s.heading_alignment }}">
-          <h2 class="faq__heading" {% render 'text-preset-style', preset: s.heading_preset %}>
+          <h2 class="faq__heading" {% render 'text-preset-style', preset: s.heading_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}>
             {{- s.heading -}}
           </h2>
         </header>
@@ -186,6 +186,9 @@
         { "value": "right", "label": "t:options.alignment.right" }
       ] },
     { "type": "checkbox", "id": "exclusive", "label": "t:labels.exclusive", "info": "t:info.exclusive", "default": true },
+
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "block",

@@ -35,7 +35,7 @@
     <div class="collections__inner">
       {%- if s.heading != blank -%}
         <header class="collections__header collections__header--{{ s.heading_alignment }}">
-          <h1 class="collections__title" {% render 'text-preset-style', preset: s.heading_preset %}>
+          <h1 class="collections__title" {% render 'text-preset-style', preset: s.heading_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}>
             {{- s.heading -}}
           </h1>
         </header>
@@ -165,6 +165,9 @@
       "visible_if": "{{ section.settings.use_slider }}" },
     { "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": false,
       "visible_if": "{{ section.settings.use_slider }}" },
+
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",

@@ -37,7 +37,7 @@
         height="331"
         class="not-found__image">
 
-      <h1 class="not-found__title" {% render 'text-preset-style', preset: s.title_preset %}>
+      <h1 class="not-found__title" {% render 'text-preset-style', preset: s.title_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}>
         {{- '404.title' | t -}}
       </h1>
 
@@ -146,6 +146,9 @@
         { "value": "h6", "label": "t:general.heading_6" }
       ] },
     { "type": "checkbox", "id": "show_search", "label": "t:labels.show_search", "default": true },
+
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "center",

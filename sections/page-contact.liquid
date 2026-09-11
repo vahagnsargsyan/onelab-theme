@@ -85,7 +85,7 @@
 
       <div class="contact__body">
         {%- if s.heading != blank -%}
-          <h2 class="contact__heading" {% render 'text-preset-style', preset: s.heading_preset %}>
+          <h2 class="contact__heading" {% render 'text-preset-style', preset: s.heading_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}>
             {{- s.heading -}}
           </h2>
         {%- endif -%}
@@ -406,6 +406,9 @@
         { "value": "portrait", "label": "t:options.image_ratio.portrait" },
         { "value": "landscape", "label": "t:options.image_ratio.landscape" }
       ] },
+
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.layout" },
     { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },

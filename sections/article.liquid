@@ -101,7 +101,7 @@
             </p>
           {%- endif -%}
 
-          <h1 class="article__title" {% render 'text-preset-style', preset: s.title_preset %}>
+          <h1 class="article__title" {% render 'text-preset-style', preset: s.title_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}>
             {{- article.title -}}
           </h1>
         </header>
@@ -405,6 +405,9 @@
       ] },
     { "type": "range", "id": "image_overlap", "label": "t:labels.image_overlap", "info": "t:info.image_overlap", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80,
       "visible_if": "{{ section.settings.show_image }}" },
+
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
     { "type": "header", "content": "t:general.size" },
     { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",

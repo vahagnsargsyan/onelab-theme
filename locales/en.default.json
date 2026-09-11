@@ -163,6 +163,9 @@
     "enter": "Enter"
   },
   "products": {
+    "tabs": {
+      "no_tabs": "Add a tab to get started."
+    },
     "featured": {
       "view_all": "View all",
       "no_collection": "Select a collection to show its products here.",

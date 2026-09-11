@@ -260,7 +260,7 @@
         "panel_offset": 32,
         "secondary_image": "shopify://shop_images/image_55.png",
         "secondary_image_width": 30,
-        "content_position": "right",
+        "image_position": "left",
         "media_width": "one_third",
         "content_alignment": "left",
         "content_spacing": "grouped",

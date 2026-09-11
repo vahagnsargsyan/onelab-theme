@@ -1,0 +1,418 @@
+{% comment %}
+  Tabbed collections. One tab per collection, each showing that collection's
+  products as a grid or a scroll-snap slider.
+
+  The tabs are the same mechanism the product page uses, in
+  assets/tabs.js: every panel is rendered and every tab is a real anchor link to
+  one, so the products are reachable and findable with scripting off. The script
+  then upgrades the strip to the ARIA tabs pattern.
+
+  Cards render through snippets/product-card.liquid, the same snippet every
+  other product listing uses, so a product looks identical wherever it appears.
+
+  Blocks are local rather than theme blocks: a tab belongs to this strip and
+  nowhere else, and its panel ids need `section.id`, which a theme block cannot
+  see. `@app` is accepted alongside them.
+{% endcomment %}
+
+{% liquid
+  assign s = section.settings
+  assign limit = s.products_to_show | default: 8
+  assign tab_blocks = section.blocks | where: 'type', 'tab'
+
+  case s.tabs_alignment
+    when 'left'
+      assign tabs_justify = 'flex-start'
+    when 'right'
+      assign tabs_justify = 'flex-end'
+    else
+      assign tabs_justify = 'center'
+  endcase
+%}
+
+{{ 'card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'tabs.js' | asset_url }}" defer="defer"></script>
+{%- if settings.card_quick_add != 'none' -%}
+  <script src="{{ 'cart-add.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+{%- if s.use_slider -%}
+  {{ 'slider.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'slider.js' | asset_url }}" defer="defer"></script>
+{%- endif -%}
+
+<div {% render 'layout-style', s: section.settings, class: 'tabbed full-width' %}>
+  {% render 'layout-background', s: section.settings %}
+
+  <div class="layout__content">
+    <div class="tabbed__inner">
+      {%- if s.heading != blank -%}
+        <h2
+          class="tabbed__heading tabbed__heading--{{ s.heading_alignment }}"
+          {% render 'text-preset-style', preset: s.heading_preset, padding_top: s.heading_padding_top, padding_bottom: s.heading_padding_bottom %}
+        >
+          {{- s.heading -}}
+        </h2>
+      {%- endif -%}
+
+      {%- if tab_blocks.size > 0 -%}
+        <content-tabs class="tabbed__tabs" style="--tabs-justify: {{ tabs_justify }};">
+          <div
+            class="tabbed__list"
+            data-tab-list
+            {% render 'text-preset-vars', preset: s.tabs_preset, prefix: 'tabbed-tab' %}
+          >
+            {%- for block in tab_blocks -%}
+              <a
+                id="tab-{{ section.id }}-{{ block.id }}"
+                class="tabbed__tab"
+                href="#panel-{{ section.id }}-{{ block.id }}"
+                aria-controls="panel-{{ section.id }}-{{ block.id }}"
+                data-tab
+              >
+                {{- block.settings.title | default: block.settings.collection.title -}}
+              </a>
+            {%- endfor -%}
+          </div>
+
+          {%- for block in tab_blocks -%}
+            {%- liquid
+              assign tab_collection = block.settings.collection
+              assign dot_count = tab_collection.products.size
+              if dot_count > limit
+                assign dot_count = limit
+              endif
+
+              assign label = block.settings.title | default: tab_collection.title
+            -%}
+            <div
+              id="panel-{{ section.id }}-{{ block.id }}"
+              class="tabbed__panel"
+              aria-labelledby="tab-{{ section.id }}-{{ block.id }}"
+              data-panel
+              {{ block.shopify_attributes }}
+            >
+              {%- comment -%}
+                Repeats the tab label for anyone without the script. The strip
+                becomes the heading once the element upgrades, so it is hidden
+                then rather than read twice.
+              {%- endcomment -%}
+              <h3 class="tabbed__panel-heading" data-panel-heading>{{ label }}</h3>
+
+              {%- if tab_collection.products.size > 0 -%}
+                {%- if s.use_slider -%}
+                  <slider-carousel
+                    class="slider"{% if s.slider_loop %} loop{% endif %}
+                    style="--slider-per-view: {{ s.columns | default: 4 }}; --slider-per-view-mobile: {{ s.columns_mobile | default: 2 }};"
+                  >
+                    {% render 'slider-controls' %}
+
+                    <ul
+                      class="slider__track list-unstyled"
+                      data-slider-track
+                      tabindex="0"
+                      role="region"
+                      aria-label="{{ label | escape }}"
+                    >
+                      {%- for product in tab_collection.products limit: limit -%}
+                        <li>
+                          {% render 'product-card', product: product, index: forloop.index0 %}
+                        </li>
+                      {%- endfor -%}
+                    </ul>
+
+                    {%- if s.show_dots -%}
+                      {% render 'slider-dots', count: dot_count %}
+                    {%- endif -%}
+                  </slider-carousel>
+                {%- else -%}
+                  <ul class="layout__blocks tabbed__grid list-unstyled">
+                    {%- for product in tab_collection.products limit: limit -%}
+                      <li>
+                        {% render 'product-card', product: product, index: forloop.index0 %}
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+                {%- endif -%}
+
+              {%- elsif request.design_mode -%}
+                {%- comment -%}
+                  Editor only. A storefront visitor gets an empty panel rather
+                  than a note about something they cannot fix.
+                {%- endcomment -%}
+                <p class="tabbed__hint">
+                  {%- if tab_collection == blank -%}
+                    {{ 'products.featured.no_collection' | t }}
+                  {%- else -%}
+                    {{ 'products.featured.empty_collection' | t }}
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </content-tabs>
+
+      {%- elsif request.design_mode -%}
+        <p class="tabbed__hint">{{ 'products.tabs.no_tabs' | t }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .tabbed__inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .tabbed__heading {
+    margin: 0;
+    font-family: var(--text-family, inherit);
+    font-weight: var(--text-weight, inherit);
+    font-size: var(--text-size, inherit);
+    line-height: var(--text-leading, inherit);
+    letter-spacing: var(--text-tracking, inherit);
+    text-transform: var(--text-case, none);
+  }
+
+  .tabbed__heading--left {
+    text-align: left;
+  }
+  .tabbed__heading--center {
+    text-align: center;
+  }
+  .tabbed__heading--right {
+    text-align: right;
+  }
+
+  .tabbed__tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    min-width: 0;
+  }
+
+  .tabbed__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: var(--tabs-justify, center);
+    gap: 2rem;
+    border-block-end: 1px solid var(--color-border);
+    font-family: var(--tabbed-tab-family, inherit);
+    font-weight: var(--tabbed-tab-weight, inherit);
+    font-size: var(--tabbed-tab-size, inherit);
+    letter-spacing: var(--tabbed-tab-tracking, inherit);
+    text-transform: var(--tabbed-tab-case, none);
+  }
+
+  .tabbed__tab {
+    /* Sits on the strip's own hairline, so the active marker replaces it. */
+    padding: 0.75rem 0.25rem;
+    margin-block-end: -1px;
+    color: inherit;
+    text-decoration: none;
+    border-block-end: 1px solid transparent;
+    cursor: pointer;
+    opacity: 0.6;
+  }
+
+  .tabbed__tab.is-active {
+    border-block-end-color: currentColor;
+    opacity: 1;
+  }
+
+  .tabbed__tab:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .tabbed__panel[hidden] {
+    display: none;
+  }
+
+  /* The panel is a tab stop; it should not paint a box when reached. */
+  .tabbed__panel:focus {
+    outline: none;
+  }
+
+  .tabbed__panel:focus-visible {
+    outline: var(--focus-ring-width) solid currentColor;
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .tabbed__panel-heading {
+    margin: 0 0 1rem;
+    font-family: var(--text-h5-family);
+    font-size: var(--text-h5-size);
+  }
+
+  .tabbed__hint {
+    padding: 2rem;
+    text-align: center;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--input-radius);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.tabbed_collections",
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "t:general.tab",
+      "settings": [
+        { "type": "collection", "id": "collection", "label": "t:labels.collection" },
+        { "type": "text", "id": "title", "label": "t:labels.title", "info": "t:info.tab_title" }
+      ]
+    },
+    { "type": "@app" }
+  ],
+  "settings": [
+    { "type": "header", "content": "t:general.products" },
+    { "type": "inline_richtext", "id": "heading", "label": "t:labels.heading", "default": "t:defaults.shop_by_category" },
+    { "type": "range", "id": "products_to_show", "label": "t:labels.products_to_show", "min": 2, "max": 24, "step": 1, "default": 8 },
+    { "type": "checkbox", "id": "use_slider", "label": "t:labels.use_slider", "info": "t:info.use_slider", "default": false },
+    { "type": "checkbox", "id": "slider_loop", "label": "t:labels.slider_loop", "info": "t:info.slider_loop", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+    { "type": "checkbox", "id": "show_dots", "label": "t:labels.show_dots", "default": false,
+      "visible_if": "{{ section.settings.use_slider }}" },
+
+    { "type": "header", "content": "t:general.typography" },
+    { "type": "select", "id": "heading_preset", "label": "t:labels.heading_preset", "default": "h3",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "heading_alignment", "label": "t:labels.heading_alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "range", "id": "heading_padding_top", "label": "t:labels.heading_padding_top", "info": "t:info.heading_padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "heading_padding_bottom", "label": "t:labels.heading_padding_bottom", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
+    { "type": "select", "id": "tabs_preset", "label": "t:labels.tabs_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "tabs_alignment", "label": "t:labels.tabs_alignment", "default": "center",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+
+    { "type": "header", "content": "t:general.layout" },
+    { "type": "select", "id": "display", "label": "t:labels.display", "default": "grid",
+      "visible_if": "{{ section.settings.use_slider == false }}",
+      "options": [
+        { "value": "block", "label": "t:options.display.block" },
+        { "value": "flex", "label": "t:options.display.flex" },
+        { "value": "grid", "label": "t:options.display.grid" }
+      ] },
+    { "type": "select", "id": "direction", "label": "t:labels.direction", "default": "vertical",
+      "visible_if": "{{ section.settings.use_slider == false and section.settings.display == 'flex' }}",
+      "options": [
+        { "value": "vertical", "label": "t:options.direction.vertical" },
+        { "value": "horizontal", "label": "t:options.direction.horizontal" }
+      ] },
+    { "type": "range", "id": "columns", "label": "t:labels.columns", "info": "t:info.columns", "min": 1, "max": 6, "step": 1, "default": 4 },
+    { "type": "select", "id": "columns_mobile", "label": "t:labels.columns_mobile", "default": "2",
+      "options": [
+        { "value": "1", "label": "t:options.columns_mobile.one" },
+        { "value": "2", "label": "t:options.columns_mobile.two" }
+      ] },
+    { "type": "select", "id": "alignment", "label": "t:labels.alignment", "default": "left",
+      "visible_if": "{{ section.settings.use_slider == false and section.settings.display != 'block' }}",
+      "options": [
+        { "value": "left", "label": "t:options.alignment.left" },
+        { "value": "center", "label": "t:options.alignment.center" },
+        { "value": "right", "label": "t:options.alignment.right" }
+      ] },
+    { "type": "select", "id": "position", "label": "t:labels.position", "default": "top",
+      "visible_if": "{{ section.settings.use_slider == false and section.settings.display != 'block' }}",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 100, "step": 2, "unit": "px", "default": 16 },
+
+    { "type": "header", "content": "t:general.size" },
+    { "type": "select", "id": "width", "label": "t:labels.width", "default": "page",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+
+    { "type": "header", "content": "t:general.appearance" },
+    { "type": "color_scheme", "id": "color_scheme", "label": "t:labels.color_scheme", "default": "scheme-1" },
+    { "type": "select", "id": "background_media", "label": "t:labels.background_media", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.background_media.none" },
+        { "value": "image", "label": "t:options.background_media.image" },
+        { "value": "video", "label": "t:options.background_media.video" }
+      ] },
+    { "type": "image_picker", "id": "background_image", "label": "t:labels.background_image",
+      "visible_if": "{{ section.settings.background_media == 'image' }}" },
+    { "type": "video", "id": "background_video", "label": "t:labels.background_video",
+      "visible_if": "{{ section.settings.background_media == 'video' }}" },
+    { "type": "color", "id": "background_color", "label": "t:labels.background_color", "info": "t:info.background_color" },
+    { "type": "checkbox", "id": "background_overlay", "label": "t:labels.show_background_overlay", "default": false },
+    { "type": "color", "id": "overlay_color", "label": "t:labels.overlay_color", "default": "#000000",
+      "visible_if": "{{ section.settings.background_overlay }}" },
+    { "type": "range", "id": "overlay_opacity", "label": "t:labels.overlay_opacity", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 40,
+      "visible_if": "{{ section.settings.background_overlay }}" },
+
+    { "type": "header", "content": "t:general.borders" },
+    { "type": "select", "id": "border_style", "label": "t:labels.style", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.border_style.none" },
+        { "value": "solid", "label": "t:options.border_style.solid" }
+      ] },
+    { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "range", "id": "border_radius", "label": "t:labels.corner_radius", "min": 0, "max": 50, "step": 1, "unit": "px", "default": 0 },
+
+    { "type": "header", "content": "t:general.animation" },
+    { "type": "select", "id": "animation", "label": "t:labels.animation", "info": "t:info.animation", "default": "none",
+      "options": [
+        { "value": "none", "label": "t:options.animation.none" },
+        { "value": "fade", "label": "t:options.animation.fade" },
+        { "value": "fade_up", "label": "t:options.animation.fade_up" },
+        { "value": "fade_down", "label": "t:options.animation.fade_down" },
+        { "value": "zoom", "label": "t:options.animation.zoom" }
+      ] },
+    { "type": "checkbox", "id": "animation_stagger", "label": "t:labels.animation_stagger", "info": "t:info.animation_stagger", "default": false,
+      "visible_if": "{{ section.settings.animation != 'none' }}" },
+
+    { "type": "header", "content": "t:general.padding" },
+    { "type": "range", "id": "padding_top", "label": "t:labels.padding_top", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "t:labels.padding_bottom", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 },
+    { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 200, "step": 4, "unit": "px", "default": 0 }
+  ],
+  "presets": [
+    {
+      "name": "t:general.tabbed_collections",
+      "blocks": [{ "type": "tab" }, { "type": "tab" }, { "type": "tab" }]
+    }
+  ]
+}
+{% endschema %}

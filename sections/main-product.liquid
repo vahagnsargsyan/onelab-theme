@@ -37,6 +37,7 @@
 
 {{ 'product.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'product.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'tabs.js' | asset_url }}" defer="defer"></script>
 
 <div {% render 'layout-style', s: section.settings, class: 'product-section full-width' %}>
   {% render 'layout-background', s: section.settings %}
@@ -274,7 +275,7 @@
   {%- endcomment -%}
   {%- assign tab_blocks = section.blocks | where: 'type', 'tab' -%}
   {%- if tab_blocks.size > 0 -%}
-    <product-tabs
+    <content-tabs
       class="product-tabs{% if s.show_divider %} product-tabs--divided{% endif %}"
       style="--tabs-justify: {{ tabs_justify }};"
     >
@@ -319,7 +320,7 @@
           </div>
         {%- endif -%}
       {%- endfor -%}
-    </product-tabs>
+    </content-tabs>
   {%- endif -%}
 </div>
   </div>

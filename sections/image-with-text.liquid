@@ -6,13 +6,20 @@
     - Panel:   a colored rectangle offset behind the image.
     - Overlap: a second image on the outer corner of the text pane.
 
-  The overlapping image belongs to the content pane, not the section, so moving
-  Content position carries it along and it always anchors to the outer edge —
-  bottom left when the text is on the left, bottom right when it is on the right.
+  The copy and the overlapping image are one group. They sit side by side in
+  normal flow inside the content pane — not the section — so the pair travels
+  together when the image moves, and the overlap always anchors to the edge of
+  the pane furthest from the main image.
 
-  The heading is its own element, a sibling of the body group rather than one
-  more item inside it. That is what lets Content spacing pin the heading to the
-  top of the pane and drop the divider, text, and button to the bottom.
+  The heading has three placements, and they differ in what it is a sibling of:
+    - Above:            a sibling of the group, so Content spacing can pin it to
+                        the top of the pane and drop the group to the bottom.
+    - With the text:    inside the group, above the divider, so it travels with
+                        the copy and the second image as one block.
+    - Over the section: out of flow, centered across the whole section.
+
+  Image position says which side the picture is on; Text position says where the
+  group sits down the pane, which only shows when the two are side by side.
 
   Content and media are emitted in visual order, so DOM order always matches
   what is on screen and focus order follows it — that is why the position is a
@@ -20,15 +27,20 @@
 
   This section omits the canonical Display / Direction / Columns / Alignment /
   Position settings: it is a fixed two-part layout, so they cannot apply.
-  Content position and Media width replace them. Everything else — Size,
+  Image position, Text position, and Media width replace them. Everything else — Size,
   Appearance, Borders, Padding, and Gap — is the shared layout verbatim.
 {% endcomment %}
 
 {% liquid
   assign s = section.settings
-  assign position = s.content_position | default: 'right'
   assign media_style = s.media_style | default: 'simple'
   assign image = s.image
+
+  comment
+    Stated as where the image goes, because that is how the layout is read: the
+    picture is on one side and everything else is on the other.
+  endcomment
+  assign image_side = s.image_position | default: 'left'
 
   case s.media_width
     when 'one_third'
@@ -39,16 +51,20 @@
       assign media_track = '50%'
   endcase
 
+  comment
+    Emitted in visual order so focus order follows the page. The content comes
+    first whenever the image is on the far side of it.
+  endcomment
   assign content_first = false
-  if position == 'top' or position == 'left'
+  if image_side == 'right' or image_side == 'bottom'
     assign content_first = true
   endif
 
   assign columns = 'minmax(0, 1fr)'
-  if position == 'left'
-    assign columns = 'minmax(0, 1fr) ' | append: media_track
-  elsif position == 'right'
+  if image_side == 'left'
     assign columns = media_track | append: ' minmax(0, 1fr)'
+  elsif image_side == 'right'
+    assign columns = 'minmax(0, 1fr) ' | append: media_track
   endif
 
   assign has_button = false
@@ -57,11 +73,11 @@
   endif
 
   comment
-    The overlap hugs the edge of the pane furthest from the image. With the text
-    stacked above or below, there is no outer side, so it falls back to the end.
+    The overlap hugs the edge of the pane furthest from the image. Stacked above
+    or below there is no outer side, so it falls back to the end.
   endcomment
   assign overlap_side = 'end'
-  if position == 'left'
+  if image_side == 'right'
     assign overlap_side = 'start'
   endif
 
@@ -70,9 +86,23 @@
     assign has_overlap = true
   endif
 
+  comment
+    Three placements, and they differ in what the heading is a sibling of.
+    "Above" makes it a sibling of the group, so Content spacing can push the two
+    apart; "With the text" puts it inside the group, above the divider, so it
+    travels with the copy and the overlapping image as one block; "Over the
+    section" takes it out of flow entirely.
+  endcomment
+  assign heading_place = s.heading_position | default: 'inline'
+
   assign heading_overlay = false
-  if s.heading_position == 'overlay'
+  if heading_place == 'overlay'
     assign heading_overlay = true
+  endif
+
+  assign heading_with_text = false
+  if heading_place == 'with_text'
+    assign heading_with_text = true
   endif
 %}
 
@@ -83,7 +113,8 @@
     <div
       class="
         image-text
-        image-text--position-{{ position }}
+        image-text--image-{{ image_side }}
+        image-text--block-{{ s.content_block | default: 'center' }}
         image-text--media-{{ media_style }}
         image-text--ratio-{{ s.image_ratio | default: 'adapt' }}
         image-text--align-{{ s.content_alignment | default: 'left' }}
@@ -134,7 +165,7 @@
             spacing can push the two apart. In overlay mode it is hoisted out of
             the pane entirely — see below.
           {%- endcomment -%}
-          {%- if s.heading != blank and heading_overlay == false -%}
+          {%- if s.heading != blank and heading_place == 'inline' -%}
             <h2 class="image-text__heading">{{ s.heading }}</h2>
           {%- endif -%}
 
@@ -146,6 +177,14 @@
           <div class="image-text__row">
             <div class="image-text__content">
               <div class="image-text__body">
+                {%- comment -%}
+                  Inside the group, so the heading stays with the copy and the
+                  overlapping image rather than sitting apart from them.
+                {%- endcomment -%}
+                {%- if s.heading != blank and heading_with_text -%}
+                  <h2 class="image-text__heading">{{ s.heading }}</h2>
+                {%- endif -%}
+
                 {%- if s.show_divider -%}
                   <span class="image-text__divider" aria-hidden="true"></span>
                 {%- endif -%}
@@ -285,6 +324,28 @@
     min-width: 0;
   }
 
+  /*
+   * Where the text group sits down the pane. Only visible when the pane is
+   * taller than its contents, which is what an image beside it usually does.
+   */
+  .image-text--block-top .image-text__pane {
+    align-content: start;
+  }
+  .image-text--block-center .image-text__pane {
+    align-content: center;
+  }
+  .image-text--block-bottom .image-text__pane {
+    align-content: end;
+  }
+
+  /*
+   * Spread fills the pane to push the heading and body apart, so it has to win
+   * over the block placement above rather than fight it.
+   */
+  .image-text--spacing-spread .image-text__pane {
+    align-content: stretch;
+  }
+
   .image-text__content {
     position: relative;
     z-index: 1;
@@ -382,14 +443,24 @@
    */
   .image-text__row {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: var(--layout-gap, 0);
     width: 100%;
     min-width: 0;
+    justify-content: flex-end;
   }
 
   .image-text--overlap-start .image-text__row {
     flex-direction: row-reverse;
+  }
+
+  /*
+   * The group — copy, and the overlapping image beside it — is one block. It
+   * ends up bottom-aligned so the second image sits on the baseline of the
+   * text, which is what makes the pair read as a single composition.
+   */
+  .image-text__row {
+    align-self: stretch;
   }
 
   .image-text__secondary {
@@ -403,7 +474,7 @@
 
   .image-text__secondary-image {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
   }
 
@@ -487,15 +558,22 @@
       "visible_if": "{{ section.settings.media_style == 'overlap' }}" },
 
     { "type": "header", "content": "t:general.layout" },
-    { "type": "select", "id": "content_position", "label": "t:labels.content_position", "info": "t:info.content_position", "default": "right",
+    { "type": "select", "id": "image_position", "label": "t:labels.image_position", "info": "t:info.image_position", "default": "left",
       "options": [
-        { "value": "top", "label": "t:options.position.top" },
         { "value": "left", "label": "t:options.alignment.left" },
         { "value": "right", "label": "t:options.alignment.right" },
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "bottom", "label": "t:options.position.bottom" }
+      ] },
+    { "type": "select", "id": "content_block", "label": "t:labels.text_position", "info": "t:info.text_position", "default": "center",
+      "visible_if": "{{ section.settings.image_position == 'left' or section.settings.image_position == 'right' }}",
+      "options": [
+        { "value": "top", "label": "t:options.position.top" },
+        { "value": "center", "label": "t:options.position.center" },
         { "value": "bottom", "label": "t:options.position.bottom" }
       ] },
     { "type": "select", "id": "media_width", "label": "t:labels.media_width", "default": "half",
-      "visible_if": "{{ section.settings.content_position == 'left' or section.settings.content_position == 'right' }}",
+      "visible_if": "{{ section.settings.image_position == 'left' or section.settings.image_position == 'right' }}",
       "options": [
         { "value": "one_third", "label": "t:options.media_width.one_third" },
         { "value": "half", "label": "t:options.media_width.half" },
@@ -515,6 +593,7 @@
     { "type": "select", "id": "heading_position", "label": "t:labels.heading_position", "info": "t:info.heading_position", "default": "inline",
       "options": [
         { "value": "inline", "label": "t:options.heading_position.inline" },
+        { "value": "with_text", "label": "t:options.heading_position.with_text" },
         { "value": "overlay", "label": "t:options.heading_position.overlay" }
       ] },
     { "type": "range", "id": "gap", "label": "t:labels.gap", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 48 },
@@ -585,7 +664,7 @@
     {
       "name": "t:general.image_with_text",
       "settings": {
-        "content_position": "left",
+        "image_position": "right",
         "media_style": "panel",
         "image_ratio": "landscape",
         "width": "page",
@@ -595,7 +674,7 @@
     {
       "name": "t:general.image_banner",
       "settings": {
-        "content_position": "right",
+        "image_position": "left",
         "media_style": "overlap",
         "image_ratio": "fill",
         "width": "full",

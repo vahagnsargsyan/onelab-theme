@@ -1,13 +1,20 @@
 {% doc %}
   Emits the typography custom properties for one of the global text presets,
-  plus an optional alignment.
+  plus an optional alignment and room of its own.
 
   Lets a section's own text pick up the same scale the `text` block uses,
   without each section restating the token names. "Default" emits nothing, so
   the element keeps whatever its tag already gets from critical.css.
 
+  The padding is here rather than among the layout settings because a title
+  needs room of its own: the section's padding moves the whole block, and the
+  gap moves every child equally. Zero emits nothing, so a title nobody has
+  adjusted carries no inline style at all.
+
   @param {string} [preset] - 'default', 'paragraph', or 'h1'…'h6'.
   @param {string} [alignment] - 'left', 'center', or 'right'.
+  @param {number} [padding_top] - Space above the text, in pixels.
+  @param {number} [padding_bottom] - Space below it.
 
   @example
   <h1 class="product__title" {% render 'text-preset-style', preset: block.settings.preset %}>
@@ -27,5 +34,11 @@ style="
   {%- endif %}
   {%- if alignment != blank %}
   text-align: {{ alignment }};
+  {%- endif %}
+  {%- if padding_top > 0 %}
+  padding-block-start: {{ padding_top }}px;
+  {%- endif %}
+  {%- if padding_bottom > 0 %}
+  padding-block-end: {{ padding_bottom }}px;
   {%- endif %}
 "
