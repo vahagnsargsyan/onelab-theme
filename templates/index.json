@@ -178,6 +178,8 @@
         "use_slider": true,
         "slider_loop": true,
         "show_dots": false,
+        "heading_padding_top": 0,
+        "heading_padding_bottom": 0,
         "display": "grid",
         "direction": "vertical",
         "columns": 3,
@@ -214,6 +216,8 @@
         "heading_preset": "h3",
         "heading_alignment": "center",
         "show_view_all": false,
+        "heading_padding_top": 0,
+        "heading_padding_bottom": 0,
         "display": "grid",
         "use_slider": true,
         "slider_loop": true,
@@ -261,6 +265,7 @@
         "secondary_image": "shopify://shop_images/image_55.png",
         "secondary_image_width": 30,
         "image_position": "left",
+        "content_block": "center",
         "media_width": "one_third",
         "content_alignment": "left",
         "content_spacing": "grouped",
@@ -297,6 +302,9 @@
         "show_date": true,
         "show_excerpt": false,
         "show_read_more": true,
+        "heading_preset": "h3",
+        "heading_padding_top": 0,
+        "heading_padding_bottom": 0,
         "display": "flex",
         "use_slider": true,
         "slider_loop": false,
@@ -824,6 +832,74 @@
         "padding_left": 0,
         "padding_right": 0
       }
+    },
+    "tabbed_collections_WiQwGW": {
+      "type": "tabbed-collections",
+      "blocks": {
+        "tab_iXN8Gz": {
+          "type": "tab",
+          "settings": {
+            "collection": "ceremonial-matcha-organic",
+            "title": ""
+          }
+        },
+        "tab_6NDKRr": {
+          "type": "tab",
+          "settings": {
+            "collection": "engagement-rings",
+            "title": ""
+          }
+        },
+        "tab_64FqiD": {
+          "type": "tab",
+          "settings": {
+            "collection": "rings",
+            "title": ""
+          }
+        }
+      },
+      "block_order": [
+        "tab_iXN8Gz",
+        "tab_6NDKRr",
+        "tab_64FqiD"
+      ],
+      "name": "t:general.tabbed_collections",
+      "settings": {
+        "heading": "Shop by category",
+        "products_to_show": 8,
+        "use_slider": true,
+        "slider_loop": false,
+        "show_dots": false,
+        "heading_preset": "h2",
+        "heading_alignment": "center",
+        "heading_padding_top": 0,
+        "heading_padding_bottom": 0,
+        "tabs_preset": "default",
+        "tabs_alignment": "center",
+        "display": "grid",
+        "direction": "vertical",
+        "columns": 4,
+        "columns_mobile": "2",
+        "alignment": "left",
+        "position": "top",
+        "gap": 16,
+        "width": "page",
+        "color_scheme": "",
+        "background_media": "none",
+        "background_color": "",
+        "background_overlay": false,
+        "overlay_color": "#000000",
+        "overlay_opacity": 40,
+        "border_style": "none",
+        "border_width": 1,
+        "border_radius": 0,
+        "animation": "none",
+        "animation_stagger": false,
+        "padding_top": 48,
+        "padding_bottom": 48,
+        "padding_left": 0,
+        "padding_right": 0
+      }
     }
   },
   "order": [
@@ -835,6 +911,7 @@
     "blog_posts_kpKz4n",
     "instagram_gallery_ik3zCD",
     "custom_section_G8iFRP",
-    "custom_section_8nnK3j"
+    "custom_section_8nnK3j",
+    "tabbed_collections_WiQwGW"
   ]
 }
