@@ -1,69 +1,186 @@
 {% doc %}
-  Multi-level navigation, up to three levels.
+  Multi-level navigation, up to three levels, as dropdowns or as a mega menu.
 
   Built on <details>/<summary> so it opens by keyboard and pointer with no
   JavaScript at all. header.js only adds the niceties: closing siblings, closing
   on Escape with focus returned, and closing on an outside click.
 
+  Mega mode follows the menu hierarchy: a top-level link gets a mega panel when
+  at least one of its children has links of its own. Its children become column
+  headings and their own children become the links beneath. A top-level link
+  whose children are all leaf links uses the regular dropdown instead.
+
+  Images are `menu_image` blocks on the header section, each naming the menu
+  item it belongs to. Matching is on the handled title, so "New Arrivals",
+  "new arrivals", and "new-arrivals" all find the same item and renaming the
+  link in the menu is the only thing that breaks the tie.
+
+  On mobile the drawer always uses the nested dropdown form: a full-width panel
+  inside a drawer is just a list.
+
   @param {object} menu - A `link_list`, usually `section.settings.menu`.
   @param {string} label - Accessible name for the <nav>.
   @param {string} [class] - Extra classes for the <nav>.
+  @param {object} [s] - `section.settings`, for the mega menu options. Omitted
+    in the drawer, which is what keeps the drawer on dropdowns.
+  @param {object} [blocks] - `section.blocks`, for the menu images.
 
   @example
-  {% render 'header-navigation', menu: section.settings.menu, label: 'Primary' %}
+  {% render 'header-navigation', menu: section.settings.menu, label: 'Primary', s: section.settings, blocks: section.blocks %}
 {% enddoc %}
 
+{%- liquid
+  assign mega = false
+  if s.menu_style == 'mega'
+    assign mega = true
+  endif
+-%}
+
 <nav class="header__nav {{ class }}" aria-label="{{ label }}">
-  <ul class="nav list-unstyled">
+  <ul class="nav list-bare" role="list">
     {%- for link in menu.links -%}
-      <li class="nav__item">
+      {%- liquid
+        assign item_mega = false
+        if mega
+          for child in link.links
+            if child.links.size > 0
+              assign item_mega = true
+              break
+            endif
+          endfor
+        endif
+      -%}
+      {%- comment -%}
+        A dropdown anchors to its own link, so `.nav__item` is the positioning
+        context. A mega panel spans the header instead, so the item it belongs
+        to has to stop being one — see `.nav__item--mega`.
+      {%- endcomment -%}
+      <li class="nav__item{% if item_mega %} nav__item--mega{% endif %}">
         {%- if link.links.size > 0 -%}
-          <details class="nav__details" data-nav-details>
+          <details
+            class="nav__details{% if item_mega %} nav__details--mega{% endif %}"
+            data-nav-details
+          >
             <summary class="nav__link">
               <span>{{ link.title }}</span>
               {{- 'icon-caret.svg' | inline_asset_content -}}
             </summary>
 
-            <ul class="nav__submenu list-unstyled">
-              {%- for child in link.links -%}
-                <li class="nav__item">
-                  {%- if child.links.size > 0 -%}
-                    <details class="nav__details nav__details--child" data-nav-details>
-                      <summary class="nav__sublink">
-                        <span>{{ child.title }}</span>
-                        {{- 'icon-caret.svg' | inline_asset_content -}}
-                      </summary>
+            {%- liquid
+              assign link_key = link.title | handle
+              assign media_start = ''
+              assign media_end = ''
+            -%}
+            {%- if item_mega -%}
 
-                      <ul class="nav__submenu nav__submenu--child list-unstyled">
-                        {%- for grandchild in child.links -%}
-                          <li>
-                            <a
-                              href="{{ grandchild.url }}"
-                              class="nav__sublink"
-                              {% if grandchild.current %}
-                                aria-current="page"
-                              {% endif %}
-                            >
-                              {{- grandchild.title -}}
-                            </a>
-                          </li>
-                        {%- endfor -%}
-                      </ul>
-                    </details>
-                  {%- else -%}
-                    <a
-                      href="{{ child.url }}"
-                      class="nav__sublink"
-                      {% if child.current %}
-                        aria-current="page"
-                      {% endif %}
-                    >
-                      {{- child.title -}}
-                    </a>
-                  {%- endif -%}
-                </li>
-              {%- endfor -%}
-            </ul>
+              {%- capture media_start -%}
+                {% render 'menu-images', blocks: blocks, link_key: link_key, position: 'start' %}
+              {%- endcapture -%}
+              {%- capture media_end -%}
+                {% render 'menu-images', blocks: blocks, link_key: link_key, position: 'end' %}
+              {%- endcapture -%}
+
+              <div class="mega mega--{{ s.mega_width | default: 'page' }} mega--media-{{ s.mega_media_direction | default: 'horizontal' }}">
+                <div
+                  class="mega__inner"
+                  style="--mega-columns: {{ s.mega_columns | default: 4 }};"
+                >
+                  {{ media_start }}
+
+                  <ul class="mega__columns list-bare" role="list">
+                    {%- for child in link.links -%}
+                      <li class="mega__column">
+                        {%- comment -%}
+                          A column heading that is also a link: the merchant
+                          pointed it somewhere, and swallowing that destination
+                          would lose a level of the menu.
+                        {%- endcomment -%}
+                        <a
+                          href="{{ child.url }}"
+                          class="mega__column-title"
+                          {% if child.current %}
+                            aria-current="page"
+                          {% endif %}
+                        >
+                          {{- child.title -}}
+                        </a>
+
+                        {%- if child.links.size > 0 -%}
+                          <ul class="mega__links list-bare" role="list">
+                            {%- for grandchild in child.links -%}
+                              <li>
+                                <a
+                                  href="{{ grandchild.url }}"
+                                  class="nav__sublink"
+                                  {% if grandchild.current %}
+                                    aria-current="page"
+                                  {% endif %}
+                                >
+                                  {{- grandchild.title -}}
+                                </a>
+                              </li>
+                            {%- endfor -%}
+                          </ul>
+                        {%- endif -%}
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+
+                  {{ media_end }}
+                </div>
+              </div>
+
+            {%- else -%}
+              <ul class="nav__submenu list-bare" role="list">
+                {%- for child in link.links -%}
+                  <li class="nav__item">
+                    {%- if child.links.size > 0 -%}
+                      <details class="nav__details nav__details--child" data-nav-details>
+                        <summary class="nav__sublink">
+                          <span>{{ child.title }}</span>
+                          {{- 'icon-caret.svg' | inline_asset_content -}}
+                        </summary>
+
+                        <ul class="nav__submenu nav__submenu--child list-bare" role="list">
+                          {%- for grandchild in child.links -%}
+                            <li>
+                              <a
+                                href="{{ grandchild.url }}"
+                                class="nav__sublink"
+                                {% if grandchild.current %}
+                                  aria-current="page"
+                                {% endif %}
+                              >
+                                {{- grandchild.title -}}
+                              </a>
+                            </li>
+                          {%- endfor -%}
+                        </ul>
+                      </details>
+                    {%- else -%}
+                      <a
+                        href="{{ child.url }}"
+                        class="nav__sublink"
+                        {% if child.current %}
+                          aria-current="page"
+                        {% endif %}
+                      >
+                        {{- child.title -}}
+                      </a>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+
+              {%- comment -%}
+                The same image blocks the mega panel uses, stacked under the
+                links rather than beside them. A drawer has no room for a column
+                of images next to a column of text, and the markup is identical
+                either way so the caption options carry over unchanged.
+              {%- endcomment -%}
+              {% render 'menu-images', blocks: blocks, link_key: link_key, position: 'start' %}
+              {% render 'menu-images', blocks: blocks, link_key: link_key, position: 'end' %}
+            {%- endif -%}
           </details>
         {%- else -%}
           <a
