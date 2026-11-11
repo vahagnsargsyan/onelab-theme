@@ -72,7 +72,7 @@
   endif
 
   assign is_transparent = false
-  if s.transparent_on_home and is_home and is_fixed
+  if s.transparent_on_home and is_home
     assign is_transparent = true
   endif
 
@@ -111,7 +111,19 @@
   <script src="{{ 'search.js' | asset_url }}" defer="defer"></script>
 {%- endif -%}
 
-<site-header>
+{%- comment -%}
+  The menu typography sits here, not on <header>: the drawer is a sibling of the
+  bar, so properties set on the bar never reach it and every preset stopped at
+  the edge of the desktop menu.
+{%- endcomment -%}
+<site-header
+  style="
+    {% render 'text-preset-vars', preset: s.menu_preset, prefix: 'header-menu' %}
+    {% render 'text-preset-vars', preset: s.submenu_preset, prefix: 'submenu' %}
+    {% render 'text-preset-vars', preset: s.menu_heading_preset, prefix: 'menu-heading' %}
+    {% render 'text-preset-vars', preset: s.utilities_preset, prefix: 'header-utilities' %}
+  "
+>
   <header
     class="
       header
@@ -143,6 +155,9 @@
       {%- endif %}
       {%- if s.border_style == 'solid' %}
       --header-border-width: {{ s.border_width | default: 1 }}px;
+      {%- if s.border_color != blank %}
+      --header-border-color: {{ s.border_color }};
+      {%- endif %}
       {%- endif %}
       {%- comment -%}
         Not while transparent: an inline background would beat the stylesheet
@@ -151,8 +166,12 @@
       {%- if s.background_color != blank and is_transparent == false %}
       background-color: {{ s.background_color }};
       {%- endif %}
-      {% render 'text-preset-vars', preset: s.menu_preset, prefix: 'header-menu' %}
-      {% render 'text-preset-vars', preset: s.utilities_preset, prefix: 'header-utilities' %}
+      {%- if s.menu_background != blank %}
+      --menu-background: {{ s.menu_background }};
+      {%- endif %}
+      {%- if s.menu_text != blank %}
+      --menu-text: {{ s.menu_text }};
+      {%- endif %}
       {%- if transparent_colors %}
       --header-transparent-text: {{ s.transparent_color_scheme.settings.text }};
       --header-transparent-border: {{ s.transparent_color_scheme.settings.borders }};
@@ -241,7 +260,9 @@
         {% render 'header-navigation',
           menu: section.settings.menu,
           label: nav_label,
-          class: 'header__nav--desktop'
+          class: 'header__nav--desktop',
+          s: section.settings,
+          blocks: section.blocks
         %}
       {%- endcapture -%}
 
@@ -266,8 +287,13 @@
             </button>
           {%- endif -%}
 
+          {%- comment -%}
+            Desktop only. On a phone the same element sits in the drawer, where
+            the design puts the account beside the country, language, and social
+            links rather than in a row of icons.
+          {%- endcomment -%}
           {%- if shop.customer_accounts_enabled -%}
-            <shopify-account menu="{{ s.customer_account_menu }}">
+            <shopify-account menu="{{ s.customer_account_menu }}" class="header__account--desktop">
               {{ 'icon-account.svg' | inline_asset_content }}
             </shopify-account>
           {%- endif -%}
@@ -295,21 +321,29 @@
               {{- cart.item_count -}}
             </span>
           </a>
-
-          <button
-            type="button"
-            class="header__action header__menu-toggle"
-            data-drawer-open
-            aria-haspopup="dialog"
-          >
-            {{- 'icon-menu.svg' | inline_asset_content -}}
-            <span class="visually-hidden">{{ 'general.navigation.open_menu' | t }}</span>
-          </button>
         </div>
+      {%- endcapture -%}
+
+      {%- comment -%}
+        The drawer button leads the header on small screens, where the design
+        puts it before the logo — so it is rendered into the first slot rather
+        than with the utility icons at the other end.
+      {%- endcomment -%}
+      {%- capture menu_toggle -%}
+        <button
+          type="button"
+          class="header__action header__menu-toggle"
+          data-drawer-open
+          aria-haspopup="dialog"
+        >
+          {{- 'icon-menu.svg' | inline_asset_content -}}
+          <span class="visually-hidden">{{ 'general.navigation.open_menu' | t }}</span>
+        </button>
       {%- endcapture -%}
 
       {%- for slot in slots -%}
         <div class="header__slot header__slot--{{ slot }}">
+          {%- if slot == 'start' -%}{{ menu_toggle }}{%- endif -%}
           {%- if logo_slot == slot -%}{{ logo_markup }}{%- endif -%}
           {%- if menu_slot == slot -%}{{ menu_markup }}{%- endif -%}
           {%- if utilities_slot == slot -%}{{ utilities_markup }}{%- endif -%}
@@ -324,18 +358,52 @@
   {%- endcomment -%}
   <dialog class="header__drawer" data-header-drawer aria-label="{{ nav_label }}">
     <div class="header__drawer-head">
+      <div class="header__drawer-logo">{{ logo_markup }}</div>
+
       <button type="button" class="header__action" data-drawer-close>
         {{- 'icon-close.svg' | inline_asset_content -}}
         <span class="visually-hidden">{{ 'general.navigation.close_menu' | t }}</span>
       </button>
     </div>
 
-    {% render 'header-navigation', menu: section.settings.menu, label: nav_label %}
+    {%- comment -%}
+      The list and every panel that slides over it share this box, which is what
+      gives a submenu somewhere to be: it covers the level above rather than
+      pushing it down, so a long menu never buries the level the customer came
+      from.
+    {%- endcomment -%}
+    <div class="header__drawer-body">
+      {% render 'header-navigation',
+        menu: section.settings.menu,
+        label: nav_label,
+        blocks: section.blocks
+      %}
+    </div>
 
-    {% render 'header-localization',
-      show_country: s.show_country,
-      show_language: s.show_language
-    %}
+    <div class="header__drawer-foot">
+      {% render 'header-localization',
+        show_country: s.show_country,
+        show_language: s.show_language
+      %}
+
+      <div class="header__drawer-actions">
+        {% render 'social-icons' %}
+
+        {%- comment -%}
+          The account element itself, not a link to it: it is what knows whether
+          the customer is signed in, and the requirements ask for it in the
+          mobile header as well as the desktop one.
+        {%- endcomment -%}
+        {%- if shop.customer_accounts_enabled -%}
+          <shopify-account menu="{{ s.customer_account_menu }}" class="header__drawer-account">
+            <span class="button button--small header__drawer-login" slot="signed-out-avatar">
+              {{- 'icon-account.svg' | inline_asset_content -}}
+              {{- 'customers.login.title' | t -}}
+            </span>
+          </shopify-account>
+        {%- endif -%}
+      </div>
+    </div>
   </dialog>
 </site-header>
 
@@ -353,7 +421,7 @@
           </button>
         </div>
 
-        <predictive-search data-limit="{{ s.search_results_count | default: 6 }}">
+        <search-suggestions data-limit="{{ s.search_results_count | default: 6 }}">
           {%- comment -%}
             A real search form. Enter submits it normally, so search works with
             the script blocked; the panel below is the enhancement.
@@ -386,6 +454,22 @@
             </button>
           </form>
 
+          {%- comment -%}
+            The empty state: somewhere to go before a search has been typed.
+            Hidden by the script the moment there are results to show, and left
+            in place with the script blocked, where it is simply a list of links.
+          {%- endcomment -%}
+          {%- if s.search_popular_menu != blank and s.search_popular_menu.links.size > 0 -%}
+            <div class="search__popular" data-search-popular>
+              <p class="search__popular-title">{{ 'search.popular' | t }}</p>
+              <ul class="search__popular-list list-bare" role="list">
+                {%- for link in s.search_popular_menu.links -%}
+                  <li><a href="{{ link.url }}" class="search__popular-link">{{ link.title }}</a></li>
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endif -%}
+
           <div
             id="header-search-results"
             class="search__results"
@@ -394,7 +478,7 @@
           ></div>
 
           <p class="visually-hidden" role="status" aria-live="polite" data-search-status></p>
-        </predictive-search>
+        </search-suggestions>
       </div>
     </dialog>
   </search-toggle>
@@ -417,6 +501,57 @@
 {% schema %}
 {
   "name": "t:general.header",
+  "blocks": [
+    {
+      "type": "menu_image",
+      "name": "t:general.menu_image",
+      "settings": [
+        { "type": "text", "id": "menu_item", "label": "t:labels.menu_item", "info": "t:info.menu_item" },
+        { "type": "select", "id": "position", "label": "t:labels.position", "default": "end",
+          "options": [
+            { "value": "start", "label": "t:options.alignment.left" },
+            { "value": "end", "label": "t:options.alignment.right" }
+          ] },
+        { "type": "image_picker", "id": "image", "label": "t:labels.image" },
+        { "type": "text", "id": "caption", "label": "t:labels.caption" },
+        { "type": "select", "id": "caption_preset", "label": "t:labels.caption_preset", "default": "default",
+          "visible_if": "{{ block.settings.caption != blank }}",
+          "options": [
+            { "value": "default", "label": "t:options.preset.default" },
+            { "value": "paragraph", "label": "t:options.preset.paragraph" },
+            { "value": "h1", "label": "t:general.heading_1" },
+            { "value": "h2", "label": "t:general.heading_2" },
+            { "value": "h3", "label": "t:general.heading_3" },
+            { "value": "h4", "label": "t:general.heading_4" },
+            { "value": "h5", "label": "t:general.heading_5" },
+            { "value": "h6", "label": "t:general.heading_6" }
+          ] },
+        { "type": "select", "id": "caption_position", "label": "t:labels.caption_position", "default": "after",
+          "visible_if": "{{ block.settings.caption != blank }}",
+          "options": [
+            { "value": "after", "label": "t:options.caption_position.after" },
+            { "value": "on", "label": "t:options.caption_position.on" }
+          ] },
+        { "type": "select", "id": "caption_placement", "label": "t:labels.caption_placement", "info": "t:info.caption_placement", "default": "bottom",
+          "visible_if": "{{ block.settings.caption != blank and block.settings.caption_position == 'on' }}",
+          "options": [
+            { "value": "top", "label": "t:options.position.top" },
+            { "value": "center", "label": "t:options.position.center" },
+            { "value": "bottom", "label": "t:options.position.bottom" }
+          ] },
+        { "type": "url", "id": "link", "label": "t:labels.link" },
+        { "type": "select", "id": "image_ratio", "label": "t:labels.image_ratio", "default": "portrait",
+          "options": [
+            { "value": "adapt", "label": "t:options.image_ratio.adapt" },
+            { "value": "square", "label": "t:options.image_ratio.square" },
+            { "value": "portrait", "label": "t:options.image_ratio.portrait" },
+            { "value": "landscape", "label": "t:options.image_ratio.landscape" }
+          ] },
+        { "type": "range", "id": "width", "label": "t:labels.width", "min": 100, "max": 400, "step": 10, "unit": "px", "default": 180 },
+        { "type": "range", "id": "corner_radius", "label": "t:labels.corner_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "default": 0 }
+      ]
+    }
+  ],
   "settings": [
     { "type": "header", "content": "t:general.navigation" },
     {
@@ -482,6 +617,29 @@
     { "type": "range", "id": "padding_left", "label": "t:labels.padding_left", "info": "t:info.header_padding_inline", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
     { "type": "range", "id": "padding_right", "label": "t:labels.padding_right", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 0 },
 
+
+    { "type": "select", "id": "menu_style", "label": "t:labels.menu_style", "info": "t:info.menu_style", "default": "dropdown",
+      "options": [
+        { "value": "dropdown", "label": "t:options.menu_style.dropdown" },
+        { "value": "mega", "label": "t:options.menu_style.mega" }
+      ] },
+    { "type": "select", "id": "mega_width", "label": "t:labels.width", "default": "page",
+      "visible_if": "{{ section.settings.menu_style == 'mega' }}",
+      "options": [
+        { "value": "page", "label": "t:options.width.page" },
+        { "value": "full", "label": "t:options.width.full" }
+      ] },
+    { "type": "range", "id": "mega_columns", "label": "t:labels.columns", "info": "t:info.mega_columns", "min": 2, "max": 6, "step": 1, "default": 4,
+      "visible_if": "{{ section.settings.menu_style == 'mega' }}" },
+    { "type": "select", "id": "mega_media_direction", "label": "t:labels.image_direction", "info": "t:info.image_direction", "default": "horizontal",
+      "visible_if": "{{ section.settings.menu_style == 'mega' }}",
+      "options": [
+        { "value": "horizontal", "label": "t:options.direction.horizontal" },
+        { "value": "vertical", "label": "t:options.direction.vertical" }
+      ] },
+    { "type": "color", "id": "menu_background", "label": "t:labels.background_color", "info": "t:info.menu_colors" },
+    { "type": "color", "id": "menu_text", "label": "t:labels.text_color" },
+
     { "type": "header", "content": "t:general.typography" },
     { "type": "select", "id": "menu_preset", "label": "t:labels.menu_preset", "default": "default",
       "options": [
@@ -495,6 +653,29 @@
         { "value": "h6", "label": "t:general.heading_6" }
       ] },
     { "type": "select", "id": "utilities_preset", "label": "t:labels.utilities_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+
+    { "type": "select", "id": "submenu_preset", "label": "t:labels.submenu_preset", "default": "default",
+      "options": [
+        { "value": "default", "label": "t:options.preset.default" },
+        { "value": "paragraph", "label": "t:options.preset.paragraph" },
+        { "value": "h1", "label": "t:general.heading_1" },
+        { "value": "h2", "label": "t:general.heading_2" },
+        { "value": "h3", "label": "t:general.heading_3" },
+        { "value": "h4", "label": "t:general.heading_4" },
+        { "value": "h5", "label": "t:general.heading_5" },
+        { "value": "h6", "label": "t:general.heading_6" }
+      ] },
+    { "type": "select", "id": "menu_heading_preset", "label": "t:labels.menu_heading_preset", "default": "h6",
       "options": [
         { "value": "default", "label": "t:options.preset.default" },
         { "value": "paragraph", "label": "t:options.preset.paragraph" },
@@ -524,8 +705,7 @@
       "id": "transparent_on_home",
       "label": "t:labels.transparent_on_home",
       "info": "t:info.transparent_on_home",
-      "default": false,
-      "visible_if": "{{ section.settings.header_position == 'fixed_all' or section.settings.header_position == 'fixed_home' }}"
+      "default": false
     },
     {
       "type": "color_scheme",
@@ -579,7 +759,16 @@
       ] },
     { "type": "range", "id": "border_width", "label": "t:labels.border_width", "min": 1, "max": 8, "step": 1, "unit": "px", "default": 1,
       "visible_if": "{{ section.settings.border_style == 'solid' }}" },
+    { "type": "color", "id": "border_color", "label": "t:labels.border_color", "info": "t:info.border_color",
+      "visible_if": "{{ section.settings.border_style == 'solid' }}" },
     { "type": "checkbox", "id": "show_search", "label": "t:labels.show_search", "default": true },
+    {
+      "type": "link_list",
+      "id": "search_popular_menu",
+      "label": "t:labels.search_popular_menu",
+      "info": "t:info.search_popular_menu",
+      "visible_if": "{{ section.settings.show_search }}"
+    },
     {
       "type": "select",
       "id": "search_style",
