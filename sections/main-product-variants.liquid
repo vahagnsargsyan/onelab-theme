@@ -63,43 +63,42 @@
         data-url="{{ product.url }}"
         data-section="{{ section.id }}"
       >
-        <div class="product-variants__header">
-          <p
-            class="product-variants__title"
-            {% render 'text-preset-style', preset: s.title_preset, alignment: 'left' %}
-          >
-            {{- product.title -}}
-          </p>
-
-          {%- if s.show_featured_image -%}
-            <div class="product-variants__featured">
-              {%- if featured != blank -%}
-                {%- liquid
-                  assign featured_focal = featured.presentation.focal_point | default: 'center center'
-                  assign featured_style = 'object-position: ' | append: featured_focal | append: ';'
-                -%}
-                {{
-                  featured
-                  | image_url: width: 240
-                  | image_tag:
-                    class: 'product-variants__featured-image',
-                    widths: '80, 120, 160, 240',
-                    sizes: '80px',
-                    alt: featured_alt,
-                    loading: 'eager',
-                    style: featured_style
-                }}
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-        </div>
-
         <div class="product-variants__body">
           <buy-form
             class="product-variants__form"
             data-added-message="{{ 'products.card.added' | t: title: product.title | escape }}"
             data-error-message="{{ 'products.card.add_error' | t | escape }}"
           >
+            <div class="product-variants__header">
+              <p
+                class="product-variants__title"
+                {% render 'text-preset-style', preset: s.title_preset, alignment: 'left' %}
+              >
+                {{- product.title -}}
+              </p>
+
+              {%- if s.show_featured_image -%}
+                <div class="product-variants__featured">
+                  {%- if featured != blank -%}
+                    {%- liquid
+                      assign featured_focal = featured.presentation.focal_point | default: 'center center'
+                      assign featured_style = 'object-position: ' | append: featured_focal | append: ';'
+                    -%}
+                    {{
+                      featured
+                      | image_url: width: 240
+                      | image_tag:
+                        class: 'product-variants__featured-image',
+                        widths: '80, 120, 160, 240',
+                        sizes: '80px',
+                        alt: featured_alt,
+                        loading: 'eager',
+                        style: featured_style
+                    }}
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
           {%- form 'product', product, id: product_form_id, class: 'product-variants__form-inner', novalidate: 'novalidate' -%}
             <fieldset class="product-variants__fieldset">
               <legend class="visually-hidden">{{ 'products.select_variant' | t }}</legend>
